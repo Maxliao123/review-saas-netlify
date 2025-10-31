@@ -6,28 +6,24 @@
 </head>
 <body style="font-family: sans-serif; padding: 20px;">
   <h2>AI Review Generator 測試頁</h2>
-  
-    <!-- 按鈕：加 loading 樣式 -->
-<button id="gen">生成（AI）</button>
-<pre id="output"></pre>
-<script>
-const btn = document.getElementById('gen');
-btn.addEventListener('click', async () => {
-  btn.disabled = true; btn.textContent = '生成中…';
-  try {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ storeid: 'leegarnei', selectedTags: ['黑糖鹿丸鮮奶','服務超親切','適合拍照'] })
+  <button id="gen">生成評論</button>
+  <pre id="output" style="white-space: pre-wrap;"></pre>
+
+  <script>
+    document.getElementById('gen').addEventListener('click', async () => {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeid: 'leegarnei',
+          selectedTags: ['黑糖鹿丸鮮奶', '服務超親切', '適合拍照']
+        })
+      });
+      const data = await res.json();
+      document.getElementById('output').textContent =
+        data.reviewText ? "✅ AI 生成的評論：\n" + data.reviewText
+                        : "⚠️ 錯誤：" + JSON.stringify(data);
     });
-    const data = await res.json();
-    document.getElementById('output').textContent = data.reviewText || JSON.stringify(data, null, 2);
-  } catch (e) {
-    document.getElementById('output').textContent = '發生錯誤：' + e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = '生成（AI）';
-  }
-});
-</script>
+  </script>
 </body>
 </html>
