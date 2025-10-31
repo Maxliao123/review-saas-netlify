@@ -1,232 +1,174 @@
 // functions/generate.js
+// 說明：
+// - POST /api/generate
+// - body: { storeid: string, selectedTags: string[], variant?: string, nonce?: number }
+// - 回傳：{ reviewText, store: { name, placeId }, usage, latencyMs }
+
 exports.handler = async (event) => {
-  // --- CORS ---
+  const t0 = Date.now();
+
+  // CORS
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-      },
+      headers: cors(),
       body: "",
     };
   }
+  if (event.httpMethod !== "POST") {
+    return json({ error: "Method not allowed" }, 405);
+  }
 
   try {
-    if (event.httpMethod !== "POST") {
-      return json({ error: "Method not allowed" }, 405);
-    }
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const SHEET_ID = process.env.SHEET_ID;
+    const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || ""; // 可選，用來自動補店家照片/名稱
 
-    const {
-      OPENAI_API_KEY,
-      SHEET_ID,
-      SHEET_STORES = "stores",
-      SHEET_HISTORY = "ReviewHistory",
-      APPS_SCRIPT_APPEND_URL = "",
-    } = process.env;
+    if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY env" }, 500);
+    if (!SHEET_ID)       return json({ error: "Missing SHEET_ID env" }, 500);
 
-    const bodyIn = JSON.parse(event.body || "{}");
-    const {
-      storeid,
-      selectedTags = [],
-      lang = "zh-Hant",
-      tone = "friendly",
-      maxLen = 100,
-    } = bodyIn;
+    const body = JSON.parse(event.body || "{}");
+    let { storeid, selectedTags = [], variant = "", nonce } = body;
+    storeid = (storeid || "").trim().toLowerCase();
 
-    if (!storeid) return json({ error: "storeid required" }, 400);
-    if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY" }, 500);
-    if (!SHEET_ID) return json({ error: "Missing SHEET_ID env" }, 500);
+    if (!storeid) return json({ error: "storeid is required" }, 400);
 
-    // ---- helpers ----
-    const csvParse = (text) => {
-      const rows = [];
-      let i = 0,
-        cur = "",
-        inQ = false,
-        row = [];
-      while (i < text.length) {
-        const ch = text[i];
-        if (inQ) {
-          if (ch === '"' && text[i + 1] === '"') {
-            cur += '"';
-            i++;
-          } else if (ch === '"') {
-            inQ = false;
-          } else cur += ch;
-        } else {
-          if (ch === '"') inQ = true;
-          else if (ch === ",") {
-            row.push(cur);
-            cur = "";
-          } else if (ch === "\n") {
-            row.push(cur);
-            rows.push(row);
-            row = [];
-            cur = "";
-          } else cur += ch;
-        }
-        i++;
-      }
-      if (cur.length || row.length) {
-        row.push(cur);
-        rows.push(row);
-      }
-      return rows;
-    };
+    // 去重、過濾空白
+    selectedTags = Array.from(new Set((selectedTags || [])
+      .map(s => (s || "").toString().trim())
+      .filter(Boolean)));
 
-    const loadCsv = async (sheetName) => {
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(
-        sheetName
-      )}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Sheet fetch failed " + res.status);
-      const txt = await res.text();
-      const rows = csvParse(txt);
-      const headers = rows[0].map((h) => h.trim());
-      return rows
-        .slice(1)
-        .map((r) => Object.fromEntries(headers.map((h, i) => [h, r[i] || ""])));
-    };
+    // 讀取店家基本資料（中文名/Place ID），與 /functions/store.js 的邏輯一致
+    const meta = await readStoreMetaFromSheet(SHEET_ID, storeid, GOOGLE_MAPS_API_KEY);
+    const storeName = meta.name || storeid;
+    const placeId   = meta.placeId || "";
 
-    const splitTags = (s) =>
-      (s || "")
-        .split(/[,、]/)
-        .map((x) => x.trim())
-        .filter(Boolean);
-    const uniq = (a) => Array.from(new Set(a));
+    // --- Prompt 設計 ---
+    // 讓模型生成「1小段自然中文短評」，避免把標籤逐字抄進去，並依 variant 微調風格
+    const style = (variant || "").trim();
+    const tagClause = selectedTags.length
+      ? `參考重點（僅作靈感，不要逐字照抄）：${selectedTags.join("、")}。`
+      : `自行選擇 1–2 個正向特色（環境、服務、招牌品項或整體感受）作為重點。`;
 
-    // ---- load store row ----
-    const stores = await loadCsv(SHEET_STORES);
-    const row = stores.find(
-      (d) =>
-        (d.StoreID || "").toLowerCase() === String(storeid).toLowerCase()
-    );
-    if (!row) return json({ error: "store not found" }, 404);
-
-    const storeName = row.StoreName || "";
-    const placeId = row.PlaceID || "";
-    const allTags = uniq([
-      ...splitTags(row.Top3Items),
-      ...splitTags(row.StoreFeatures),
-      ...splitTags(row.Ambiance),
-      ...splitTags(row["新品"] || row.tags_new),
-    ]);
-
-    // ---- load last sentences for de-dup ----
-    let lastSentences = [];
-    try {
-      const history = await loadCsv(SHEET_HISTORY);
-      const recent = history
-        .filter(
-          (h) =>
-            (h.StoreID || "").toLowerCase() === String(storeid).toLowerCase()
-        )
-        .slice(-20);
-      lastSentences = recent
-        .map((h) => (h.GeneratedText || "").trim())
-        .filter(Boolean);
-    } catch (e) {
-      // ignore if history sheet not found
-    }
-
-    // ---- build prompt ----
-    const system =
-      "你是專業在地美食寫手。請以第一人稱，寫出真誠、口語、自然的短評，總字數控制在 50 到 100 字之間。禁止條列與數字列點，避免浮誇與不實承諾。盡量融合使用者選擇的關鍵字，同時與近期評論避免重複。";
-
-    const picked = selectedTags; // 直接使用來自前端的選擇
-    const user = [
-      `你是一位剛在「${storeName}」用餐完畢、感到非常滿意的顧客，正準備寫一篇 Google 評論。`,
-      `你的任務是創作一段融合度極高的短評（50–100 字）。`,
-      "",
-      "【可用素材】（請融合成一段話，不要逐一列點）：",
-      `- 菜品/產品/新品：${picked.join("、") || "（尚未選擇）"}`,
-      "",
-      "【寫作指令】",
-      "1) 高度融合：請勿像清單一樣逐一提及素材；要自然地揉合在一句或幾句通順的話中，形成完整連貫的體驗。",
-      "2) 格式要求：最終必須是一段流暢、完整的短文，嚴禁條列或數字列點。",
-      "3) 視角：使用第一人稱「我」，語氣真誠、口語化，像一般顧客真心推薦。",
-      lastSentences.length
-        ? `【記憶參考（請避免雷同）】：${lastSentences.join(" / ")}`
-        : "",
+    const systemPrompt = [
+      "你是專業的中文在地向導，擅長撰寫自然、真誠、口語化的餐飲短評。",
+      "產出 1 段 1–3 句的中文短評（避免條列），不超過 120 字。",
+      "避免過度浮誇、避免廣告語氣、避免連續多個驚嘆號；不要直接複製使用者提供的關鍵詞。",
+      "可微量加入具體細節（口感、氛圍、服務感受），但不要捏造價格或虛假承諾。",
+      "不要包含店家內部資訊或 AI/生成的描述；不要加標題與引用。",
     ].join("\n");
 
-    const payload = {
-      model: "gpt-4o-mini",
+    const userPrompt = [
+      `店名（內部參考）：${storeName}`,
+      tagClause,
+      style ? `希望風格：${style}。` : "風格：自然真誠。",
+      "請輸出：短評正文（1 段）。",
+    ].join("\n");
+
+    // --- OpenAI 請求 ---
+    const openaiPayload = {
+      model: "gpt-4o-mini",          // 可視成本與品質調整
+      temperature: 0.9,              // 提高多樣性
+      top_p: 0.9,
+      presence_penalty: 0.5,         // 減少重複表達
+      frequency_penalty: 0.4,
       messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
-      temperature: 0.7,
-      max_tokens: 160,
     };
 
-    const t0 = Date.now();
-    const ai = await fetch("https://api.openai.com/v1/chat/completions", {
+    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(openaiPayload),
     });
-    if (!ai.ok) {
-      const txt = await ai.text();
-      throw new Error("OpenAI error " + ai.status + ": " + txt);
-    }
-    const result = await ai.json();
-    const reviewText = (result.choices?.[0]?.message?.content || "").trim();
-    const latency = Date.now() - t0;
-    const usage = result.usage || {};
 
-    // ---- append back to sheet by Apps Script (optional) ----
-    if (APPS_SCRIPT_APPEND_URL) {
-      try {
-        await fetch(APPS_SCRIPT_APPEND_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            StoreID: storeid,
-            GeneratedText: reviewText,
-            SelectedTags: selectedTags,
-            Lang: lang,
-            Tone: tone,
-            Model: payload.model,
-            TokenUsage: usage,
-            LatencyMs: latency,
-            CreatedAt: new Date().toISOString(),
-          }),
-        });
-      } catch (e) {
-        console.warn("Append history failed:", e.message);
-      }
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
+      throw new Error(`OpenAI error: ${aiRes.status} ${errText}`);
     }
 
-    return json(
-      {
-        reviewText,
-        store: { name: storeName, placeId },
-        usage,
-        latencyMs: latency,
+    const aiJson = await aiRes.json();
+    const text =
+      aiJson?.choices?.[0]?.message?.content?.trim() ||
+      aiJson?.choices?.[0]?.text?.trim() ||
+      "";
+
+    const latencyMs = Date.now() - t0;
+
+    return json({
+      reviewText: text,
+      store: {
+        name: storeName,
+        placeId: placeId,
       },
-      200
-    );
+      usage: aiJson?.usage || null,
+      latencyMs,
+    });
   } catch (e) {
     console.error(e);
     return json({ error: e.message || "server error" }, 500);
   }
 };
 
-// ---- helper ----
-function json(obj, statusCode = 200) {
+/* -------------------------- helpers -------------------------- */
+
+function cors() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  };
+}
+
+function json(data, statusCode = 200) {
   return {
     statusCode,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
+      ...cors(),
     },
-    body: JSON.stringify(obj),
+    body: JSON.stringify(data),
   };
 }
+
+/**
+ * 讀取店家基本資料（中文名 / placeId），
+ * Google Sheet「stores」工作表欄位順序：A storeid, B name_zh, C place_id, D logo_url
+ * 如無 name_zh，會 fallback storeid；如無 place_id，回傳空字串。
+ * 若提供 GOOGLE_MAPS_API_KEY，且 place_id 缺失，可加上你要的延伸查詢（這版先不做正向查找，以免歧義）。
+ */
+async function readStoreMetaFromSheet(SHEET_ID, storeid, GOOGLE_MAPS_API_KEY = "") {
+  try {
+    const sheetName = "stores";
+    const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
+    const tq = encodeURIComponent(`select A,B,C,D where lower(A)='${storeid}' limit 1`);
+    const url = `${base}?sheet=${encodeURIComponent(sheetName)}&tq=${tq}`;
+
+    const r = await fetch(url);
+    const txt = await r.text();
+    const jsonStr = txt.replace(/^[\s\S]*setResponse\(/, "").replace(/\);?\s*$/, "");
+    const obj = JSON.parse(jsonStr);
+
+    let name = "";
+    let placeId = "";
+
+    if (obj.table && obj.table.rows && obj.table.rows.length) {
+      const row = obj.table.rows[0].c;
+      name    = (row[1]?.v || "").toString();
+      placeId = (row[2]?.v || "").toString();
+      // D 欄是 logo_url，本函式暫不回傳；需要的話可補
+    }
+
+    return { name, placeId };
+  } catch (e) {
+    console.warn("readStoreMetaFromSheet failed:", e.message);
+    return { name: "", placeId: "" };
+  }
+}
+
 
