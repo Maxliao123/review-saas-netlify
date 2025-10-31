@@ -1,12 +1,6 @@
 [build]
   publish = "."
-  functions = "netlify/functions"
-  command = ""
+  functions = "functions"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["openai", "node-fetch"]
-
-[build.environment]
-  NODE_VERSION = "18.18.0"
-  NPM_VERSION = "9.8.1"
