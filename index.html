@@ -1,29 +1,171 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Review Generator 測試頁</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Google Review · AI 一則短評</title>
+  <style>
+    :root { --bg:#f5f4f2; --fg:#1f2937; --card:#ffffff; --muted:#6b7280; --pri:#0ea5e9; --chip:#e5f2fb; --chip-on:#0ea5e9; --chip-on-fg:#fff; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .wrap { max-width:980px; margin:56px auto; padding:0 20px; }
+    .card { background:var(--card); border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,.06); padding:28px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    .sub { color:var(--muted); margin-bottom:18px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .field { display:flex; gap:10px; align-items:center; }
+    .field input { height:36px; padding:0 12px; border:1px solid #e5e7eb; border-radius:10px; outline:none; }
+    .field input:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+    .chip { padding:8px 12px; background:var(--chip); border-radius:999px; cursor:pointer; user-select:none; transition:.15s; }
+    .chip.on { background:var(--chip-on); color:var(--chip-on-fg); }
+    .btn { height:40px; padding:0 14px; border:0; border-radius:12px; cursor:pointer; background:var(--pri); color:#fff; font-weight:600; }
+    .btn[disabled] { opacity:.6; cursor:not-allowed; }
+    .btn.secondary { background:#111827; }
+    .btn.ghost { background:#eef2f7; color:#111827; }
+    textarea { width:100%; min-height:140px; resize:vertical; padding:12px; border:1px solid #e5e7eb; border-radius:12px; outline:none; }
+    textarea:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+    .muted { color:var(--muted); font-size:13px; }
+    .spacer { height:10px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+  </style>
 </head>
-<body style="font-family: sans-serif; padding: 20px;">
-  <h2>AI Review Generator 測試頁</h2>
-  <button id="gen">生成評論</button>
-  <pre id="output" style="white-space: pre-wrap;"></pre>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>為「<span id="storeName">李家</span>」寫一則短評</h1>
+      <div class="sub">勾選幾個重點，再按「生成（AI）」就會幫你寫出自然的一段評論。</div>
+
+      <!-- storeid 與自訂標籤 -->
+      <div class="row" style="margin-bottom:10px;">
+        <div class="field">
+          <label for="storeid" class="muted">StoreID：</label>
+          <input id="storeid" value="leegarnei" />
+        </div>
+        <div class="field">
+          <label for="addTag" class="muted">新增標籤：</label>
+          <input id="addTag" placeholder="輸入後按 Enter" />
+        </div>
+      </div>
+
+      <!-- 標籤 Chips -->
+      <div id="chips" class="row" style="margin-bottom:16px;"></div>
+
+      <!-- 操作按鈕 -->
+      <div class="actions" style="margin-bottom:12px;">
+        <button id="gen" class="btn">✨ 生成（AI）</button>
+        <button id="copy" class="btn ghost">📋 複製</button>
+        <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 開啟 Google 評論</a>
+      </div>
+
+      <!-- 結果 -->
+      <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…" ></textarea>
+      <div class="muted" id="status" aria-live="polite"></div>
+    </div>
+  </div>
 
   <script>
-    document.getElementById('gen').addEventListener('click', async () => {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeid: 'leegarnei',
-          selectedTags: ['黑糖鹿丸鮮奶', '服務超親切', '適合拍照']
-        })
+    // 初始可選標籤（先寫死；之後可改成從後端或 Sheet 讀取）
+    const seedTags = [
+      '黑糖鹿丸鮮奶','皇家九號奶茶','白桃烏龍','服務超親切','環境很舒服','適合拍照',
+      '適合情侶約會','家庭聚餐','朋友小酌','鹹酥雞麵'
+    ];
+
+    const $chips = document.getElementById('chips');
+    const $storeid = document.getElementById('storeid');
+    const $addTag = document.getElementById('addTag');
+    const $gen = document.getElementById('gen');
+    const $copy = document.getElementById('copy');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $storeName = document.getElementById('storeName');
+    const $openGoogle = document.getElementById('openGoogle');
+
+    let selected = new Set();
+
+    function renderChips(list){
+      $chips.innerHTML = '';
+      list.forEach(tag=>{
+        const el = document.createElement('div');
+        el.className = 'chip';
+        el.textContent = tag;
+        el.onclick = () => {
+          if(selected.has(tag)) selected.delete(tag);
+          else selected.add(tag);
+          el.classList.toggle('on');
+        };
+        $chips.appendChild(el);
       });
-      const data = await res.json();
-      document.getElementById('output').textContent =
-        data.reviewText ? "✅ AI 生成的評論：\n" + data.reviewText
-                        : "⚠️ 錯誤：" + JSON.stringify(data);
+    }
+
+    // 新增自訂標籤（Enter）
+    $addTag.addEventListener('keydown', e=>{
+      if(e.key === 'Enter'){
+        const v = $addTag.value.trim();
+        if(!v) return;
+        if(!seedTags.includes(v)){
+          seedTags.unshift(v);
+          renderChips(seedTags);
+          // 自動選取新標籤
+          const chip = [...$chips.children].find(c=>c.textContent===v);
+          if(chip){ chip.click(); }
+        }
+        $addTag.value = '';
+      }
     });
+
+    // 依 storeid 調整顯示名稱（先簡化：直接顯示 storeid；之後可從 Sheet 拉正式名稱）
+    $storeid.addEventListener('input', ()=>{
+      $storeName.textContent = $storeid.value || '門市';
+      // 也同步更新 Google 查詢連結
+      const q = encodeURIComponent($storeid.value || 'Big Way');
+      $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
+    });
+    $storeid.dispatchEvent(new Event('input')); // 觸發一次以初始化
+
+    renderChips(seedTags);
+
+    async function generate(){
+      const storeid = ($storeid.value || '').trim();
+      if(!storeid){
+        $status.textContent = '請先輸入 StoreID。';
+        return;
+      }
+      const selectedTags = Array.from(selected);
+      $gen.disabled = true; $copy.disabled = true;
+      const prevTxt = $gen.textContent;
+      $gen.textContent = '生成中…';
+      $status.textContent = '';
+
+      try{
+        const res = await fetch('/api/generate', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ storeid, selectedTags })
+        });
+        const data = await res.json();
+        if(!res.ok){
+          throw new Error(data?.error || ('HTTP '+res.status));
+        }
+        $output.value = data.reviewText || JSON.stringify(data, null, 2);
+        $status.textContent = `✅ 完成（延遲 ${data.latencyMs ?? '-'} ms）`;
+      }catch(err){
+        $output.value = '';
+        $status.textContent = '❌ 發生錯誤：' + err.message;
+      }finally{
+        $gen.disabled = false; $copy.disabled = false;
+        $gen.textContent = prevTxt;
+      }
+    }
+
+    async function copyText(){
+      const t = $output.value.trim();
+      if(!t){ $status.textContent = '尚無內容可複製'; return; }
+      await navigator.clipboard.writeText(t);
+      $status.textContent = '📋 已複製到剪貼簿';
+    }
+
+    $gen.addEventListener('click', generate);
+    $copy.addEventListener('click', copyText);
   </script>
 </body>
 </html>
