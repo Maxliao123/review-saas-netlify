@@ -22,26 +22,24 @@
     .btn[disabled] { opacity:.6; cursor:not-allowed; }
     .btn.secondary { background:#111827; }
     .btn.ghost { background:#eef2f7; color:#111827; }
-    /* 讓 a 按鈕在停用時不可點擊 */
-    .btn[aria-disabled="true"] { opacity:.6; pointer-events:none; }
     textarea { width:100%; min-height:140px; resize:vertical; padding:12px; border:1px solid #e5e7eb; border-radius:12px; outline:none; }
     textarea:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(14,165,233,.15); }
     .muted { color:var(--muted); font-size:13px; }
-    .spacer { height:10px; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .footer-actions { display:flex; gap:10px; align-items:center; margin-top:10px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>為「<span id="storeName">李家</span>」寫一則短評</h1>
+      <h1>為「<span id="storeName">門市</span>」寫一則短評</h1>
       <div class="sub">勾選幾個重點，再按「生成（AI）」就會幫你寫出自然的一段評論。</div>
 
-      <!-- storeid 與自訂標籤 -->
-      <div class="row" style="margin-bottom:10px;">
+      <!-- 只有沒有帶 store 到網址時，才顯示這列 -->
+      <div id="storeRow" class="row" style="margin-bottom:10px;">
         <div class="field">
           <label for="storeid" class="muted">StoreID：</label>
-          <input id="storeid" value="leegarnei" />
+          <input id="storeid" placeholder="例如 leegarnei" />
         </div>
         <div class="field">
           <label for="addTag" class="muted">新增標籤：</label>
@@ -52,26 +50,39 @@
       <!-- 標籤 Chips -->
       <div id="chips" class="row" style="margin-bottom:16px;"></div>
 
-      <!-- 操作按鈕（保留 生成 / 複製） -->
-      <div class="actions" style="margin-bottom:12px;">
+      <!-- 動作按鈕（上） -->
+      <div class="actions">
         <button id="gen" class="btn">✨ 生成（AI）</button>
         <button id="copy" class="btn ghost">📋 複製</button>
       </div>
 
       <!-- 結果 -->
-      <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…" ></textarea>
-
-      <!-- ✅ 開啟 Google 評論：移到輸出框下方；尚未有 place_id 前為停用狀態 -->
-      <div class="actions" style="margin-top:10px;">
-        <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer"
-           href="javascript:void(0)" aria-disabled="true">🔍 開啟 Google 評論</a>
+      <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…"></textarea>
+      <!-- 動作按鈕（輸出框下方） -->
+      <div class="footer-actions">
+        <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 開啟 Google 評論</a>
+        <span class="muted" id="status" aria-live="polite"></span>
       </div>
-
-      <div class="muted" id="status" aria-live="polite"></div>
     </div>
   </div>
 
   <script>
+    // 解析網址 store（?store=xxx 或 /xxx）
+    function getStoreFromURL() {
+      const url = new URL(location.href);
+      const byQuery = (url.searchParams.get('store') || '').trim();
+      if (byQuery) return byQuery;
+
+      // 支援路徑 /leegarnei 或 /s/leegarnei
+      const parts = url.pathname.replace(/^\/+/,'').split('/');
+      if (parts.length >= 1 && parts[0]) {
+        // 若第一段是 s，就取第二段
+        if (parts[0].toLowerCase() === 's' && parts[1]) return parts[1];
+        return parts[0];
+      }
+      return '';
+    }
+
     // 初始可選標籤（先寫死；之後可改成從後端或 Sheet 讀取）
     const seedTags = [
       '黑糖鹿丸鮮奶','皇家九號奶茶','白桃烏龍','服務超親切','環境很舒服','適合拍照',
@@ -79,6 +90,7 @@
     ];
 
     const $chips = document.getElementById('chips');
+    const $storeRow = document.getElementById('storeRow');
     const $storeid = document.getElementById('storeid');
     const $addTag = document.getElementById('addTag');
     const $gen = document.getElementById('gen');
@@ -89,6 +101,24 @@
     const $openGoogle = document.getElementById('openGoogle');
 
     let selected = new Set();
+    let currentStore = getStoreFromURL() || 'leegarnei'; // 預設一個以便開發測試
+
+    // 若網址有 store，隱藏整個 StoreID 列；否則顯示輸入框
+    if (getStoreFromURL()) {
+      $storeRow.style.display = 'none';
+    } else {
+      $storeid.value = currentStore;
+    }
+
+    function updateStoreVisual() {
+      // 這裡先用 storeid 當顯示名稱；之後你可改成查 Sheet 顯示正式店名
+      $storeName.textContent = currentStore || '門市';
+
+      // 更新 Google 搜尋備用連結（沒有 placeId 時用）
+      const q = encodeURIComponent(currentStore || 'Big Way');
+      $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
+    }
+    updateStoreVisual();
 
     function renderChips(list){
       $chips.innerHTML = '';
@@ -104,53 +134,38 @@
         $chips.appendChild(el);
       });
     }
-
-    // 新增自訂標籤（Enter）
-    $addTag.addEventListener('keydown', e=>{
-      if(e.key === 'Enter'){
-        const v = $addTag.value.trim();
-        if(!v) return;
-        if(!seedTags.includes(v)){
-          seedTags.unshift(v);
-          renderChips(seedTags);
-          // 自動選取新標籤
-          const chip = [...$chips.children].find(c=>c.textContent===v);
-          if(chip){ chip.click(); }
-        }
-        $addTag.value = '';
-      }
-    });
-
-    // 設定「開啟 Google 評論」的連結
-    // 若有 place_id -> 直接開評論編輯；否則回退到搜尋結果並設為停用
-    function setGoogleLink(store) {
-      if (store?.placeId) {
-        $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(store.placeId)}`;
-        $openGoogle.removeAttribute('aria-disabled');
-      } else {
-        const q = encodeURIComponent(store?.name || $storeid.value || 'Big Way');
-        $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
-        $openGoogle.setAttribute('aria-disabled', 'true');
-      }
-    }
-
-    // 依 storeid 調整顯示名稱 + 預設搜尋連結（未生成前的 fallback）
-    $storeid.addEventListener('input', ()=>{
-      const name = $storeid.value || '門市';
-      $storeName.textContent = name;
-
-      const q = encodeURIComponent(name);
-      $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
-      $openGoogle.setAttribute('aria-disabled', 'true');  // 尚未產生、無 place_id 前先停用
-    });
-    $storeid.dispatchEvent(new Event('input')); // 觸發一次以初始化
-
     renderChips(seedTags);
 
+    // 新增自訂標籤（Enter）
+    if ($addTag) {
+      $addTag.addEventListener('keydown', e=>{
+        if(e.key === 'Enter'){
+          const v = $addTag.value.trim();
+          if(!v) return;
+          if(!seedTags.includes(v)){
+            seedTags.unshift(v);
+            renderChips(seedTags);
+            // 自動選取新標籤
+            const chip = [...$chips.children].find(c=>c.textContent===v);
+            if(chip){ chip.click(); }
+          }
+          $addTag.value = '';
+        }
+      });
+    }
+
+    // 當使用者在「顯示輸入框」情況下改了 StoreID
+    if ($storeid) {
+      $storeid.addEventListener('input', ()=>{
+        currentStore = ($storeid.value || '').trim();
+        updateStoreVisual();
+      });
+    }
+
     async function generate(){
-      const storeid = ($storeid.value || '').trim();
+      const storeid = (currentStore || '').trim();
       if(!storeid){
-        $status.textContent = '請先輸入 StoreID。';
+        $status.textContent = '請先指定 StoreID（於網址帶入 ?store=xxx 或在欄位輸入）。';
         return;
       }
       const selectedTags = Array.from(selected);
@@ -170,17 +185,20 @@
           throw new Error(data?.error || ('HTTP '+res.status));
         }
 
-        // 顯示 AI 文字
+        // 顯示文字
         $output.value = data.reviewText || JSON.stringify(data, null, 2);
         $status.textContent = `✅ 完成（延遲 ${data.latencyMs ?? '-'} ms）`;
 
-        // 用後端回傳的正式名稱 / place_id 更新標題與按鈕
-        if (data.store?.name) $storeName.textContent = data.store.name;
-        setGoogleLink(data.store); // ← 這裡決定是否能一鍵直達評論編輯
+        // 若回傳有 placeId，改為直接打開「撰寫評論」視窗
+        if (data?.store?.placeId) {
+          $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(data.store.placeId)}`;
+        } else {
+          // 沒有 placeId 時，維持用搜尋頁（已在 updateStoreVisual 設好）
+          updateStoreVisual();
+        }
       }catch(err){
         $output.value = '';
         $status.textContent = '❌ 發生錯誤：' + err.message;
-        setGoogleLink(null);
       }finally{
         $gen.disabled = false; $copy.disabled = false;
         $gen.textContent = prevTxt;
@@ -194,9 +212,10 @@
       $status.textContent = '📋 已複製到剪貼簿';
     }
 
-    $gen.addEventListener('click', generate);
-    $copy.addEventListener('click', copyText);
+    document.getElementById('gen').addEventListener('click', generate);
+    document.getElementById('copy').addEventListener('click', copyText);
   </script>
 </body>
 </html>
+
 
