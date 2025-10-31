@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Google Review</title>
+  <style>
+    :root{--bg:#f6f4ef;--ink:#111827;--muted:#6b7280;--card:#fff;--pill:#eef2f7;--brand:#111827}
+    *{box-sizing:border-box} html,body{margin:0;height:100%}
+    body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
+    .wrap{max-width:820px;margin:0 auto;padding:18px}
+    header{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+    .logo{width:32px;height:32px;border-radius:10px;background:conic-gradient(from 0deg,#38bdf8,#a78bfa,#22c55e,#38bdf8)}
+    h1{font-size:clamp(22px,4.2vw,32px);margin:0}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 8px 30px -20px rgba(0,0,0,.25)}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .pill{padding:10px 12px;border-radius:999px;border:1px solid #e5e7eb;background:var(--pill);cursor:pointer;user-select:none}
+    .pill.selected{outline:3px solid #bae6fd;background:#e0f2fe}
+    textarea{width:100%;padding:12px;border-radius:12px;border:1px solid #e5e7eb;min-height:120px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:12px;border:1px solid #111827;color:#fff;background:var(--brand);font-weight:700;cursor:pointer}
+    .btn.secondary{background:#fff;color:#111827}
+    .alert{display:none;margin-top:8px;color:#ef4444}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"></div>
+    <div>
+      <div style="font-weight:800">Smart Google Review</div>
+      <div class="muted" id="storeLine">載入中… / Loading…</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <h1 id="title">為此店寫一則短評</h1>
+
+    <div id="tags" class="row" style="margin:6px 0 10px"></div>
+
+    <div class="row" style="margin:8px 0">
+      <button id="gen" class="btn">✨ 生成（AI）</button>
+      <button id="copy" class="btn secondary">📋 複製</button>
+    </div>
+
+    <textarea id="review" placeholder="生成文字會出現在這裡…"></textarea>
+
+    <div class="row" style="margin:10px 0 0">
+      <a id="open" class="btn" href="#" target="_blank" rel="noopener">🔗 開啟 Google 評論</a>
+    </div>
+
+    <div class="alert" id="err"></div>
+  </div>
+</div>
+
+<script>
+const SHEET_ID = (new URLSearchParams(location.search).get('sheet_id')) || "1XxJtStsls55XyeMwSZuPEKX_lo6YidMRj2qtmkXsC80";
+const SHEET_NAME = (new URLSearchParams(location.search).get('sheet')) || "stores";
+
+const qs=(s)=>document.querySelector(s);
+const qsa=(s)=>Array.from(document.querySelectorAll(s));
+const getParam=(k)=>new URLSearchParams(location.search).get(k);
+function csvParse(text){ const rows=[]; let i=0,cur='',inQ=false,row=[]; while(i<text.length){ const ch=text[i];
+  if(inQ){ if(ch=='"' && text[i+1]=='"'){cur+='"'; i++;} else if(ch=='"'){inQ=false;} else cur+=ch; }
+  else{ if(ch=='"') inQ=true; else if(ch==','){row.push(cur);cur='';} else if(ch=='\n'){row.push(cur);rows.push(row);row=[];cur='';} else cur+=ch; }
+  i++; } if(cur.length||row.length){row.push(cur);rows.push(row);} return rows; }
+function uniq(arr){return [...new Set(arr.filter(Boolean).map(s=>s.trim()).filter(Boolean))];}
+function splitTags(s){ if(!s) return []; return s.split(/[、,]/).map(x=>x.trim()).filter(Boolean); }
+function err(msg){ const el=qs('#err'); el.textContent=msg; el.style.display='block'; }
+
+async function loadSheetRows(sheetName){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Network '+res.status);
+  const txt = await res.text();
+  const rows = csvParse(txt);
+  const headers = rows[0].map(h=>h.trim());
+  return rows.slice(1).map(r=>Object.fromEntries(headers.map((h,i)=>[h, r[i]||''])));
+}
+
+function buildUI(row){
+  const store=row.StoreName||'';
+  const pid=row.PlaceID||'';
+  const tags = uniq([
+    ...splitTags(row.Top3Items||''),
+    ...splitTags(row.StoreFeatures||''),
+    ...splitTags(row.Ambiance||''),
+    ...splitTags(row['新品']||row.tags_new||'')
+  ]);
+  qs('#storeLine').textContent = store?`正在為「${store}」寫一則短評`:'無店名';
+  qs('#title').textContent = store?`為「${store}」寫一則短評`:'為此店寫一則短評';
+  qs('#open').href = pid?`https://search.google.com/local/writereview?placeid=${encodeURIComponent(pid)}`:'#';
+  const wrap = qs('#tags'); wrap.innerHTML='';
+  if(!tags.length){ wrap.innerHTML='<span class="muted">此店尚無標籤</span>'; }
+  tags.forEach(t=>{ const el=document.createElement('div'); el.className='pill'; el.textContent=t; el.onclick=()=>el.classList.toggle('selected'); wrap.appendChild(el); });
+}
+
+function sample(a){return a[Math.floor(Math.random()*a.length)]}
+function genLocal(tags, store){
+  const openers=[`剛到訪${store||'這家店'}，整體體驗很不錯。`,`今天在${store||'這裡'}的體驗讓人驚喜。`,`${store||'這間店'}讓我印象很好。`];
+  const feels=['順口','到位','讓人放鬆','值得推薦'];
+  const picked=tags.slice(0,6).join('、');
+  const line2=tags.length?`重點：「${picked}」。`:'';
+  return `${sample(openers)} ${line2}${sample(feels)}。`.trim();
+}
+
+(async()=>{
+  try{
+    const all = await loadSheetRows(SHEET_NAME);
+    const sid=(getParam('storeid')||'').toLowerCase();
+    const row = all.find(d => (d.StoreID||'').toLowerCase()===sid) || all[0];
+    if(!row){ err('找不到對應店家'); return; }
+    buildUI(row);
+
+    qs('#gen').onclick=async()=>{
+      const picked=qsa('.pill.selected').map(x=>x.textContent);
+      try{
+        const resp = await fetch('/.netlify/functions/generate', {
+          method:'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            storeid: row.StoreID,
+            selectedTags: picked,
+            lang: 'zh-Hant',
+            tone: 'friendly'
+          })
+        });
+        if(!resp.ok) throw new Error('API error '+resp.status);
+        const data = await resp.json();
+        qs('#review').value = data.reviewText || genLocal(picked, row.StoreName||'');
+      }catch(e){
+        qs('#review').value = genLocal(picked, row.StoreName||'');
+      }
+    };
+
+    qs('#copy').onclick=async()=>{
+      const t=qs('#review').value.trim(); if(!t) return;
+      try{ await navigator.clipboard.writeText(t); alert('已複製，打開 Google 後貼上即可。'); }catch{ alert('無法自動複製，請手動長按複製。'); }
+    };
+  }catch(e){ err('載入表單失敗或表單未公開（Anyone with the link → Viewer）'); console.error(e); }
+})();
+</script>
+</body>
+</html>
