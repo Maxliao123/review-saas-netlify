@@ -35,11 +35,11 @@
   <div class="wrap">
     <div class="card">
       <!-- hero -->
-      <img id="hero" class="hero" alt="hero" onerror="this.style.display='none'"/>
+      <img id="hero" class="hero" alt="hero" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>
 
       <!-- 標題（含 logo） -->
       <div class="title">
-        <img id="logo" class="logo" alt="logo" onerror="this.style.display='none'"/>
+        <img id="logo" class="logo" alt="logo" referrerpolicy="no-referrer" onerror="this.style.display='none'"/>
         <h1 style="margin:0;">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
       </div>
 
@@ -175,6 +175,35 @@
       $openGoogle.href = 'https://www.google.com/search?q=' + q + '+google+reviews';
     }
 
+    // ---- 圖片載入共用工具（破快取 + Drive→Places 備援）----
+    function withBuster(u){
+      if(!u) return '';
+      var sep = u.indexOf('?') >= 0 ? '&' : '?';
+      return u + sep + 'v=' + Date.now();
+    }
+    function setImg(img, primary, fallback){
+      if (primary) {
+        img.onerror = function(){
+          if (fallback && img.src !== fallback) {
+            img.onerror = function(){ img.style.display = 'none'; };
+            img.src = withBuster(fallback);
+          } else {
+            img.style.display = 'none';
+          }
+        };
+        img.src = withBuster(primary);
+        img.style.display = 'block';
+        return;
+      }
+      if (fallback) {
+        img.onerror = function(){ img.style.display = 'none'; };
+        img.src = withBuster(fallback);
+        img.style.display = 'block';
+        return;
+      }
+      img.style.display = 'none';
+    }
+
     // 載入店家 meta（含圖片與 placeId）
     async function loadStoreMeta() {
       try {
@@ -189,43 +218,11 @@
         buildChipsFromMeta(data);
 
         // 3) LOGO：Drive → Places 備援 → 隱藏
-        if (data.logoUrl || data.placePhotoUrl) {
-          if (data.logoUrl) {
-            $logo.onerror = function () {
-              if (data.placePhotoUrl && $logo.src !== data.placePhotoUrl) $logo.src = data.placePhotoUrl;
-              else $logo.style.display = 'none';
-            };
-            $logo.src = data.logoUrl;
-          } else {
-            $logo.src = data.placePhotoUrl;
-          }
-          $logo.style.display = 'block';
-        } else {
-          $logo.style.display = 'none';
-        }
+        setImg($logo, data.logoUrl, data.placePhotoUrl);
 
         // 4) HERO：Drive → Places 備援 → 隱藏
-        // === 只用 heroUrl（不再用 Place Photo）===
-if (data.heroUrl || data.placePhotoUrl) {
-  if (data.heroUrl) {
-    $hero.onerror = () => {
-      if (data.placePhotoUrl && $hero.src !== data.placePhotoUrl) {
-        $hero.src = data.placePhotoUrl;
-      } else {
-        $hero.style.display = 'none';
-      }
-    };
-    $hero.src = data.heroUrl;
-  } else {
-    $hero.src = data.placePhotoUrl;
-  }
-  $hero.style.display = 'block';
-} else {
-  $hero.style.display = 'none';
-}
+        setImg($hero, data.heroUrl, data.placePhotoUrl);
 
-
-        
         // 5) 直接開寫評論（若有 placeId）
         if (data.placeId) {
           $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
