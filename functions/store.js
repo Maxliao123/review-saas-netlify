@@ -59,6 +59,13 @@ exports.handler = async (event) => {
       }
     }
 
+    const backupPhotoUrl = (row.placeId && GMAPS_KEY)
++      ? await (async () => {
++          const ref = await fetchPlacePhotoRef(row.placeId);
++          return ref ? buildPlacePhotoUrl(ref) : null;
++        })()
++      : null;
+
     return json({
       storeid: row.storeid,
       name: row.name || row.storeid,
@@ -66,6 +73,7 @@ exports.handler = async (event) => {
       logoUrl: logoUrl || null,
       heroUrl: heroUrl || null,
       // 若前端需要，你也可回傳這些文字欄位
+      placePhotoUrl: backupPhotoUrl,   // ⬅️ 新增：備援圖
       top3: row.top3,
       features: row.features,
       ambiance: row.ambiance,
