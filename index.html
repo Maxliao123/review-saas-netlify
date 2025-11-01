@@ -205,21 +205,18 @@
         }
 
         // 4) HERO：Drive → Places 備援 → 隱藏
-        if (data.heroUrl || data.placePhotoUrl) {
-          if (data.heroUrl) {
-            $hero.onerror = function () {
-              if (data.placePhotoUrl && $hero.src !== data.placePhotoUrl) $hero.src = data.placePhotoUrl;
-              else $hero.style.display = 'none';
-            };
-            $hero.src = data.heroUrl;
-          } else {
-            $hero.src = data.placePhotoUrl;
-          }
-          $hero.style.display = 'block';
-        } else {
-          $hero.style.display = 'none';
-        }
+        // === 只用 heroUrl（不再用 Place Photo）===
+if (data.heroUrl) {
+  $hero.onerror = () => { $hero.style.display = 'none'; };
+  $hero.src = data.heroUrl;
+  $hero.style.display = 'block';
+} else {
+  $hero.style.display = 'none';
+}
 
+
+
+        
         // 5) 直接開寫評論（若有 placeId）
         if (data.placeId) {
           $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
