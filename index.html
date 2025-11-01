@@ -10,10 +10,10 @@
     body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; }
     .wrap { max-width:980px; margin:56px auto; padding:0 20px; }
     .card { background:var(--card); border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,.06); padding:28px; }
-    .brand { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
-    .logo { width:40px; height:40px; border-radius:10px; object-fit:cover; background:#eee; }
-    h1 { margin:0; font-size:24px; }
-    .sub { color:var(--muted); margin:10px 0 18px; }
+    .hero { width:100%; height:180px; object-fit:cover; border-radius:12px; display:none; margin-bottom:16px; }
+    .title { display:flex; align-items:center; gap:10px; margin:0 0 6px; font-size:28px; }
+    .logo { width:44px; height:44px; border-radius:10px; object-fit:cover; background:#eee; display:none; }
+    .sub { color:var(--muted); margin-bottom:18px; }
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
     .field { display:flex; gap:10px; align-items:center; }
     .field input { height:36px; padding:0 12px; border:1px solid #e5e7eb; border-radius:10px; outline:none; }
@@ -27,17 +27,22 @@
     textarea { width:100%; min-height:140px; resize:vertical; padding:12px; border:1px solid #e5e7eb; border-radius:12px; outline:none; }
     textarea:focus { border-color:var(--pri); box-shadow:0 0 0 3px rgba(14,165,233,.15); }
     .muted { color:var(--muted); font-size:13px; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
     .footer-actions { display:flex; gap:10px; align-items:center; margin-top:10px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="brand">
-        <img id="storeLogo" class="logo" alt="logo" />
-        <h1>為「<span id="storeName">門市</span>」寫一則短評</h1>
+      <!-- hero 圖片（I 欄） -->
+      <img id="hero" class="hero" alt="hero" />
+
+      <!-- 標題（含 logo） -->
+      <div class="title">
+        <img id="logo" class="logo" alt="logo" />
+        <h1 style="margin:0;">為「<span id="storeName">門市</span>」寫一則短評</h1>
       </div>
+
       <div class="sub">勾選幾個重點，再按「生成（AI）」就會幫你寫出自然的一段評論。</div>
 
       <!-- 只有沒有帶 store 到網址時，才顯示這列 -->
@@ -63,7 +68,6 @@
 
       <!-- 結果 -->
       <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…"></textarea>
-
       <!-- 動作按鈕（輸出框下方） -->
       <div class="footer-actions">
         <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 開啟 Google 評論</a>
@@ -73,12 +77,11 @@
   </div>
 
   <script>
-    // 解析網址 store（支援 ?store=xxx、/xxx、/s/xxx）
+    // 解析網址 store（?store=xxx 或 /xxx 或 /s/xxx）
     function getStoreFromURL() {
       const url = new URL(location.href);
       const byQuery = (url.searchParams.get('store') || '').trim();
       if (byQuery) return byQuery;
-
       const parts = url.pathname.replace(/^\/+/, '').split('/');
       const first = (parts[0] || '').trim().toLowerCase();
       if (!first || first === 'index.html' || first === 'favicon.ico' || first === 'api') return '';
@@ -86,7 +89,6 @@
       return parts[0] || '';
     }
 
-    // 初始可選標籤（先寫死；之後可改從 Sheet 拉）
     const seedTags = [
       '黑糖鹿丸鮮奶','皇家九號奶茶','白桃烏龍','服務超親切','環境很舒服','適合拍照',
       '適合情侶約會','家庭聚餐','朋友小酌','鹹酥雞麵'
@@ -101,15 +103,13 @@
     const $output = document.getElementById('output');
     const $status = document.getElementById('status');
     const $storeName = document.getElementById('storeName');
-    const $storeLogo = document.getElementById('storeLogo');
     const $openGoogle = document.getElementById('openGoogle');
+    const $logo = document.getElementById('logo');
+    const $hero = document.getElementById('hero');
 
     let selected = new Set();
-    let currentStore = getStoreFromURL() || 'leegarnei'; // 方便開發預設
-    let placeId = '';
-    let logoUrl = '';
+    let currentStore = getStoreFromURL() || 'leegarnei';
 
-    // 若網址有 store，隱藏 StoreID 列；否則顯示輸入框
     if (getStoreFromURL()) {
       $storeRow.style.display = 'none';
     } else {
@@ -130,39 +130,8 @@
         $chips.appendChild(el);
       });
     }
-
-    function applyStoreVisual(nameText){
-      $storeName.textContent = nameText || currentStore || '門市';
-      if (logoUrl) $storeLogo.src = logoUrl; else $storeLogo.removeAttribute('src');
-
-      // 預設「開啟 Google 評論」：若有 placeId 走 writereview，否則搜尋
-      if (placeId) {
-        $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
-      } else {
-        const q = encodeURIComponent(nameText || currentStore || 'Big Way');
-        $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
-      }
-    }
-
-    async function fetchStoreMeta(){
-      try {
-        const res = await fetch(`/api/store?storeid=${encodeURIComponent(currentStore)}`);
-        if (!res.ok) throw new Error('store meta not found');
-        const data = await res.json();
-        placeId = data.placeId || '';
-        logoUrl = data.logoUrl || '';
-        applyStoreVisual(data.name || currentStore);
-      } catch(e){
-        placeId = '';
-        logoUrl = '';
-        applyStoreVisual(currentStore);
-      }
-    }
-
     renderChips(seedTags);
-    fetchStoreMeta();
 
-    // 新增自訂標籤（Enter）
     if ($addTag) {
       $addTag.addEventListener('keydown', e=>{
         if(e.key === 'Enter'){
@@ -179,30 +148,69 @@
       });
     }
 
-    // 使用者手動改 StoreID（只有看得到輸入框時）
     if ($storeid) {
       $storeid.addEventListener('input', ()=>{
         currentStore = ($storeid.value || '').trim();
-        placeId = ''; logoUrl = '';
-        fetchStoreMeta();
+        applyBasicLinks();
       });
     }
 
-    // 讓產文較不重複的小手段：送一個隨機 style/variant
-    function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)] }
-    const styles = ['溫暖走心','活潑可愛','簡潔俐落','專業中立','真誠自然'];
+    function applyBasicLinks(nameText) {
+      $storeName.textContent = nameText || currentStore || '門市';
+      const q = encodeURIComponent(currentStore || 'Big Way');
+      $openGoogle.href = `https://www.google.com/search?q=${q}+google+reviews`;
+    }
+
+    // 讀 store meta（name / logoUrl / heroUrl / placeId）
+    async function loadStoreMeta() {
+      try {
+        const res = await fetch(`/api/store?storeid=${encodeURIComponent(currentStore)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
+
+        // 顯示名稱
+        applyBasicLinks(data.name || currentStore);
+
+        // 顯示 logo
+        if (data.logoUrl) {
+          $logo.src = data.logoUrl;
+          $logo.style.display = 'block';
+        } else {
+          $logo.style.display = 'none';
+        }
+
+        // 顯示 hero
+        if (data.heroUrl) {
+          $hero.src = data.heroUrl;
+          $hero.style.display = 'block';
+        } else {
+          $hero.style.display = 'none';
+        }
+
+        // 若有 placeId，直接指向撰寫評論窗
+        if (data.placeId) {
+          $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(data.placeId)}`;
+        }
+      } catch (e) {
+        applyBasicLinks();
+      }
+    }
+    applyBasicLinks();
+    loadStoreMeta();
 
     async function generate(){
       const storeid = (currentStore || '').trim();
       if(!storeid){
-        $status.textContent = '請先指定 StoreID（於網址帶入 ?store=xxx 或在欄位輸入）。';
+        $status.textContent = '請先指定 StoreID。';
         return;
       }
       const selectedTags = Array.from(selected);
-      // 防呆：至少選 1 個標籤
-      if (selectedTags.length === 0) {
-        selectedTags.push('整體體驗很棒');
-      }
+
+      // 👉 你要「固定或隨機」二選一：
+      // 固定：
+      const body = { storeid, selectedTags, variant: 1, minChars: 90, maxChars: 160 };
+      // 如果要隨機：改成 ↓
+      // const body = { storeid, selectedTags, variant: Math.floor(Math.random()*5), minChars: 90, maxChars: 160, nonce: Date.now() };
 
       $gen.disabled = true; $copy.disabled = true;
       const prevTxt = $gen.textContent;
@@ -213,13 +221,7 @@
         const res = await fetch('/api/generate', {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-           body: JSON.stringify({
-            storeid,
-            selectedTags,
-            variant: Math.floor(Math.random() * 5), // 0~4 之間，製造變化但不失控
-            minChars: 90,
-            maxChars: 160  
-            })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if(!res.ok){
@@ -228,10 +230,9 @@
         $output.value = data.reviewText || JSON.stringify(data, null, 2);
         $status.textContent = `✅ 完成（延遲 ${data.latencyMs ?? '-'} ms）`;
 
-        // 若回傳有 placeId，覆蓋按鈕連結到寫評論視窗
+        // 如果 generate 回來也附了 placeId，確保按鈕會直開撰寫評論
         if (data?.store?.placeId) {
-          placeId = data.store.placeId;
-          $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
+          $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(data.store.placeId)}`;
         }
       }catch(err){
         $output.value = '';
@@ -254,5 +255,6 @@
   </script>
 </body>
 </html>
+
 
 
