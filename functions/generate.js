@@ -16,14 +16,17 @@ const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
 // —— in-memory stores（同一 Lambda 實例有效）——
 const cache = new Map();                  // key -> { expiresAt, data }
-const ngramMemory = new Map();            // storeid -> [{text, ts}]
+const ngramMemory = new Map();            // (storeid|tags) -> [{text, ts}]
 const ipWindows = new Map();              // ip -> [timestamps]
 const dailyCounter = { date: dayStr(), count: 0 };
 
 function json(data, statusCode = 200) {
   return {
     statusCode,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    },
     body: JSON.stringify(data),
   };
 }
@@ -97,23 +100,26 @@ function jaccard(a,b) {
   const union = A.size + B.size - inter;
   return union ? inter/union : 0;
 }
-function storeNgramPush(storeid, text) {
+function keyOf(storeid, tags=[]) {
+  return `${storeid}|${tags.slice().sort().join(",")}`;
+}
+function storeNgramPush(storeid, tags, text) {
   const now = Date.now();
-  if (!ngramMemory.has(storeid)) ngramMemory.set(storeid, []);
-  const list = ngramMemory.get(storeid);
+  const k = keyOf(storeid, tags);
+  if (!ngramMemory.has(k)) ngramMemory.set(k, []);
+  const list = ngramMemory.get(k);
   list.push({ text, ts: now });
-  // 只保留最近 100 筆
   while (list.length > 100) list.shift();
 }
-function isTooSimilar(storeid, text, threshold=0.6) {
-  const list = ngramMemory.get(storeid) || [];
+function isTooSimilar(storeid, tags, text, threshold=0.6) {
+  const list = ngramMemory.get(keyOf(storeid, tags)) || [];
   for (const it of list) {
     if (jaccard(text, it.text) >= threshold) return true;
   }
   return false;
 }
 
-// 节流
+// 節流
 function getIP(event) {
   return event.headers["x-forwarded-for"]?.split(",")[0]?.trim()
       || event.headers["client-ip"]
@@ -181,6 +187,7 @@ exports.handler = async (event) => {
     };
   }
   if (event.httpMethod !== "POST") return json({ error: "Method not allowed" }, 405);
+
   try {
     if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY" }, 500);
 
@@ -217,10 +224,17 @@ exports.handler = async (event) => {
     lines.push(`店名（中文）：${storeName}`);
     lines.push(`店家代號：${storeid}`);
     if (selectedTags.length) lines.push(`顧客關注重點：${selectedTags.join("、")}`);
-    if (meta.top3)     lines.push(`熱門品項：${meta.top3}`);
-    if (meta.features) lines.push(`服務與動線：${meta.features}`);
-    if (meta.ambiance) lines.push(`氛圍：${meta.ambiance}`);
-    if (meta.newItems) lines.push(`新品/限定：${meta.newItems}`);
+
+    // ⤵ 門市 meta 僅作語氣參考，不得引入未勾選項目
+    if (meta.top3)     lines.push(`（語氣參考）熱門：${meta.top3}`);
+    if (meta.features) lines.push(`（語氣參考）服務/動線：${meta.features}`);
+    if (meta.ambiance) lines.push(`（語氣參考）氛圍：${meta.ambiance}`);
+    if (meta.newItems) lines.push(`（語氣參考）新品：${meta.newItems}`);
+
+    // 🔒 嚴格規則：只允許出現勾選標籤
+    lines.push(`【嚴格規則】只允許出現以下關鍵詞：${selectedTags.join("、")}。`);
+    lines.push("不得加入未列出的餐點/飲品/形容詞或其他標籤；若需要連接詞，僅可使用一般敘述用語，不得捏造新名詞。");
+
     lines.push(`風格變體：${FLAVORS[variant]}`);
     lines.push(`長度：${minChars}–${maxChars} 字（繁體中文）。`);
     lines.push("請直接輸出最終短評文字本身，勿加任何前後說明。");
@@ -230,7 +244,7 @@ exports.handler = async (event) => {
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
     // 去重：若過像 -> 重試一次，換一條微提示
-    if (isTooSimilar(storeid, text, 0.6)) {
+    if (isTooSimilar(storeid, selectedTags, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
       user = user + `\n（額外改寫提醒）${hint}`;
       const retry = await callOpenAI(sys, user);
@@ -247,8 +261,8 @@ exports.handler = async (event) => {
       meta: { variant, abBucket, minChars, maxChars, tags: selectedTags },
     };
 
-    // 記憶最近輸出，用於去重
-    storeNgramPush(storeid, text);
+    // 記憶最近輸出，用於去重（同店＋同標籤組合）
+    storeNgramPush(storeid, selectedTags, text);
 
     // 寫回 ReviewHistory（若有設定 webhook）
     if (REVIEW_WEBHOOK) {
@@ -257,10 +271,19 @@ exports.handler = async (event) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ts: new Date().toISOString(),
-            ip, storeid, storeName, placeId: meta.placeId || "",
-            selectedTags, variant, abBucket, minChars, maxChars,
-            text, latencyMs, usage
+            timestamp: new Date().toISOString(),
+            storeid,
+            store: { name: storeName, placeId: meta.placeId || "" }, // 給接收端更彈性的解構
+            storeName,
+            placeId: meta.placeId || "",
+            selectedTags,
+            reviewText: text,
+            variant,
+            abBucket,
+            latencyMs,
+            usage,
+            clientIp: ip,
+            userAgent: (event.headers["user-agent"] || "")
           }),
         });
       } catch (_) {}
@@ -273,6 +296,5 @@ exports.handler = async (event) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
 
 
