@@ -80,7 +80,7 @@
     // 解析網址 store（?store=xxx 或 /xxx 或 /s/xxx）
     function getStoreFromURL() {
       const url = new URL(location.href);
-      const byQuery = (url.searchParams.get('store') || '').trim();
++ const byQuery = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
       if (byQuery) return byQuery;
       const parts = url.pathname.replace(/^\/+/, '').split('/');
       const first = (parts[0] || '').trim().toLowerCase();
