@@ -206,14 +206,23 @@
 
         // 4) HERO：Drive → Places 備援 → 隱藏
         // === 只用 heroUrl（不再用 Place Photo）===
-if (data.heroUrl) {
-  $hero.onerror = () => { $hero.style.display = 'none'; };
-  $hero.src = data.heroUrl;
+if (data.heroUrl || data.placePhotoUrl) {
+  if (data.heroUrl) {
+    $hero.onerror = () => {
+      if (data.placePhotoUrl && $hero.src !== data.placePhotoUrl) {
+        $hero.src = data.placePhotoUrl;
+      } else {
+        $hero.style.display = 'none';
+      }
+    };
+    $hero.src = data.heroUrl;
+  } else {
+    $hero.src = data.placePhotoUrl;
+  }
   $hero.style.display = 'block';
 } else {
   $hero.style.display = 'none';
 }
-
 
 
         
