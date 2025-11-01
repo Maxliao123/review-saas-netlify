@@ -141,7 +141,7 @@ exports.handler = async (event) => {
     if (!storeid) return json({ error: "storeid required" }, 400);
 
     // 45s cache key（不將 variant 納入可取得更高命中率；若想每個變體獨立緩存就把 variant 加進 key）
-    const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars });
+    const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars, variant });
     const cached = getFromCache(cacheKey);
     if (cached) return json(cached, 200);
 
