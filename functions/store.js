@@ -113,19 +113,27 @@ async function fetchRow(storeidLower) {
 
 // 把各種 Google Drive 連結轉成能直接出圖的格式
 function normalizeDrive(u) {
-  if (!u) return "";
+  if (!u) return '';
   try {
-    var url = new URL(u);
-    if (url.hostname === "drive.google.com") {
-      // /file/d/{id}/...
-      var m = url.pathname.match(/\/file\/d\/([A-Za-z0-9_-]+)/);
-      if (m && m[1]) return "https://drive.google.com/uc?export=view&id=" + m[1];
-      // ?id={id}
-      var id = url.searchParams.get("id");
-      if (id) return "https://drive.google.com/uc?export=view&id=" + id;
+    // 已是 uc 直連則直接回傳（但我們仍會補上可能的 resourcekey）
+    const isUC = /^https:\/\/drive\.google\.com\/uc/i.test(u);
+
+    // 取出 id
+    const mId = u.match(/\/file\/d\/([^/]+)/) || u.match(/[?&]id=([^&]+)/i);
+    const id = mId ? mId[1] : '';
+    if (!id) return u;
+
+    // 取出 resourcekey（若有就保留）
+    const rkMatch = u.match(/[?&]resourcekey=([^&]+)/i);
+    const rk = rkMatch ? rkMatch[1] : '';
+
+    let out = isUC ? u : `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
+    // 若原本不是 uc 或 uc 上沒有 resourcekey，補上它
+    if (rk && !/[?&]resourcekey=/.test(out)) {
+      out += (out.includes('?') ? '&' : '?') + `resourcekey=${encodeURIComponent(rk)}`;
     }
-    return u;
-  } catch (_e) {
+    return out;
+  } catch {
     return u;
   }
 }
