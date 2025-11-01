@@ -4,7 +4,7 @@
 // 讀 Google Sheet（A..I 欄）回傳：name / placeId / logoUrl / heroUrl
 // - 會把 Google Drive 連結轉成可直出圖片的 uc?id=... 格式
 // - 若無 LOGO/Hero 而有 PlaceID + GOOGLE_MAPS_API_KEY，則用 Place Photos 備援
-
+const PREFER_PLACES_PHOTO = true;
 const SHEET_ID   = process.env.SHEET_ID;
 const SHEET_NAME = process.env.SHEET_NAME || "stores"; // 你已在 Netlify 設定成「工作表1」
 const GMAPS_KEY  = process.env.GOOGLE_MAPS_API_KEY || "";
