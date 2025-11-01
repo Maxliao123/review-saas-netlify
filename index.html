@@ -205,69 +205,67 @@
     }
 
     // 載入店家 meta（含圖片與 placeId）
-    async function loadStoreMeta() {
-      try {
-        var res = await fetch('/api/store?storeid=' + encodeURIComponent(currentStore));
-        var data = await res.json();
-        if (!res.ok) throw new Error((data && data.error) ? data.error : ('HTTP ' + res.status));
+  // ...前略（保持你原本的程式）...
 
-        // 1) 店名
-        applyBasicLinks(data.name || currentStore);
+  async function loadStoreMeta() {
+    try {
+      var res = await fetch('/api/store?storeid=' + encodeURIComponent(currentStore));
+      var data = await res.json();
+      if (!res.ok) throw new Error((data && data.error) ? data.error : ('HTTP ' + res.status));
 
-        // 2) 標籤
-        buildChipsFromMeta(data);
+      // 名稱 / 標籤維持你原本的寫法…
+      applyBasicLinks(data.name || currentStore);
+      buildChipsFromMeta(data);
 
-        // 3) LOGO：Drive → Places 備援 → 隱藏
-        setImg($logo, data.logoUrl, data.placePhotoUrl);
-
-        // 4) HERO：Drive → Places 備援 → 隱藏
-        setImg($hero, data.heroUrl, data.placePhotoUrl);
-
-        // 5) 直接開寫評論（若有 placeId）
-        if (data.placeId) {
-          $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
+      // === LOGO：Drive → Places → 隱藏 ===
+      if (data.logoUrl || data.placePhotoUrl) {
+        if (data.logoUrl) {
+          $logo.onerror = function () {
+            console.warn('[LOGO] Drive 載入失敗，改用 PlacePhoto');
+            if (data.placePhotoUrl && $logo.src !== data.placePhotoUrl) $logo.src = data.placePhotoUrl;
+            else $logo.style.display = 'none';
+          };
+          $logo.src = data.logoUrl;
+        } else {
+          $logo.src = data.placePhotoUrl;
         }
-      } catch (e) {
-        console.error('loadStoreMeta error:', e);
-        applyBasicLinks('門市');
+        $logo.style.display = 'block';
+      } else {
         $logo.style.display = 'none';
+      }
+
+      // === HERO：優先用 Drive；失敗才用 Places；再失敗才隱藏 ===
+      if (data.heroUrl || data.placePhotoUrl) {
+        if (data.heroUrl) {
+          $hero.onerror = function () {
+            console.warn('[HERO] Drive 載入失敗，改用 PlacePhoto');
+            if (data.placePhotoUrl && $hero.src !== data.placePhotoUrl) $hero.src = data.placePhotoUrl;
+            else $hero.style.display = 'none';
+          };
+          $hero.src = data.heroUrl;          // 先嘗試 Drive
+        } else {
+          $hero.src = data.placePhotoUrl;    // 沒有 Drive，就用 Places
+        }
+        $hero.style.display = 'block';
+      } else {
         $hero.style.display = 'none';
       }
-    }
 
-    // 監聽「手動輸入 StoreID」
-    if ($storeInput) {
-      $storeInput.addEventListener('input', function(){
-        currentStore = ($storeInput.value || '').trim();
-        applyBasicLinks();
-      });
+      if (data.placeId) {
+        $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
+      }
+    } catch (e) {
+      console.error('loadStoreMeta error:', e);
+      applyBasicLinks('門市');
+      $logo.style.display = 'none';
+      $hero.style.display = 'none';
     }
+  }
 
-    // 新增自訂標籤
-    if ($addTag) {
-      $addTag.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') {
-          var v = ($addTag.value || '').trim();
-          if (!v) return;
-          var tags = [];
-          for (var i=0;i<$chips.children.length;i++) tags.push($chips.children[i].textContent);
-          if (tags.indexOf(v) === -1) {
-            tags.unshift(v);
-            renderTagChips(tags);
-            // 預設選取新加入的
-            var kids = $chips.children;
-            for (var j=0;j<kids.length;j++){
-              if (kids[j].textContent === v) { kids[j].click(); break; }
-            }
-          }
-          $addTag.value = '';
-        }
-      });
-    }
+  // 保持你原本的呼叫
+  applyBasicLinks('門市');
+  loadStoreMeta();
 
-    // 初始化
-    applyBasicLinks('門市');
-    loadStoreMeta();
 
     // 生成短評
     async function generate(){
