@@ -104,26 +104,40 @@ async function fetchRow(storeidLower) {
   };
 }
 
-// 把各種 Google Drive 連結轉成能直接出圖的 uc?id=...
+/// 把各種 Google Drive 連結轉成能直接出圖的格式
 function normalizeDrive(u) {
   if (!u) return "";
   try {
     const url = new URL(u);
-    // 已是 uc?id= 或 uc?export=view&id= → 統一改成 uc?id=
+
+    // 只處理 drive.google.com
     if (url.hostname === "drive.google.com") {
-      // /file/d/{id}/...
+      // 1) /file/d/{id}/... → 取出 id
       const m = url.pathname.match(/\/file\/d\/([A-Za-z0-9_-]+)/);
-      if (m && m[1]) return `https://drive.google.com/uc?id=${m[1]}`;
-      // ?id={id}
-      const id = url.searchParams.get("id");
-      if (id) return `https://drive.google.com/uc?id=${id}`;
-      // 若是 folders 之類的就無法直出
+      if (m && m[1]) {
+        const id = m[1];
+        // 先試 uc?export=view&id=...（比 uc?id= 更穩）
+        return `https://drive.google.com/uc?export=view&id=${id}`;
+      }
+
+      // 2) ?id={id}
+      const id2 = url.searchParams.get("id");
+      if (id2) {
+        return `https://drive.google.com/uc?export=view&id=${id2}`;
+      }
+
+      // 3) 其他（如 open?usp=drive_link 或 sharing?resourcekey=）多半無法直出
+      // 直接回傳原連結（之後可加更多分支）
+      return u;
     }
+
+    // 非 drive.google.com，原樣回傳
     return u;
   } catch {
     return u;
   }
 }
+
 
 // 取 Place Details 的第一張 photo_reference
 async function fetchPlacePhotoRef(placeId) {
