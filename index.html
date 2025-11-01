@@ -162,41 +162,70 @@
     }
 
     // 讀 store meta（name / logoUrl / heroUrl / placeId）
-    async function loadStoreMeta() {
-      try {
-        const res = await fetch(`/api/store?storeid=${encodeURIComponent(currentStore)}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
+async function loadStoreMeta() {
+  try {
+    const res = await fetch(`/api/store?storeid=${encodeURIComponent(currentStore)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || ('HTTP ' + res.status));
 
-        // 顯示名稱
-        applyBasicLinks(data.name || currentStore);
+    // 顯示名稱
+    applyBasicLinks(data.name || currentStore);
 
-        // 顯示 logo
-        if (data.logoUrl) {
-          $logo.src = data.logoUrl;
-          $logo.style.display = 'block';
-        } else {
-          $logo.style.display = 'none';
-        }
-
-        // 顯示 hero
-        if (data.heroUrl) {
-          $hero.src = data.heroUrl;
-          $hero.style.display = 'block';
-        } else {
-          $hero.style.display = 'none';
-        }
-
-        // 若有 placeId，直接指向撰寫評論窗
-        if (data.placeId) {
-          $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(data.placeId)}`;
-        }
-      } catch (e) {
-        applyBasicLinks();
+    // === 顯示 logo（Drive 失敗 → 換 Place Photo → 再失敗就隱藏）===
+    if (data.logoUrl || data.placePhotoUrl) {
+      if (data.logoUrl) {
+        $logo.onerror = () => {
+          // 若 Drive 被擋且還沒換過，就改用 placePhotoUrl
+          if (data.placePhotoUrl && $logo.src !== data.placePhotoUrl) {
+            $logo.src = data.placePhotoUrl;
+          } else {
+            $logo.style.display = 'none';
+          }
+        };
+        $logo.src = data.logoUrl;
+      } else {
+        $logo.src = data.placePhotoUrl;
       }
+      $logo.style.display = 'block';
+    } else {
+      $logo.style.display = 'none';
     }
+
+    // === 顯示 hero（Drive 失敗 → 換 Place Photo → 再失敗就隱藏）===
+    if (data.heroUrl || data.placePhotoUrl) {
+      if (data.heroUrl) {
+        $hero.onerror = () => {
+          if (data.placePhotoUrl && $hero.src !== data.placePhotoUrl) {
+            $hero.src = data.placePhotoUrl;
+          } else {
+            $hero.style.display = 'none';
+          }
+        };
+        $hero.src = data.heroUrl;
+      } else {
+        $hero.src = data.placePhotoUrl;
+      }
+      $hero.style.display = 'block';
+    } else {
+      $hero.style.display = 'none';
+    }
+
+    // === 若有 placeId，直接指向撰寫評論窗 ===
+    if (data.placeId) {
+      $openGoogle.href = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(data.placeId)}`;
+    }
+
+  } catch (e) {
+    console.error("loadStoreMeta error:", e);
     applyBasicLinks();
-    loadStoreMeta();
+    $logo.style.display = 'none';
+    $hero.style.display = 'none';
+  }
+}
+
+applyBasicLinks();
+loadStoreMeta();
+
 
     async function generate(){
       const storeid = (currentStore || '').trim();
