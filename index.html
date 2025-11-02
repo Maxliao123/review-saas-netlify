@@ -6,113 +6,120 @@
   <title>Smart Google Review · AI 一則短評</title>
   <style>
     :root{
-      --bg:#f6f8fa; --card:#fff; --fg:#111827; --muted:#6b7280;
-      --pri:#0ea5e9; --chip:#eaf4fe; --chip-on:#0ea5e9; --chip-on-fg:#fff;
-      --fs-title: clamp(18px, 1.6vw + 16px, 28px);
-      --fs-sub: clamp(13px, .6vw + 12px, 16px);
-      --fs-body: clamp(13px, .6vw + 11px, 16px);
-      --fs-chip: clamp(12px, .4vw + 10px, 14px);
-      --fs-btn:  clamp(14px, .6vw + 11px, 16px);
-      --radius: 16px;
+      --bg:#f6f8fa; --card:#fff; --fg:#1f2937; --muted:#6b7280;
+      --pri:#0ea5e9; --chip:#e5f2fb; --chip-on:#0ea5e9; --chip-on-fg:#fff;
+      --fs-title-max: 28px;     /* 標題上限字級 */
+      --fs-title-min: 18px;     /* 標題下限字級（fitTitle 最小） */
+      --fs-body:  clamp(13px, 1.2vw + 10px, 16px);
+      --fs-chip:  clamp(12px, 1vw  + 9px, 14px);
+      --fs-btn:   clamp(14px, 1.2vw + 11px, 16px);
     }
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-    body{margin:0; background:var(--bg); color:var(--fg); font:var(--fs-body)/1.5 'Inter','PingFang TC','Noto Sans','Noto Sans TC',system-ui,sans-serif;}
-    .wrap{max-width:540px; margin:auto; padding:12px;}
-    .card{position:relative; background:var(--card); border-radius:var(--radius); box-shadow:0 6px 20px rgba(0,0,0,.06); overflow:hidden;}
+    body{margin:0; background:var(--bg); color:var(--fg); font:var(--fs-body)/1.5 'Inter','PingFang TC','Noto Sans TC',sans-serif;}
+    .wrap{max-width:720px; margin:auto; padding:12px;}
+    .card{background:var(--card); border-radius:16px; box-shadow:0 6px 20px rgba(0,0,0,.06); overflow:hidden; position:relative;}
 
-    /* Hero + 疊圖 Logo */
-    .hero{width:100%; height:180px; object-fit:cover; display:block;}
-    @media (max-width:420px){ .hero{height:150px;} }
-    #logo{
-      position:absolute; left:14px; bottom:14px; z-index:2;
-      width:56px; height:56px; border-radius:12px; object-fit:cover;
-      box-shadow:0 4px 14px rgba(0,0,0,.25); border:2px solid #fff; background:#fff;
+    /* --- HERO 與浮層 --- */
+    .hero-wrap{position:relative;}
+    .hero{width:100%; height:220px; object-fit:cover; display:block;}
+    @media (max-width:520px){ .hero{height:180px;} }
+
+    /* 語言膠囊：浮在 Hero 右上角，不再擠壓標題 */
+    .lang-pill{
+      position:absolute; right:12px; top:12px;
+      display:flex; gap:4px; padding:4px; border-radius:999px;
+      background:rgba(0,0,0,.45); backdrop-filter:blur(4px);
     }
-    @media (max-width:420px){ #logo{width:50px;height:50px;left:12px;bottom:12px;} }
-
-    /* 標題列：盡量單行 + 右側語言切換 */
-    .title-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px 6px;}
-    .title h1{
-      margin:0; font-size:var(--fs-title); line-height:1.25; font-weight:800;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+    .lang-pill button{
+      border:0; background:transparent; padding:6px 10px; border-radius:999px;
+      font-weight:700; cursor:pointer; color:#fff; min-width:40px; font-size:12px;
     }
-    .sub{color:var(--muted); padding:0 14px 10px; font-size:var(--fs-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .lang-pill button.active{background:#111827; color:#fff;}
 
-    /* 語言切換 segmented control */
-    .lang{display:flex; background:#e5e7eb; border-radius:999px; padding:3px; gap:3px; flex:0 0 auto;}
-    .lang button{
-      border:0; background:transparent; padding:6px 12px; border-radius:999px;
-      font-weight:800; cursor:pointer; color:#374151; min-width:44px;
+    /* Logo 徽章：置中，跨越 Hero 與卡片交界 */
+    .logo-badge{
+      position:absolute; left:50%; bottom:-22px; transform:translateX(-50%);
+      width:64px; height:64px; border-radius:14px; object-fit:cover; display:none;
+      background:#fff; padding:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.1);
     }
-    .lang button.active{background:#0b1220; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.15);}
+    @media (max-width:520px){ .logo-badge{width:56px; height:56px; bottom:-20px;} }
 
-    /* Chips：三欄等寬，文字不溢出（ellipsis）；過長時微縮字級 */
-    #chips{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; padding:0 14px 6px;}
+    /* --- 內容區（Hero 下方） --- */
+    .content{padding:28px 16px 16px; margin-top:16px;} /* margin-top 讓出徽章空間 */
+    .title{display:block; margin:0 0 6px 0; font-weight:800;
+      font-size:var(--fs-title-max); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .sub{color:var(--muted); margin:0 0 12px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+    /* Chips：固定三欄、等寬；單行省略 */
+    #chips{
+      display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:12px;
+    }
     .chip{
-      width:100%; padding:10px 10px; border-radius:999px; text-align:center;
+      width:100%; padding:10px 12px; border-radius:999px; text-align:center;
       background:var(--chip); color:var(--fg); cursor:pointer; font-size:var(--fs-chip);
       user-select:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:.15s;
     }
     .chip.on{background:var(--chip-on); color:var(--chip-on-fg);}
-    /* 超長字自動縮小一點（保守，避免擠爆） */
-    .chip.long{font-size:calc(var(--fs-chip) - 1px);}
-    .chip.xlong{font-size:calc(var(--fs-chip) - 2px);}
 
-    .actions{display:flex; gap:8px; padding:10px 14px 8px;}
+    .actions{display:flex; gap:10px; margin-bottom:10px;}
     .btn{
-      flex:1; height:44px; border:0; border-radius:12px; font-weight:800;
+      flex:1; height:46px; border:0; border-radius:12px; font-weight:700;
       font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; cursor:pointer;
     }
     .btn.primary{background:var(--pri); color:#fff;}
-    .btn.secondary{background:#0b1220; color:#fff;}
+    .btn.secondary{background:#111827; color:#fff;}
     .btn:disabled{opacity:.7; cursor:not-allowed;}
     .spinner{width:18px; height:18px; border:2px solid rgba(255,255,255,.45);
       border-top-color:#fff; border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
     .btn.loading .spinner{display:inline-block;}
 
-    textarea{width:calc(100% - 28px); margin:0 14px 10px; padding:10px; min-height:64px; resize:vertical;
+    textarea{width:100%; margin:0; padding:10px; min-height:64px; resize:vertical;
       border:1px solid #e5e7eb; border-radius:10px; font-size:var(--fs-body);}
-    .footer-actions{display:flex; justify-content:center; padding:0 14px 16px;}
-    .status{color:var(--muted); font-size:12px; text-align:center; padding:0 14px 14px;}
+    .footer-actions{display:flex; justify-content:center; margin-top:12px;}
+    .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
+
+    /* 只有沒帶 store 參數時才顯示（相容） */
     #storeRow{display:none;}
-    .row{display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 6px;}
+    .row{display:flex; flex-wrap:wrap; gap:6px;}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <img id="hero" class="hero" alt="hero" onerror="this.style.display='none'"/>
-      <img id="logo" alt="logo" onerror="this.style.display='none'"/>
+      <!-- Hero + 浮層（Logo、語言切換） -->
+      <div class="hero-wrap">
+        <img id="hero" class="hero" alt="hero" onerror="this.style.display='none'"/>
+        <img id="logo" class="logo-badge" alt="logo" onerror="this.style.display='none'"/>
+        <div id="langBar" class="lang-pill" aria-label="language switch"></div>
+      </div>
 
-      <div class="title-row">
-        <div class="title">
-          <h1 id="title">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
+      <!-- 內容區 -->
+      <div class="content">
+        <h1 id="title" class="title">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
+        <p id="subtitle" class="sub">挑幾個重點，按「生成（AI）」就能得到自然的一段評論。</p>
+
+        <div id="storeRow" class="row" style="margin-bottom:10px;">
+          <div class="field"><label class="status" id="labStore">StoreID：</label><input id="store-input" placeholder="leegarnei" /></div>
+          <div class="field"><label class="status" id="labAddTag">新增標籤：</label><input id="addTag" placeholder="輸入後按 Enter" /></div>
         </div>
-        <div id="langBar" class="lang" aria-label="language switch"></div>
+
+        <div id="chips"></div>
+
+        <div class="actions">
+          <button id="gen" class="btn primary"><span class="spinner"></span><span id="btnGen">✨ 生成（AI）</span></button>
+          <button id="copy" class="btn"><span id="btnCopy">📋 複製</span></button>
+        </div>
+
+        <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…"></textarea>
+
+        <div class="footer-actions">
+          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
+        </div>
+
+        <div id="status" class="status" aria-live="polite"></div>
       </div>
-
-      <div id="subtitle" class="sub">挑幾個重點，按「生成（AI）」就能得到自然的一段評論。</div>
-
-      <div id="storeRow" class="row" style="margin-bottom:10px;">
-        <div class="field"><label class="status" id="labStore">StoreID：</label><input id="store-input" placeholder="leegarnei" /></div>
-        <div class="field"><label class="status" id="labAddTag">新增標籤：</label><input id="addTag" placeholder="輸入後按 Enter" /></div>
-      </div>
-
-      <div id="chips" style="margin-bottom:6px;"></div>
-
-      <div class="actions">
-        <button id="gen" class="btn primary"><span class="spinner"></span><span id="btnGen">✨ 生成（AI）</span></button>
-        <button id="copy" class="btn"><span id="btnCopy">📋 複製</span></button>
-      </div>
-
-      <textarea id="output" placeholder="這裡會顯示 AI 生成的短評…"></textarea>
-
-      <div class="footer-actions">
-        <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
-      </div>
-
-      <div id="status" class="status" aria-live="polite"></div>
     </div>
   </div>
 
@@ -194,10 +201,10 @@
 
     let selected = new Set();
     let currentStore = getStoreFromURL() || 'leegarnei';
-    let currentLang = 'en';
+    let currentLang = 'en';       // 預設英語
     let storeMeta = null;
     let availableLangs = [];
-    let storeNames = null;
+    let storeNames = null;        // 解析後的多語店名 {zh,en,ko,ja,fr,es}
 
     if (!getStoreFromURL()) { $storeRow.style.display='flex'; if ($storeInput) $storeInput.value=currentStore; }
 
@@ -207,7 +214,7 @@
       $openGoogle.href = 'https://www.google.com/search?q=' + q + '+google+reviews';
     }
 
-    /* -------- StoreName 解析 + 依語言取名 -------- */
+    /* StoreName 解析 + 依語言取名（含 fallback） */
     function parseStoreNameMulti(s){
       const out = { zh:'', en:'', ko:'', ja:'', fr:'', es:'', _raw:(s||'').trim() };
       if (!s) return out;
@@ -252,7 +259,7 @@
       return (nameMap._raw || '').trim();
     }
 
-    /* -------- 語言 UI 與 Chips -------- */
+    /* 語言 UI 與 Chips */
     function langHasContent(langKey, data){
       const cfg = LANGS[langKey]; if(!cfg) return false;
       return cfg.chips.some(k => (data[k]||'').trim());
@@ -266,11 +273,23 @@
         btn.onclick = ()=>{
           currentLang = k;
           renderUI();
-          buildLangBar();          // 更新 active 樣式位置
+          buildLangBar();          // active 樣式跟著更新
           buildChipsFromMeta();
         };
         $langBar.appendChild(btn);
       });
+    }
+    function fitTitle(){
+      // 將標題縮到單行塞得下
+      const max = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-max')) || 28;
+      const min = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-min')) || 18;
+      let size = max;
+      $title.style.fontSize = size + 'px';
+      const w = $title.clientWidth;
+      while ($title.scrollWidth > w && size > min) {
+        size -= 1;
+        $title.style.fontSize = size + 'px';
+      }
     }
     function renderUI(){
       const ui = LANGS[currentLang].ui;
@@ -283,6 +302,7 @@
       $btnCopy.textContent = ui.copy;
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
+      requestAnimationFrame(fitTitle);
     }
     function buildChipsFromMeta(){
       const cfg = LANGS[currentLang]; const data = storeMeta || {};
@@ -298,18 +318,14 @@
       selected.clear();
       $chips.innerHTML = '';
       tags.forEach(tag=>{
-        const t = tag.trim();
         const el = document.createElement('div');
-        el.className='chip'; el.textContent=t;
-        // 極長字自動降一點字級
-        if (t.length > 14 && t.length <= 20) el.classList.add('long');
-        if (t.length > 20) el.classList.add('xlong');
-        el.onclick=()=>{ if(selected.has(t)) selected.delete(t); else selected.add(t); el.classList.toggle('on'); };
+        el.className='chip'; el.textContent=tag.trim();
+        el.onclick=()=>{ if(selected.has(tag)) selected.delete(tag); else selected.add(tag); el.classList.toggle('on'); };
         $chips.appendChild(el);
       });
     }
 
-    /* -------- 載入店家 meta -------- */
+    /* 載入店家 meta */
     async function loadStoreMeta(){
       try{
         const res = await fetch('/api/store?storeid=' + encodeURIComponent(currentStore));
@@ -327,6 +343,8 @@
 
         setImg($logo, data.logoUrl, data.placePhotoUrl);
         setImg($hero, data.heroUrl, data.placePhotoUrl);
+        // 如果 Logo 成功載入，顯示徽章（setImg 已處理 onerror）
+        $logo.style.display = 'block';
 
         if (data.placeId) $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
 
@@ -334,10 +352,11 @@
       }catch(e){
         console.error('loadStoreMeta error:', e);
         applyBasicLinks('Store'); $logo.style.display='none'; $hero.style.display='none';
+        renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
-    // 手動輸入 StoreID（相容）
+    // 相容：手動輸入 StoreID
     if ($storeInput) $storeInput.addEventListener('input', ()=>{ currentStore = ($storeInput.value||'').trim(); applyBasicLinks(); });
 
     // 新增自訂標籤
@@ -345,8 +364,6 @@
       if (e.key==='Enter'){
         const v = ($addTag.value||'').trim(); if(!v) return;
         const el = document.createElement('div'); el.className='chip on'; el.textContent=v;
-        if (v.length > 14 && v.length <= 20) el.classList.add('long');
-        if (v.length > 20) el.classList.add('xlong');
         selected.add(v); el.onclick=()=>{ if(selected.has(v)) selected.delete(v); else selected.add(v); el.classList.toggle('on'); };
         $chips.prepend(el); $addTag.value='';
       }
@@ -354,13 +371,14 @@
 
     // 初始化
     applyBasicLinks('Store'); loadStoreMeta();
+    addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
-    /* -------- 產生 / 複製 -------- */
+    /* 產生 / 複製 */
     async function generate(){
       const storeid = (currentStore || '').trim();
       if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
       const selectedTags = Array.from(selected);
-      const body = { storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang: currentLang }; // ✅ 帶語言
+      const body = { storeid, selectedTags, lang: currentLang, variant:1, minChars:90, maxChars:160 };
 
       $gen.classList.add('loading'); $gen.disabled=true; $copy.disabled=true;
       const prev = $gen.innerHTML; $gen.innerHTML = '<span class="spinner"></span>' + (currentLang==='zh'?'生成中…':'Generating…');
@@ -391,6 +409,7 @@
   </script>
 </body>
 </html>
+
 
 
 
