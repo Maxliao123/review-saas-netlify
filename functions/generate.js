@@ -1,6 +1,6 @@
 // functions/generate.js
 // POST /api/generate
-// Body: { storeid, selectedTags: string[], minChars?, maxChars?, lang? }
+// Body: { storeid, selectedTags: string[], lang?: "en"|"zh"|"ko"|"ja"|"fr"|"es", minChars?, maxChars? }
 
 const OPENAI_API_KEY   = process.env.OPENAI_API_KEY;
 const SHEET_ID         = process.env.SHEET_ID;
@@ -8,15 +8,16 @@ const SHEET_NAME       = process.env.SHEET_NAME || "stores";
 const CACHE_TTL_S      = parseInt(process.env.CACHE_TTL_S || "60", 10);
 const CACHE_TTL_MS     = Math.max(10, CACHE_TTL_S) * 1000;
 
+// 成本控管 / 節流（簡易 in-memory 示範）
 const DAILY_MAX_CALLS  = parseInt(process.env.DAILY_MAX_CALLS || "500", 10);
 const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "20", 10);
-const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10);
+const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
 const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
-// in-memory
-const cache = new Map();
-const ngramMemory = new Map();
-const ipWindows = new Map();
+// —— in-memory stores（同一 Lambda 實例有效）——
+const cache = new Map();                  // key -> { expiresAt, data }
+const ngramMemory = new Map();            // (storeid|tags) -> [{text, ts}]
+const ipWindows = new Map();              // ip -> [timestamps]
 const dailyCounter = { date: dayStr(), count: 0 };
 
 function json(data, statusCode = 200) {
@@ -32,6 +33,7 @@ function json(data, statusCode = 200) {
 function dayStr() { const d = new Date(); return d.toISOString().slice(0,10); }
 function stableKey(obj) { return JSON.stringify(obj, Object.keys(obj).sort()); }
 
+// cache
 function cacheGet(key) {
   const hit = cache.get(key);
   if (!hit) return null;
@@ -40,6 +42,7 @@ function cacheGet(key) {
 }
 function cacheSet(key, data) { cache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, data }); }
 
+// 小型 hash（stable variant / AB）
 function hashStr(s) { let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
 
 // 讀店家 row（A..G）
@@ -54,19 +57,19 @@ async function fetchStoreRow(storeidLower) {
   const obj = JSON.parse(jsonStr);
   const row = obj?.table?.rows?.[0]?.c;
   if (!row) return null;
-  const v = (i) => ((row[i]?.v ?? "") + "").trim();
+  const val = (i) => ((row[i]?.v ?? "") + "").trim();
   return {
-    storeid:  v(0),
-    name:     v(1) || v(0),
-    placeId:  v(2),
-    top3:     v(3),
-    features: v(4),
-    ambiance: v(5),
-    newItems: v(6),
+    storeid:  val(0),
+    name:     val(1) || val(0),
+    placeId:  val(2),
+    top3:     val(3),
+    features: val(4),
+    ambiance: val(5),
+    newItems: val(6),
   };
 }
 
-// 風格變體
+// 穩定隨機變體 + AB bucket
 const FLAVORS = [
   "語氣自然親切、像對朋友分享；語序口語但不浮誇。",
   "精簡俐落、重點清楚；少形容詞、多實際細節。",
@@ -74,16 +77,17 @@ const FLAVORS = [
   "中性理性、陳述體驗重點；避免誇飾與口頭禪。",
   "加入一個小情境（點餐/上桌/座位/排隊/結帳其中一項）。",
 ];
-function pickVariant(storeid, selectedTags) {
-  const seed = stableKey({ storeid, selectedTags });
-  const h = hashStr(seed);
-  return h % FLAVORS.length;
+function pickVariant(seedA, seedB) {
+  const h = hashStr(stableKey({ seedA, seedB }));
+  return h % FLAVORS.length; // 0..4
 }
-function pickAB(storeid) { return (hashStr(storeid) % 2) === 0 ? "A" : "B"; }
+function pickAB(storeid) {
+  return (hashStr(storeid) % 2) === 0 ? "A" : "B";
+}
 
-// 去重
+// 內容去重：3-gram Jaccard
 function ngrams(str, n=3) {
-  const s = str.replace(/\s+/g, "");
+  const s = String(str || "").replace(/\s+/g, "");
   const arr = [];
   for (let i=0;i<=s.length-n;i++) arr.push(s.slice(i,i+n));
   return new Set(arr);
@@ -95,7 +99,9 @@ function jaccard(a,b) {
   const union = A.size + B.size - inter;
   return union ? inter/union : 0;
 }
-function keyOf(storeid, tags=[]) { return `${storeid}|${tags.slice().sort().join(",")}`; }
+function keyOf(storeid, tags=[]) {
+  return `${storeid}|${tags.slice().sort().join(",")}`;
+}
 function storeNgramPush(storeid, tags, text) {
   const now = Date.now();
   const k = keyOf(storeid, tags);
@@ -106,7 +112,9 @@ function storeNgramPush(storeid, tags, text) {
 }
 function isTooSimilar(storeid, tags, text, threshold=0.6) {
   const list = ngramMemory.get(keyOf(storeid, tags)) || [];
-  for (const it of list) if (jaccard(text, it.text) >= threshold) return true;
+  for (const it of list) {
+    if (jaccard(text, it.text) >= threshold) return true;
+  }
   return false;
 }
 
@@ -156,129 +164,117 @@ async function callOpenAI(system, user) {
   };
 }
 
-// 不同語言的 System Prompt
-const SYS = {
-  zh: [
-    "你是在地向導型寫手，擅長將真實用餐體驗濃縮為『可信、自然、短小精悍』的一段繁體中文評論。",
-    "輸出限制：只寫 1–2 句；不要列點、不要 hashtag、不要 emoji、避免模板化與多個驚嘆號。",
-    "若有長度限制，盡量控制在範圍內（以中文字數粗估）。",
-  ].join("\n"),
-  en: [
-    "You are a local food writer who condenses real dining experiences into a short, natural, credible English review.",
-    "Constraints: write only 1–2 sentences; no bullets, no hashtags, no emoji, avoid clichés and exclamation marks.",
-    "Respect the requested length in characters as closely as possible.",
-  ].join("\n"),
-  ko: [
-    "당신은 현지 맛집을 자연스럽고 신뢰감 있게 1~2문장으로 소개하는 리뷰 작가입니다.",
-    "제약: 글머리표, 해시태그, 이모지 금지, 과도한 감탄사와 진부한 표현은 피하세요.",
-  ].join("\n"),
-  ja: [
-    "あなたは地元の食のライターです。実体験に基づく短く自然で信頼できる日本語レビューを1〜2文で書いてください。",
-    "箇条書き・ハッシュタグ・絵文字は使わず、誇張や定型表現は避けてください。",
-  ].join("\n"),
-  fr: [
-    "Vous êtes un critique culinaire local. Rédigez un avis court, naturel et crédible en 1–2 phrases en français.",
-    "Pas de listes, hashtags ni emojis ; évitez les clichés et les points d’exclamation.",
-  ].join("\n"),
-  es: [
-    "Eres un redactor gastronómico local. Escribe una reseña breve, natural y creíble en 1–2 frases en español.",
-    "Sin listas, hashtags ni emojis; evita los clichés y los signos de exclamación.",
-  ].join("\n"),
-};
-
-// 按語言建立 User Prompt
-function buildUserPrompt(lang, meta, storeid, selectedTags, minChars, maxChars, variant) {
-  const name = meta?.name || storeid;
-  const allow = selectedTags.join(lang === 'zh' ? "、" : ", ");
+// —— 多語系 system/user 模板 —— //
+function buildPrompt({ lang, storeid, storeName, meta, selectedTags, minChars, maxChars, variant }) {
+  // 將共同資訊（熱門/服務/氛圍/新品）作為「語氣參考」，但不允許引入未勾選的關鍵字
   const ref = [];
+  if (meta.top3)     ref.push(`Top: ${meta.top3}`);
+  if (meta.features) ref.push(`Service/Flow: ${meta.features}`);
+  if (meta.ambiance) ref.push(`Ambience: ${meta.ambiance}`);
+  if (meta.newItems) ref.push(`New: ${meta.newItems}`);
 
-  if (meta?.top3)     ref.push(label(lang, 'Top picks') + ": " + meta.top3);
-  if (meta?.features) ref.push(label(lang, 'Service/Flow') + ": " + meta.features);
-  if (meta?.ambiance) ref.push(label(lang, 'Ambience') + ": " + meta.ambiance);
-  if (meta?.newItems) ref.push(label(lang, 'New items') + ": " + meta.newItems);
+  const joinedTags = selectedTags.join(", ");
+  const rangeText = `${minChars}-${maxChars}`;
 
-  const flavor = FLAVORS[variant];
-  const strictRule = hardRule(lang, allow);
+  // 各語言文案
+  const T = {
+    en: {
+      sys: [
+        "You are a local-savvy food reviewer.",
+        "Write 1–2 compact sentences in natural English; no hashtags, no emojis, no bullet points, no excessive exclamation marks.",
+        "Avoid templates and filler words. Vary sentence openings. Keep it trustworthy and specific.",
+        `Respect allowed keywords only: the review must not invent items beyond the selected tags.`,
+      ].join("\n"),
+      user: [
+        `Store: ${storeName} (id: ${storeid})`,
+        selectedTags.length ? `Allowed keywords: ${joinedTags}` : "Allowed keywords: (none provided)",
+        ref.length ? `Reference only (do not introduce new items): ${ref.join(" | ")}` : "",
+        `Style variant: ${FLAVORS[variant]}`,
+        `Length target: ${rangeText} characters (rough guidance).`,
+        "Return ONLY the final review text."
+      ].filter(Boolean).join("\n"),
+    },
+    zh: {
+      sys: [
+        "你是懂在地口味的美食短評寫手。",
+        "請用繁體中文撰寫 1–2 句，語氣自然可信、不要列點、不要 hashtag、不要 emoji、避免過度誇飾與口頭禪。",
+        "僅能使用勾選的關鍵詞，不得捏造未被選中的餐點/形容詞。",
+      ].join("\n"),
+      user: [
+        `店名：${storeName}（id: ${storeid}）`,
+        selectedTags.length ? `允許關鍵詞：${joinedTags}` : "允許關鍵詞：（無）",
+        ref.length ? `（僅作語氣參考）${ref.join("｜")}` : "",
+        `風格變體：${FLAVORS[variant]}`,
+        `字數範圍：${rangeText}（概略）`,
+        "只輸出最終短評文字。"
+      ].filter(Boolean).join("\n"),
+    },
+    ko: {
+      sys: [
+        "당신은 현지에 밝은 음식 리뷰어입니다.",
+        "자연스러운 한국어로 1–2문장만 작성하세요. 해시태그/이모지/불릿포인트/과도한 감탄사는 사용하지 마세요.",
+        "선택한 키워드만 사용하고, 그 밖의 항목을 새로 만들어내지 마세요.",
+      ].join("\n"),
+      user: [
+        `매장: ${storeName} (id: ${storeid})`,
+        selectedTags.length ? `허용 키워드: ${joinedTags}` : "허용 키워드: (없음)",
+        ref.length ? `참고(새 항목 추가 금지): ${ref.join(" | ")}` : "",
+        `스타일 변형: ${FLAVORS[variant]}`,
+        `길이 가이드: ${rangeText}자`,
+        "최종 리뷰 문장만 반환하세요."
+      ].filter(Boolean).join("\n"),
+    },
+    ja: {
+      sys: [
+        "あなたは土地勘のあるフードレビュアーです。",
+        "自然な日本語で1〜2文。ハッシュタグ・絵文字・箇条書き・過度な感嘆符は使わないでください。",
+        "選択したキーワードのみ使用し、それ以外の項目を新たに作らないでください。",
+      ].join("\n"),
+      user: [
+        `店名：${storeName}（id: ${storeid}）`,
+        selectedTags.length ? `使用可キーワード：${joinedTags}` : "使用可キーワード：（なし）",
+        ref.length ? `参考（新規項目の追加は禁止）：${ref.join("｜")}` : "",
+        `文体バリアント：${FLAVORS[variant]}`,
+        `文字数目安：${rangeText}`,
+        "最終のレビュー文のみを出力してください。"
+      ].filter(Boolean).join("\n"),
+    },
+    fr: {
+      sys: [
+        "Vous êtes un critique culinaire local crédible.",
+        "Rédigez 1–2 phrases naturelles en français; pas de hashtags, pas d’emojis, pas de listes, évitez les exclamations excessives.",
+        "N’utilisez que les mots-clés sélectionnés; n’inventez pas d’éléments non choisis.",
+      ].join("\n"),
+      user: [
+        `Établissement : ${storeName} (id : ${storeid})`,
+        selectedTags.length ? `Mots-clés autorisés : ${joinedTags}` : "Mots-clés autorisés : (aucun)",
+        ref.length ? `Références (ton uniquement, ne rien ajouter) : ${ref.join(" | ")}` : "",
+        `Variante de style : ${FLAVORS[variant]}`,
+        `Longueur visée : ${rangeText} caractères (indicatif).`,
+        "Retournez UNIQUEMENT le texte final de l’avis."
+      ].filter(Boolean).join("\n"),
+    },
+    es: {
+      sys: [
+        "Eres un reseñista gastronómico con conocimiento local.",
+        "Escribe 1–2 frases naturales en español; sin hashtags, sin emojis, sin viñetas, evita signos de exclamación excesivos.",
+        "Usa solo las palabras clave seleccionadas; no inventes elementos no elegidos.",
+      ].join("\n"),
+      user: [
+        `Lugar: ${storeName} (id: ${storeid})`,
+        selectedTags.length ? `Palabras clave permitidas: ${joinedTags}` : "Palabras clave permitidas: (ninguna)",
+        ref.length ? `Referencia (solo tono, no añadir ítems): ${ref.join(" | ")}` : "",
+        `Variante de estilo: ${FLAVORS[variant]}`,
+        `Objetivo de longitud: ${rangeText} caracteres (orientativo).`,
+        "Devuelve SOLO el texto final de la reseña."
+      ].filter(Boolean).join("\n"),
+    }
+  };
 
-  const lines = [];
-  lines.push(titleLine(lang, name, storeid));
-  if (ref.length) lines.push(ref.map(s => `(${softHint(lang)}) ${s}`).join("\n"));
-  lines.push(strictRule);
-  lines.push(styleLine(lang, flavor));
-  lines.push(lengthLine(lang, minChars, maxChars));
-  lines.push(finalOnly(lang));
-
-  return lines.join("\n");
+  return T[lang] || T["en"];
 }
 
-// 多語字串
-function label(lang, en) {
-  const map = {
-    zh: { 'Top picks':'熱門', 'Service/Flow':'服務/動線', 'Ambience':'氛圍', 'New items':'新品' },
-  };
-  return map[lang]?.[en] || en;
-}
-function titleLine(lang, name, storeid) {
-  const m = {
-    zh: `店名：${name}\n店家代號：${storeid}`,
-    en: `Restaurant: ${name}\nStore ID: ${storeid}`,
-    ko: `가게명: ${name}\nStore ID: ${storeid}`,
-    ja: `店名：${name}\nStore ID：${storeid}`,
-    fr: `Nom du restaurant : ${name}\nStore ID : ${storeid}`,
-    es: `Restaurante: ${name}\nStore ID: ${storeid}`,
-  };
-  return m[lang] || m.en;
-}
-function softHint(lang) {
-  const m = { zh:'（語氣參考）', en:'(tone hint)', ko:'(톤 힌트)', ja:'（トーン参考）', fr:'(indice de ton)', es:'(pista de tono)' };
-  return m[lang] || m.en;
-}
-function hardRule(lang, allowList) {
-  const m = {
-    zh: `【嚴格規則】只允許出現以下關鍵詞：${allowList}。不得加入未列出的餐點/飲品/形容詞或其他標籤；如需連接詞，只能使用一般敘述用語，不得捏造新名詞。`,
-    en: `STRICT RULE: Only the following keywords may appear: ${allowList}. Do not invent items or adjectives not listed; use neutral connectors only.`,
-    ko: `엄격한 규칙: 다음 키워드만 사용하세요: ${allowList}. 목록에 없는 항목/형용사/표현을 새로 만들지 마세요.`,
-    ja: `厳格なルール：使用できるキーワードは次のみ：${allowList}。記載のない名詞・形容詞を作らず、接続には一般的な表現のみを用いてください。`,
-    fr: `RÈGLE STRICTE : n’utilisez que ces mots-clés : ${allowList}. N’inventez pas d’éléments non listés ; utilisez seulement des connecteurs neutres.`,
-    es: `REGLA ESTRICTA: solo se permiten estas palabras clave: ${allowList}. No inventes elementos no listados; usa conectores neutros.`,
-  };
-  return m[lang] || m.en;
-}
-function styleLine(lang, flavor) {
-  const m = {
-    zh: `風格變體：${flavor}`,
-    en: `Style variant: ${flavor}`,
-    ko: `스타일 변형: ${flavor}`,
-    ja: `スタイルバリエーション：${flavor}`,
-    fr: `Variante de style : ${flavor}`,
-    es: `Variante de estilo: ${flavor}`,
-  };
-  return m[lang] || m.en;
-}
-function lengthLine(lang, minC, maxC) {
-  const m = {
-    zh: `長度：${minC}–${maxC} 字（以中文字數粗估）。`,
-    en: `Length: about ${minC}–${maxC} characters.`,
-    ko: `길이: 약 ${minC}–${maxC}자.`,
-    ja: `長さ：約 ${minC}〜${maxC} 文字。`,
-    fr: `Longueur : environ ${minC}–${maxC} caractères.`,
-    es: `Longitud: unas ${minC}–${maxC} caracteres.`,
-  };
-  return m[lang] || m.en;
-}
-function finalOnly(lang) {
-  const m = {
-    zh: "請直接輸出最終短評文字本身，勿加任何前後說明。",
-    en: "Output only the final review text, no preface or suffix.",
-    ko: "최종 리뷰 문장만 출력하고, 앞뒤 설명은 쓰지 마세요.",
-    ja: "最終的なレビュー文のみを出力し、前置きや補足は不要です。",
-    fr: "Ne renvoyez que le texte final de l’avis, sans préambule ni postface.",
-    es: "Devuelve solo el texto final de la reseña, sin prefacios ni añadidos.",
-  };
-  return m[lang] || m.en;
-}
-
-// 微提示池
+// 微提示池（重試時替換）
 const MICRO = [
   "換一種開場方式，避免常見模板；加上一個具體細節即可。",
   "調整句型與斷句，避免口頭禪；資訊密度略高一些。",
@@ -312,30 +308,32 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || "{}");
     const storeid = (body.storeid || "").trim();
     const selectedTags = Array.isArray(body.selectedTags) ? body.selectedTags : [];
+    const lang = (body.lang || "en").toLowerCase(); // ⬅ 由前端傳入
     const minChars = Math.max(60, parseInt(body.minChars || 90, 10));
     const maxChars = Math.max(minChars + 20, parseInt(body.maxChars || 160, 10));
-    const lang = (body.lang || "en").toLowerCase();  // ✅ 新增
     if (!storeid) return json({ error: "storeid required" }, 400);
 
     const variant = pickVariant(storeid, selectedTags);
     const abBucket = pickAB(storeid);
 
-    // ✅ Cache key 納入語言
     const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars, v: variant, lang });
     const cached = cacheGet(cacheKey);
     if (cached) return json(cached, 200);
 
     const meta = (await fetchStoreRow(storeid.toLowerCase())) || { name: storeid, placeId: "" };
-    const sys = SYS[lang] || SYS.en;                                       // ✅ 按語言
-    const user = buildUserPrompt(lang, meta, storeid, selectedTags, minChars, maxChars, variant); // ✅ 按語言
+    const storeName = meta.name || storeid;
+
+    const { sys, user } = buildPrompt({
+      lang, storeid, storeName, meta, selectedTags, minChars, maxChars, variant
+    });
 
     // 第一次生成
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
-    // 去重：若過像 -> 重試
+    // 去重：若過像 -> 重試一次，換一條微提示
     if (isTooSimilar(storeid, selectedTags, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
-      const retry = await callOpenAI(sys, user + `\n${hint}`);
+      const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
       text = retry.text || text;
       usage = retry.usage || usage;
       latencyMs += retry.latencyMs || 0;
@@ -343,14 +341,16 @@ exports.handler = async (event) => {
 
     const result = {
       reviewText: text,
-      store: { name: meta.name || storeid, placeId: meta.placeId || "" },
+      store: { name: storeName, placeId: meta.placeId || "" },
       usage,
       latencyMs,
-      meta: { variant, abBucket, minChars, maxChars, tags: selectedTags, lang }, // ✅ 回傳語言
+      meta: { variant, abBucket, minChars, maxChars, tags: selectedTags, lang },
     };
 
+    // 記憶最近輸出，用於去重（同店＋同標籤組合）
     storeNgramPush(storeid, selectedTags, text);
 
+    // 寫回 ReviewHistory（若有設定 webhook）
     if (REVIEW_WEBHOOK) {
       try {
         await fetch(REVIEW_WEBHOOK, {
@@ -359,7 +359,9 @@ exports.handler = async (event) => {
           body: JSON.stringify({
             timestamp: new Date().toISOString(),
             storeid,
-            store: { name: meta.name || storeid, placeId: meta.placeId || "" },
+            store: { name: storeName, placeId: meta.placeId || "" },
+            storeName,
+            placeId: meta.placeId || "",
             selectedTags,
             reviewText: text,
             variant,
@@ -381,6 +383,5 @@ exports.handler = async (event) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
 
 
