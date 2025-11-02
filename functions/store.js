@@ -158,6 +158,10 @@ function normalizeRowToStore(row, event) {
   logoUrl = absolutizeAsset(normalizeDriveUrl(logoUrl), event);
   heroUrl = absolutizeAsset(normalizeDriveUrl(heroUrl), event);
 
+  // ✅ 新增：品牌主色（AD 欄）與主按鈕文字色（AE 欄）
+  const themeBlue   = String(pickField(row, ['AD','ThemeBlue','BrandColor'])).trim();
+  const themeOnBlue = String(pickField(row, ['AE','ThemeOnBlue','PrimaryTextColor'])).trim();
+
   const base = {
     top3:       normalizeListCell(pickField(row, ['top3','Top3Items'])),
     features:   normalizeListCell(pickField(row, ['features','StoreFeatures'])),
@@ -167,14 +171,13 @@ function normalizeRowToStore(row, event) {
 
   const multi = {};
   for (const sufKey of Object.keys(LANG_SUFFIXES)) {
-    const suf = LANG_SUFFIXES[sufKey]; // En/Cn/Ko/Fr/Ja/Es
+    const suf = LANG_SUFFIXES[sufKey];
     for (const baseName of LIST_FIELD_BASES) {
-      const colName = `${baseName}${suf}`;      // e.g. top3En
+      const colName = `${baseName}${suf}`;
       multi[colName] = normalizeListCell(pickField(row, [colName]));
     }
   }
 
-  // placePhotoUrl：優先表格 placePhotoRef，否則由 placeId 取第一張
   const photoRef = pickField(row, ['placePhotoRef','photoReference','PlacePhotoRef']);
   const placePhotoUrl = photoRef ? buildPlacePhotoUrlFromRef(photoRef) : '';
 
@@ -185,6 +188,9 @@ function normalizeRowToStore(row, event) {
     logoUrl,
     heroUrl,
     placePhotoUrl,
+    // ✅ 輸出給前端
+    themeBlue,
+    themeOnBlue,
     ...base,
     ...multi,
   };
