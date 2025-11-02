@@ -62,7 +62,7 @@
       border:1px solid #e5e7eb; border-radius:10px; font-size:var(--fs-body);}
     .footer-actions{display:flex; justify-content:center; padding:0 14px 16px;}
     .status{color:var(--muted); font-size:12px; text-align:center; padding:0 14px 14px;}
-    #storeRow{display:none;} /* 只有沒帶 store 參數時才顯示（相容） */
+    #storeRow{display:none;}
     .row{display:flex; flex-wrap:wrap; gap:6px; padding:0 14px 6px;}
   </style>
 </head>
@@ -129,14 +129,7 @@
       img.style.display='none';
     }
 
-    /* -------- 多語設定（Sheet 欄位對應） --------
-       EN: D-G  -> top3En/featuresEn/ambianceEn/newItemsEn
-       CN: J-M  -> top3Cn/featuresCn/ambianceCn/newItemsCn
-       KO: N-Q  -> ...Ko
-       FR: R-U  -> ...Fr
-       JA: V-Y  -> ...Ja
-       ES: Z-AC -> ...Es
-    -------------------------------------------- */
+    /* -------- 多語設定（Sheet 欄位對應） -------- */
     const LANGS = {
       en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn'],
         ui:{title:'Write a short review for “{name}”', sub:'Pick a few highlights, then tap “Generate (AI)”.',
@@ -188,9 +181,10 @@
 
     let selected = new Set();
     let currentStore = getStoreFromURL() || 'leegarnei';
-    let currentLang = 'en';       // 預設英語（你的需求）
+    let currentLang = 'en';       // 預設英語
     let storeMeta = null;
     let availableLangs = [];
+    let storeNames = null;        // ⬅ 解析後的多語店名 {zh,en,ko,ja,fr,es}
 
     if (!getStoreFromURL()) { $storeRow.style.display='flex'; if ($storeInput) $storeInput.value=currentStore; }
 
@@ -198,6 +192,56 @@
       $titleStoreName.textContent = nameText || currentStore || 'Store';
       const q = encodeURIComponent(currentStore || 'Big Way');
       $openGoogle.href = 'https://www.google.com/search?q=' + q + '+google+reviews';
+    }
+
+    /* -------- StoreName 解析 + 依語言取名（含 fallback） -------- */
+    function parseStoreNameMulti(s){
+      const out = { zh:'', en:'', ko:'', ja:'', fr:'', es:'', _raw:(s||'').trim() };
+      if (!s) return out;
+      const str = String(s).trim();
+
+      // A) 標示式：zh=.., en=.., ko=..
+      const hasEq = /[a-z]{2}\s*=/.test(str);
+      if (hasEq) {
+        str.split(',').forEach(pair=>{
+          const [kRaw,vRaw] = pair.split('=');
+          if (!kRaw || !vRaw) return;
+          const k = kRaw.trim().toLowerCase();
+          const v = vRaw.trim();
+          if (['zh','en','ko','ja','fr','es'].includes(k)) out[k] = v;
+        });
+        return out;
+      }
+
+      // B) 逗號式：李家, Lee Gar Nei, 이가네 ...
+      const parts = str.split(',').map(x=>x.trim()).filter(Boolean);
+      const isLatin = t => /[A-Za-z]/.test(t);
+      const isKorean = t => /[가-힣]/.test(t);
+      const isJapanese = t => /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9D]/.test(t);
+
+      parts.forEach(p=>{
+        if (!out.en && isLatin(p)) { out.en = p; return; }
+        if (!out.ko && isKorean(p)) { out.ko = p; return; }
+        if (!out.ja && isJapanese(p)) { out.ja = p; return; }
+        if (!out.zh) { out.zh = p; return; } // 其餘先當中文
+      });
+      return out;
+    }
+    function storeNameForLang(nameMap, lang){
+      if (!nameMap) return '';
+      const tryOrder = {
+        zh: ['zh','en','ko','ja','fr','es'],
+        en: ['en','zh','ko','ja','fr','es'],
+        ko: ['ko','zh','en','ja','fr','es'],
+        ja: ['ja','zh','en','ko','fr','es'],
+        fr: ['fr','en','zh','ko','ja','es'],
+        es: ['es','en','zh','ko','ja','fr'],
+      }[lang] || ['en','zh','ko','ja','fr','es'];
+      for (const code of tryOrder) {
+        const v = (nameMap[code]||'').trim();
+        if (v) return v;
+      }
+      return (nameMap._raw || '').trim();
     }
 
     /* -------- 語言 UI 與 Chips -------- */
@@ -211,13 +255,18 @@
         const btn = document.createElement('button');
         btn.textContent = LANGS[k].label;
         btn.className = (k===currentLang)?'active':'';
-        btn.onclick = ()=>{ currentLang=k; renderUI(); buildChipsFromMeta(); };
+        btn.onclick = ()=>{
+          currentLang = k;
+          renderUI();
+          buildLangBar();          // 讓 active 跟著更新
+          buildChipsFromMeta();
+        };
         $langBar.appendChild(btn);
       });
     }
     function renderUI(){
       const ui = LANGS[currentLang].ui;
-      const name = storeMeta?.name || currentStore || 'Store';
+      const name = storeNameForLang(storeNames, currentLang) || storeMeta?.name || currentStore || 'Store';
       $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${name}</span>`);
       $subtitle.textContent = ui.sub;
       $labStore.textContent = ui.store;
@@ -255,8 +304,9 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
+        storeNames = parseStoreNameMulti(data.name || ''); // ⬅ 解析多語店名
 
-        applyBasicLinks(data.name || currentStore);
+        applyBasicLinks(storeNameForLang(storeNames, currentLang) || data.name || currentStore);
 
         const order = ['en','zh','ko','fr','ja','es'];
         availableLangs = order.filter(k => langHasContent(k, data));
@@ -327,4 +377,5 @@
   </script>
 </body>
 </html>
+
 
