@@ -249,25 +249,31 @@
     }
     // 套用單一色階（全部“更亮”），hover 更亮、active 回 base；支援 AE 覆蓋 on-color
     function applyBlueScale(baseHex, onHex){
-      const base = normHex(baseHex) || '#0A84FF';
-      const on   = normHex(onHex)   || autoOnColor(base);
-      const root = document.documentElement;
-      const vars = {
-        '--blue-600': base,                 // 不更深
-        '--blue-500': base,                 // = base
-        '--blue-400': lighten(base, 0.08),  // 淺
-        '--blue-300': lighten(base, 0.16),  // 更淺
-        '--blue-200': lighten(base, 0.26),
-        '--blue-100': lighten(base, 0.34),
-        '--blue-050': lighten(base, 0.42),
-        '--blue-hover': lighten(base, 0.06), // hover 比 base 更亮
-        '--blue-active': base,               // active 回到 base
-        '--on-blue': on,
-      };
-      Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
-      root.style.setProperty('--chip-bg', 'var(--blue-100)');
-      root.style.setProperty('--chip-bg-on', 'var(--blue-500)'); // 點擊＝base，不超過 AD 深度
-    }
+  const base = normHex(baseHex) || '#0A84FF';
+  const on   = normHex(onHex)   || autoOnColor(base);
+  const root = document.documentElement;
+
+  const vars = {
+    '--blue-600': base,                 // 主色＝品牌色
+    '--blue-500': base,                 // 主色（CTA用）
+    '--blue-450': lighten(base, 0.04),  // chip-on 用，略亮一層，保持層次
+    '--blue-400': lighten(base, 0.10),
+    '--blue-300': lighten(base, 0.20),
+    '--blue-200': lighten(base, 0.30),
+    '--blue-100': lighten(base, 0.38),
+    '--blue-050': lighten(base, 0.45),
+    '--blue-hover': lighten(base, 0.06),
+    '--blue-active': base,
+    '--on-blue': on,
+  };
+
+  Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
+
+  // Chip 狀態調整：點擊後略亮但不搶主按鈕
+  root.style.setProperty('--chip-bg', 'var(--blue-100)');
+  root.style.setProperty('--chip-bg-on', 'var(--blue-450)'); // 比 CTA 淡一階
+  root.style.setProperty('--chip-fg-on', 'var(--on-blue)');
+}
 
     /* ------------------- helpers ------------------- */
     function getStoreFromURL(){
