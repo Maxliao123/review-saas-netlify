@@ -171,7 +171,7 @@
   </div>
 
   <script>
-    /* ------------------- Color algorithm (HSL) ------------------- */
+    /* ------------------- Color algorithm (HSL) + AE on-color ------------------- */
     function hexToRgb(hex){ hex = hex.replace('#',''); if(hex.length===3){ hex = hex.split('').map(c=>c+c).join(''); }
       const num = parseInt(hex,16); return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 }; }
     function rgbToHex(r,g,b){ const to=h=>('0'+h.toString(16)).slice(-2); return '#'+to(r)+to(g)+to(b); }
@@ -204,6 +204,16 @@
       }
       return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255) };
     }
+    function normHex(h){
+      if(!h) return '';
+      let s=String(h).trim();
+      if(!s.startsWith('#')) s='#'+s;
+      if(/^#([0-9a-fA-F]{3})$/.test(s)){
+        const [,r,g,b]=s.match(/^#(.)(.)(.)$/);
+        s = '#'+r+r+g+g+b+b;
+      }
+      return /^#([0-9a-fA-F]{6})$/.test(s)? s.toUpperCase() : '';
+    }
     // adjust lightness by +/- percent (e.g., -0.12 => darker 12%)
     function tone(hex, deltaL){
       const {r,g,b}=hexToRgb(hex); const hsl=rgbToHsl(r,g,b);
@@ -213,20 +223,30 @@
       const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);
       return rgbToHex(rgb.r,rgb.g,rgb.b);
     }
-    function applyBlueScale(baseHex){
-      const vars = {
-        '--blue-700': tone(baseHex, -0.18),
-        '--blue-600': tone(baseHex, -0.12),
-        '--blue-500': baseHex,
-        '--blue-400': tone(baseHex,  +0.08),
-        '--blue-300': tone(baseHex,  +0.16),
-        '--blue-200': tone(baseHex,  +0.26),
-        '--blue-100': tone(baseHex,  +0.32),
-        '--blue-050': tone(baseHex,  +0.40),
-        '--blue-hover': tone(baseHex, -0.06),
-        '--blue-active': tone(baseHex,-0.12),
-      };
+    // 自動 on-color（按鈕文字/Spinner）確保對比
+    function autoOnColor(bgHex){
+      const {r,g,b}=hexToRgb(bgHex);
+      const L = (0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255)); // 相對亮度
+      return (L < 0.56) ? '#FFFFFF' : '#0B1220';
+    }
+    // 套用單一藍色系（含 hover/active）與 on-blue（支援 AE 覆蓋）
+    function applyBlueScale(baseHex, onHex){
+      const base = normHex(baseHex) || '#0A84FF';
+      const on   = normHex(onHex)   || autoOnColor(base);
       const root = document.documentElement;
+      const vars = {
+        '--blue-700': tone(base, -0.18),
+        '--blue-600': tone(base, -0.12),
+        '--blue-500': base,
+        '--blue-400': tone(base,  +0.08),
+        '--blue-300': tone(base,  +0.16),
+        '--blue-200': tone(base,  +0.26),
+        '--blue-100': tone(base,  +0.32),
+        '--blue-050': tone(base,  +0.40),
+        '--blue-hover': tone(base, -0.06),
+        '--blue-active': tone(base,-0.12),
+        '--on-blue': on,
+      };
       Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
       // derived tokens
       root.style.setProperty('--chip-bg', 'var(--blue-100)');
@@ -415,9 +435,11 @@
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
 
-        // colors: allow API override themeBlue
+        /* ✅ 套用 AD/AE：themeBlue（主色）、themeOnBlue（主按鈕文字色） */
         const apiBlue = (pick(data,'themeBlue') || '').trim();
-        applyBlueScale(apiBlue || getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
+        const apiOn   = (pick(data,'themeOnBlue') || '').trim();
+        const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
+        applyBlueScale(apiBlue || cssBase, apiOn);
 
         storeNames = parseStoreNameMulti(pick(data,'name','storeName','title') || currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
@@ -437,7 +459,8 @@
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }catch(e){
         console.error('loadStoreMeta error:', e);
-        applyBlueScale(getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
+        const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
+        applyBlueScale(cssBase, '');  // 沒有 AE 時自動對比
         storeNames = parseStoreNameMulti(currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
         renderUI(); buildLangBar(); buildChipsFromMeta();
@@ -445,7 +468,12 @@
     }
 
     /* init */
-    applyBlueScale(getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
+    (function initThemeFirstPaint(){
+      // 先用CSS內建主色，避免首屏閃爍；API 回來後再覆蓋
+      const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
+      applyBlueScale(cssBase, '');
+    })();
+
     function getStoreFromURLOnce(){ return getStoreFromURL(); }
     let tmp = getStoreFromURLOnce(); if (tmp) { /* noop */ }
     function noop(){}
@@ -496,3 +524,4 @@
   </script>
 </body>
 </html>
+
