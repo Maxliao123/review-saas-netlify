@@ -6,21 +6,30 @@
   <title>Smart Google Review · AI 一則短評</title>
   <style>
     :root{
-      /* Colors – Apple-ish */
+      /* Neutrals */
       --bg:#F5F7FB;
       --card:#FFFFFF;
       --fg:#0F172A;
       --muted:#64748B;
 
-      /* one blue, many tints */
-      --blue:#0A84FF;
-      --blue-600:#0A84FF;
-      --blue-500:#1B8BFF;
-      --blue-400:#4CA0FF;
-      --blue-200:#E8F2FF;
+      /* === Single blue scale (base only; others由JS動態計算) === */
+      --blue:#0A84FF;          /* Apple-like default */
+      /* 以下會在JS裡被覆蓋（宣告在這避免FOUT） */
+      --blue-700:#086BD1;
+      --blue-600:#0A78E8;
+      --blue-500:#0A84FF;
+      --blue-400:#49A2FF;
+      --blue-300:#7CB9FF;
+      --blue-200:#CDE5FF;
+      --blue-100:#EAF4FF;
+      --blue-050:#F3F9FF;
+      --blue-hover:#096DEB;
+      --blue-active:#075FCD;
+      --on-blue:#FFFFFF;
 
-      --chip-bg:#EAF2FE;
-      --chip-bg-on:#0A84FF;
+      /* Components using the scale */
+      --chip-bg:var(--blue-100);
+      --chip-bg-on:var(--blue-600);
       --chip-fg:#0F172A;
       --chip-fg-on:#FFFFFF;
 
@@ -34,6 +43,7 @@
       --radius-sm: 10px;
       --shadow: 0 10px 30px rgba(15,23,42,0.08);
       --shadow-soft: 0 6px 20px rgba(15,23,42,0.06);
+      --ring: 0 0 0 3px color-mix(in oklab, var(--blue-300) 60%, transparent);
     }
 
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -46,7 +56,7 @@
     .hero{width:100%; height:220px; object-fit:cover; display:none;}
     @media (max-width:520px){ .hero{height:180px;} }
 
-    /* Lang pill – floats on hero */
+    /* Lang pill */
     .lang-pill{
       position:absolute; right:12px; top:12px; display:flex; gap:6px; padding:6px;
       border-radius:999px; background:rgba(15,23,42,.45); backdrop-filter:blur(6px);
@@ -57,7 +67,7 @@
     }
     .lang-pill button.active{background:#0B1020; color:#fff;}
 
-    /* Logo badge pinned at seam */
+    /* Logo badge */
     .logo-badge{
       position:absolute; left:50%; bottom:-22px; transform:translateX(-50%);
       width:64px; height:64px; border-radius:14px; background:#fff; padding:8px;
@@ -73,20 +83,19 @@
     .title.fit{white-space:normal;}
     .sub{color:var(--muted); margin:0 0 10px 0;}
 
-    /* Chips – two rows in a pill (no overflow …) */
-    #chips{
-      display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:10px 0 12px;
-    }
+    /* Chips */
+    #chips{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:10px 0 12px; }
     @media (min-width:540px){ #chips{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 
     .chip{
       border-radius:999px; padding:10px 14px; background:var(--chip-bg); color:var(--chip-fg);
       display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;
-      border:1px solid #E5EAF5; transition:all .15s ease; box-shadow:var(--shadow-soft);
-      min-height:48px; /* fixed height; allow two lines */
+      border:1px solid var(--blue-200); transition:all .15s ease; box-shadow:var(--shadow-soft);
+      min-height:48px;
     }
     .chip:hover{transform:translateY(-1px);}
     .chip.on{ background:var(--chip-bg-on); color:var(--chip-fg-on); border-color:transparent; }
+    .chip:focus-visible{ outline:none; box-shadow:var(--ring); }
 
     .chip-text{
       font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25;
@@ -99,27 +108,32 @@
     .btn{
       flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn);
       display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-soft);
+      transition:transform .08s ease, background-color .12s ease;
     }
     .btn.primary{
-      color:#fff;
+      color:var(--on-blue);
       background:linear-gradient(180deg, var(--blue-500), var(--blue-600));
     }
-    .btn.primary:active{transform:translateY(1px);}
+    .btn.primary:hover{ background:linear-gradient(180deg, var(--blue-hover), var(--blue-600)); }
+    .btn.primary:active{ transform:translateY(1px); background:linear-gradient(180deg, var(--blue-active), var(--blue-600)); }
+    .btn.primary:focus-visible{ outline:none; box-shadow:var(--ring); }
+
     .btn.ghost{
-      background:#F6F8FC; color:#1D4ED8; border:1px solid #E6ECFA;
+      background:var(--blue-050); color:var(--blue-600); border:1px solid var(--blue-200);
     }
+    .btn.ghost:hover{ background:var(--blue-100); }
     .btn.secondary{
       background:#0B1220; color:#fff; height:52px; border-radius:16px;
     }
     .btn:disabled{opacity:.7; cursor:not-allowed;}
-    .spinner{width:18px; height:18px; border:2px solid rgba(255,255,255,.45);
-      border-top-color:#fff; border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
+    .spinner{width:18px; height:18px; border:2px solid color-mix(in oklab, var(--on-blue) 45%, transparent);
+      border-top-color:var(--on-blue); border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
     .btn.loading .spinner{display:inline-block;}
 
     textarea{
-      width:100%; margin:0; padding:12px 14px; min-height:120px; /* taller for editing */
-      border:1px solid #E6ECFA; border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);
+      width:100%; margin:0; padding:12px 14px; min-height:120px;
+      border:1px solid var(--blue-200); border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);
     }
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
     .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
@@ -128,7 +142,6 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <!-- HERO + overlays -->
       <div class="hero-wrap">
         <img id="hero" class="hero" alt="hero"/>
         <div id="langBar" class="lang-pill" aria-label="language switch"></div>
@@ -158,7 +171,69 @@
   </div>
 
   <script>
-    /* ---------- helpers ---------- */
+    /* ------------------- Color algorithm (HSL) ------------------- */
+    function hexToRgb(hex){ hex = hex.replace('#',''); if(hex.length===3){ hex = hex.split('').map(c=>c+c).join(''); }
+      const num = parseInt(hex,16); return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 }; }
+    function rgbToHex(r,g,b){ const to=h=>('0'+h.toString(16)).slice(-2); return '#'+to(r)+to(g)+to(b); }
+    function rgbToHsl(r,g,b){
+      r/=255; g/=255; b/=255;
+      const max=Math.max(r,g,b), min=Math.min(r,g,b);
+      let h,s,l=(max+min)/2;
+      if(max===min){ h=s=0; } else{
+        const d=max-min;
+        s=l>0.5 ? d/(2-max-min) : d/(max+min);
+        switch(max){
+          case r: h=(g-b)/d+(g<b?6:0); break;
+          case g: h=(b-r)/d+2; break;
+          case b: h=(r-g)/d+4; break;
+        }
+        h/=6;
+      }
+      return { h, s, l };
+    }
+    function hslToRgb(h,s,l){
+      let r, g, b;
+      if(s===0){ r=g=b=l; }
+      else{
+        const hue2rgb=(p,q,t)=>{ if(t<0) t+=1; if(t>1) t-=1;
+          if(t<1/6) return p+(q-p)*6*t; if(t<1/2) return q;
+          if(t<2/3) return p+(q-p)*(2/3 - t)*6; return p; };
+        const q=l<0.5 ? l*(1+s) : l+s-l*s;
+        const p=2*l-q;
+        r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+      }
+      return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255) };
+    }
+    // adjust lightness by +/- percent (e.g., -0.12 => darker 12%)
+    function tone(hex, deltaL){
+      const {r,g,b}=hexToRgb(hex); const hsl=rgbToHsl(r,g,b);
+      hsl.l = Math.max(0, Math.min(1, hsl.l + deltaL));
+      // gentle saturation clamp to keep Apple-like softness
+      hsl.s = Math.max(0, Math.min(0.92, hsl.s*1.00));
+      const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);
+      return rgbToHex(rgb.r,rgb.g,rgb.b);
+    }
+    function applyBlueScale(baseHex){
+      const vars = {
+        '--blue-700': tone(baseHex, -0.18),
+        '--blue-600': tone(baseHex, -0.12),
+        '--blue-500': baseHex,
+        '--blue-400': tone(baseHex,  +0.08),
+        '--blue-300': tone(baseHex,  +0.16),
+        '--blue-200': tone(baseHex,  +0.26),
+        '--blue-100': tone(baseHex,  +0.32),
+        '--blue-050': tone(baseHex,  +0.40),
+        '--blue-hover': tone(baseHex, -0.06),
+        '--blue-active': tone(baseHex,-0.12),
+      };
+      const root = document.documentElement;
+      Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
+      // derived tokens
+      root.style.setProperty('--chip-bg', 'var(--blue-100)');
+      root.style.setProperty('--chip-bg-on', 'var(--blue-600)');
+    }
+
+    /* ------------------- existing helpers ------------------- */
     function getStoreFromURL(){
       const url = new URL(location.href);
       const byQuery = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
@@ -173,7 +248,6 @@
     const pick = (obj, ...keys) => { for (const k of keys){ const v = obj && obj[k]; if (v!==undefined && v!==null && String(v).trim()!=='') return v; } return ''; };
     const withBuster = u => (!u ? '' : (u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()));
 
-    /* image helper (shows wrapper on load) */
     function setImgEl(imgEl, url, fallback, wrapper){
       const show = ok => (wrapper||imgEl).style.display = ok ? ((wrapper||imgEl).classList.contains('hero')?'block':'flex') : 'none';
       const src = url || fallback;
@@ -183,17 +257,11 @@
       imgEl.src = withBuster(src);
     }
 
-    /* -------- store name parsing & localization --------
-       Accepts:
-       - "zh=李家,en=Lee Gar Nei,ko=이가네"
-       - or "李家,Lee Gar Nei,이가네" (auto-detect scripts)
-    */
+    /* -------- store name parsing & localization -------- */
     function parseStoreNameMulti(s){
       const out = { zh:'', en:'', ko:'', ja:'', fr:'', es:'', _raw:(s||'').trim() };
       if (!s) return out;
       const str = String(s).trim();
-
-      // key=value style
       if (/[a-z]{2}\s*=/.test(str)){
         str.split(',').forEach(pair=>{
           const [kRaw,vRaw] = pair.split('=');
@@ -204,8 +272,6 @@
         });
         return out;
       }
-
-      // comma-separated guess by script
       const parts = str.split(',').map(x=>x.trim()).filter(Boolean);
       const isLatin = t => /[A-Za-z]/.test(t);
       const isKorean = t => /[가-힣]/.test(t);
@@ -235,35 +301,23 @@
     /* ---------- i18n config ---------- */
     const LANGS = {
       en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],
-        ui:{title:'Write a short review for “{name}”',
-            sub:'Pick what stood out today, then tap “Compose”.',
-            gen:'✍️ Compose', copy:'📋 Copy', open:'Open Google Reviews',
-            placeholder:'Your summarized review will appear here…'} },
+        ui:{title:'Write a short review for “{name}”', sub:'Pick what stood out today, then tap “Compose”.',
+            gen:'✍️ Compose', copy:'📋 Copy', open:'Open Google Reviews', placeholder:'Your summarized review will appear here…'} },
       zh: { label:'中', chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],
-        ui:{title:'為「{name}」寫一則短評',
-            sub:'挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。',
-            gen:'✍️ 幫我撰寫', copy:'📋 複製', open:'開啟 Google 評論',
-            placeholder:'這裡會顯示整理後的一段短評…'} },
+        ui:{title:'為「{name}」寫一則短評', sub:'挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。',
+            gen:'✍️ 幫我撰寫', copy:'📋 複製', open:'開啟 Google 評論', placeholder:'這裡會顯示整理後的一段短評…'} },
       ko: { label:'한국어', chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],
-        ui:{title:'“{name}” 리뷰 한 줄',
-            sub:'오늘 인상 깊었던 포인트 몇 가지를 고르고 ‘작성’을 눌러 주세요.',
-            gen:'✍️ 작성', copy:'📋 복사', open:'Google 리뷰 열기',
-            placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
+        ui:{title:'“{name}” 리뷰 한 줄', sub:'오늘 인상 깊었던 포인트 몇 가지를 고르고 ‘작성’을 눌러 주세요.',
+            gen:'✍️ 작성', copy:'📋 복사', open:'Google 리뷰 열기', placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
       ja: { label:'日本語', chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],
-        ui:{title:'「{name}」へ一言レビュー',
-            sub:'今日印象に残ったポイントをいくつか選び、「作成」を押してください。',
-            gen:'✍️ 作成', copy:'📋 コピー', open:'Google 口コミを開く',
-            placeholder:'要約したレビューが表示されます…'} },
+        ui:{title:'「{name}」へ一言レビュー', sub:'今日印象に残ったポイントをいくつか選び、「作成」を押してください。',
+            gen:'✍️ 作成', copy:'📋 コピー', open:'Google 口コミを開く', placeholder:'要約したレビューが表示されます…'} },
       fr: { label:'FR', chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],
-        ui:{title:'Écrire un avis court pour « {name} »',
-            sub:'Choisissez ce qui vous a marqué aujourd’hui, puis touchez « Rédiger ».',
-            gen:'✍️ Rédiger', copy:'📋 Copier', open:'Ouvrir les avis Google',
-            placeholder:'Votre avis synthétisé s’affichera ici…'} },
+        ui:{title:'Écrire un avis court pour « {name} »', sub:'Choisissez ce qui vous a marqué aujourd’hui, puis touchez « Rédiger ».',
+            gen:'✍️ Rédiger', copy:'📋 Copier', open:'Ouvrir les avis Google', placeholder:'Votre avis synthétisé s’affichera ici…'} },
       es: { label:'ES', chips:['top3Es','featuresEs','ambianceEs','newItemsEs','top3','features','ambiance','newItems'],
-        ui:{title:'Escribe una reseña corta para «{name}»',
-            sub:'Elige lo que más te llamó la atención hoy y pulsa «Redactar».',
-            gen:'✍️ Redactar', copy:'📋 Copiar', open:'Abrir reseñas de Google',
-            placeholder:'Aquí aparecerá tu reseña resumida…'} },
+        ui:{title:'Escribe una reseña corta para «{name}»', sub:'Elige lo que más te llamó la atención hoy y pulsa «Redactar».',
+            gen:'✍️ Redactar', copy:'📋 Copiar', open:'Abrir reseñas de Google', placeholder:'Aquí aparecerá tu reseña resumida…'} },
     };
 
     /* ---------- DOM ---------- */
@@ -288,7 +342,7 @@
     let currentLang = 'zh';
     let storeMeta = null;
     let availableLangs = [];
-    let storeNames = null; // localized map from parseStoreNameMulti
+    let storeNames = null;
 
     const genButtonTemplate = () => `<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
@@ -309,12 +363,7 @@
         const btn = document.createElement('button');
         btn.textContent = LANGS[k].label;
         btn.className = (k===currentLang)?'active':'';
-        btn.onclick = ()=>{
-          currentLang = k;
-          renderUI();
-          buildLangBar();
-          buildChipsFromMeta();
-        };
+        btn.onclick = ()=>{ currentLang = k; renderUI(); buildLangBar(); buildChipsFromMeta(); };
         $langBar.appendChild(btn);
       });
     }
@@ -325,10 +374,7 @@
       let size = max;
       $title.style.fontSize = size + 'px';
       const w = $title.clientWidth;
-      while ($title.scrollWidth > w && size > min) {
-        size -= 1;
-        $title.style.fontSize = size + 'px';
-      }
+      while ($title.scrollWidth > w && size > min) { size -= 1; $title.style.fontSize = size + 'px'; }
     }
 
     function renderUI(){
@@ -339,7 +385,6 @@
       $btnCopy.textContent = ui.copy;
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
-      // rebuild Generate button each time (prevents stale language)
       $gen.innerHTML = genButtonTemplate();
       requestAnimationFrame(fitTitle);
     }
@@ -356,8 +401,7 @@
       selected.clear();
       $chips.innerHTML = '';
       tags.forEach(tag=>{
-        const el = document.createElement('div');
-        el.className='chip';
+        const el = document.createElement('div'); el.className='chip';
         el.innerHTML = `<span class="chip-text">${tag.trim()}</span>`;
         el.onclick=()=>{ if(selected.has(tag)) selected.delete(tag); else selected.add(tag); el.classList.toggle('on'); };
         $chips.appendChild(el);
@@ -371,17 +415,18 @@
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
 
-        // localized title name
+        // colors: allow API override themeBlue
+        const apiBlue = (pick(data,'themeBlue') || '').trim();
+        applyBlueScale(apiBlue || getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
+
         storeNames = parseStoreNameMulti(pick(data,'name','storeName','title') || currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
 
-        // languages available
         const order = ['zh','en','ko','ja','fr','es'];
         availableLangs = order.filter(k => langHasContent(k, data));
         if (availableLangs.length===0) availableLangs = ['zh','en'];
         if (!availableLangs.includes(currentLang)) currentLang = availableLangs[0];
 
-        // images
         const heroUrl = pick(data,'heroUrl','cover','banner','placePhotoUrl','photoUrl');
         const logoUrl = pick(data,'logoUrl','logo','image','icon');
         setImgEl($hero, heroUrl, pick(data,'placePhotoUrl','photoUrl'));
@@ -392,31 +437,33 @@
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }catch(e){
         console.error('loadStoreMeta error:', e);
+        applyBlueScale(getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
         storeNames = parseStoreNameMulti(currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
-    // init
+    /* init */
+    applyBlueScale(getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF');
+    function getStoreFromURLOnce(){ return getStoreFromURL(); }
+    let tmp = getStoreFromURLOnce(); if (tmp) { /* noop */ }
+    function noop(){}
+
     applyBasicLinks('Store');
-    renderUI(); // ensures button exists before listeners
+    renderUI();
     loadStoreMeta();
     addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
-    /* ---------- generate / copy ---------- */
+    /* actions */
     async function generate(){
       const storeid = (currentStore || '').trim();
-      if (!storeid){
-        $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.';
-        return;
-      }
+      if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
       const selectedTags = Array.from(selected);
       const body = { storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang: currentLang };
 
       $gen.classList.add('loading'); $gen.disabled=true; $copy.disabled=true;
       const loadingText = { en:'Composing…', zh:'撰寫中…', ko:'작성 중…', ja:'作成中…', fr:'Rédaction…', es:'Redactando…' }[currentLang] || 'Composing…';
-      // show spinner + localized loading text
       $gen.innerHTML = `<span class="spinner"></span>${loadingText}`;
       $status.textContent='';
 
@@ -433,11 +480,9 @@
         $output.value=''; $status.textContent = errPrefix + err.message;
       }finally{
         $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false;
-        // rebuild button with CURRENT language (fixes “stuck language”)
         $gen.innerHTML = genButtonTemplate();
       }
     }
-
     async function copyText(){
       const t = ($output.value||'').trim();
       const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
@@ -446,13 +491,8 @@
       try{ await navigator.clipboard.writeText(t); $status.textContent = msgOK; }
       catch{ $status.textContent = msgNG; }
     }
-
     document.getElementById('gen').addEventListener('click', generate);
     document.getElementById('copy').addEventListener('click', copyText);
   </script>
 </body>
 </html>
-
-
-
-
