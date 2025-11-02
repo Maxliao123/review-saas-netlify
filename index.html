@@ -70,7 +70,6 @@
     /* Content */
     .content{padding:26px 16px 14px; margin-top:14px;}
     .title{margin:0 0 6px 0; font-weight:800; line-height:1.2; font-size:var(--fs-title-max);}
-    /* allow wrapping; auto-fit if too long */
     .title.fit{white-space:normal;}
     .sub{color:var(--muted); margin:0 0 10px 0;}
 
@@ -119,7 +118,7 @@
     .btn.loading .spinner{display:inline-block;}
 
     textarea{
-      width:100%; margin:0; padding:12px 14px; min-height:120px; /* higher for editing */
+      width:100%; margin:0; padding:12px 14px; min-height:120px; /* taller for editing */
       border:1px solid #E6ECFA; border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);
     }
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
@@ -143,7 +142,7 @@
         <div id="chips"></div>
 
         <div class="actions">
-          <button id="gen" class="btn primary"><span class="spinner"></span><span id="btnGen">✍️ 幫我撰寫</span></button>
+          <button id="gen" class="btn primary"></button>
           <button id="copy" class="btn ghost"><span id="btnCopy">📋 複製</span></button>
         </div>
 
@@ -171,28 +170,66 @@
       return parts[0] || '';
     }
     const uniq = a => Array.from(new Set((a||[]).map(s => String(s||'').trim()).filter(Boolean)));
+    const pick = (obj, ...keys) => { for (const k of keys){ const v = obj && obj[k]; if (v!==undefined && v!==null && String(v).trim()!=='') return v; } return ''; };
+    const withBuster = u => (!u ? '' : (u + (u.includes('?') ? '&' : '?') + 'v=' + Date.now()));
 
-    // tolerant key picker: pick(data,'a','b','c') => first truthy
-    const pick = (obj, ...keys) => {
-      for (const k of keys) {
-        const v = obj && obj[k];
-        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
-      }
-      return '';
-    };
-
-    function withBuster(u){ if(!u) return ''; const sep = u.includes('?') ? '&':'?'; return u + sep + 'v=' + Date.now(); }
-
-    function setImgEl(imgEl, url, fallback, showWrapper){
-      const show = (ok) => {
-        const wrap = showWrapper || imgEl;
-        wrap.style.display = ok ? (wrap.classList.contains('hero') ? 'block' : 'flex') : 'none';
-      };
+    /* image helper (shows wrapper on load) */
+    function setImgEl(imgEl, url, fallback, wrapper){
+      const show = ok => (wrapper||imgEl).style.display = ok ? ((wrapper||imgEl).classList.contains('hero')?'block':'flex') : 'none';
       const src = url || fallback;
       if (!src) return show(false);
       imgEl.onload  = () => show(true);
       imgEl.onerror = () => show(false);
       imgEl.src = withBuster(src);
+    }
+
+    /* -------- store name parsing & localization --------
+       Accepts:
+       - "zh=李家,en=Lee Gar Nei,ko=이가네"
+       - or "李家,Lee Gar Nei,이가네" (auto-detect scripts)
+    */
+    function parseStoreNameMulti(s){
+      const out = { zh:'', en:'', ko:'', ja:'', fr:'', es:'', _raw:(s||'').trim() };
+      if (!s) return out;
+      const str = String(s).trim();
+
+      // key=value style
+      if (/[a-z]{2}\s*=/.test(str)){
+        str.split(',').forEach(pair=>{
+          const [kRaw,vRaw] = pair.split('=');
+          if (!kRaw || !vRaw) return;
+          const k = kRaw.trim().toLowerCase();
+          const v = vRaw.trim();
+          if (out.hasOwnProperty(k)) out[k] = v;
+        });
+        return out;
+      }
+
+      // comma-separated guess by script
+      const parts = str.split(',').map(x=>x.trim()).filter(Boolean);
+      const isLatin = t => /[A-Za-z]/.test(t);
+      const isKorean = t => /[가-힣]/.test(t);
+      const isJapanese = t => /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9D]/.test(t);
+      parts.forEach(p=>{
+        if (!out.en && isLatin(p)) { out.en = p; return; }
+        if (!out.ko && isKorean(p)) { out.ko = p; return; }
+        if (!out.ja && isJapanese(p)) { out.ja = p; return; }
+        if (!out.zh) { out.zh = p; return; }
+      });
+      return out;
+    }
+    function storeNameForLang(nameMap, lang){
+      if (!nameMap) return '';
+      const order = {
+        zh:['zh','en','ko','ja','fr','es'],
+        en:['en','zh','ko','ja','fr','es'],
+        ko:['ko','zh','en','ja','fr','es'],
+        ja:['ja','zh','en','ko','fr','es'],
+        fr:['fr','en','zh','ko','ja','es'],
+        es:['es','en','zh','ko','ja','fr'],
+      }[lang] || ['en','zh','ko','ja','fr','es'];
+      for (const k of order){ const v=(nameMap[k]||'').trim(); if (v) return v; }
+      return (nameMap._raw||'').trim();
     }
 
     /* ---------- i18n config ---------- */
@@ -242,7 +279,6 @@
     const $langBar = document.getElementById('langBar');
     const $title = document.getElementById('title');
     const $subtitle = document.getElementById('subtitle');
-    const $btnGen = document.getElementById('btnGen');
     const $btnCopy = document.getElementById('btnCopy');
     const $btnOpen = document.getElementById('btnOpen');
     const $titleStoreName = document.getElementById('title-store-name');
@@ -252,6 +288,9 @@
     let currentLang = 'zh';
     let storeMeta = null;
     let availableLangs = [];
+    let storeNames = null; // localized map from parseStoreNameMulti
+
+    const genButtonTemplate = () => `<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
     function applyBasicLinks(nameText){
       $titleStoreName.textContent = nameText || currentStore || 'Store';
@@ -270,13 +309,17 @@
         const btn = document.createElement('button');
         btn.textContent = LANGS[k].label;
         btn.className = (k===currentLang)?'active':'';
-        btn.onclick = ()=>{ currentLang=k; renderUI(); buildLangBar(); buildChipsFromMeta(); };
+        btn.onclick = ()=>{
+          currentLang = k;
+          renderUI();
+          buildLangBar();
+          buildChipsFromMeta();
+        };
         $langBar.appendChild(btn);
       });
     }
 
     function fitTitle(){
-      // downsize a bit if overflows container
       const max = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-max')) || 28;
       const min = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-min')) || 18;
       let size = max;
@@ -290,13 +333,14 @@
 
     function renderUI(){
       const ui = LANGS[currentLang].ui;
-      const name = pick(storeMeta,'name') || currentStore || 'Store';
-      $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${name}</span>`);
+      const localizedName = storeNameForLang(storeNames, currentLang) || pick(storeMeta,'name') || currentStore || 'Store';
+      $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${localizedName}</span>`);
       $subtitle.textContent = ui.sub;
-      $btnGen.textContent = ui.gen;
       $btnCopy.textContent = ui.copy;
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
+      // rebuild Generate button each time (prevents stale language)
+      $gen.innerHTML = genButtonTemplate();
       requestAnimationFrame(fitTitle);
     }
 
@@ -304,14 +348,9 @@
       const cfg = LANGS[currentLang];
       const data = storeMeta || {};
       let tags = [];
-      // gather by language keys; if沒有語系欄位則吃通用 top3/features/ambiance/newItems
-      cfg.chips.forEach(k=>{
-        const raw = pick(data, k); // pick handles undefined
-        if (raw) tags = tags.concat(String(raw).split(','));
-      });
+      cfg.chips.forEach(k=>{ const raw = pick(data, k); if (raw) tags = tags.concat(String(raw).split(',')); });
       tags = uniq(tags).slice(0,18);
       if (tags.length===0){
-        // fallback to a small default set
         tags = ['boba','rice','dumpling','Nice service','clean environment','Couple date','family reunion','Fried noodles'];
       }
       selected.clear();
@@ -332,19 +371,19 @@
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
 
-        const storeName = pick(data,'name','storeName','title') || currentStore;
-        applyBasicLinks(storeName);
+        // localized title name
+        storeNames = parseStoreNameMulti(pick(data,'name','storeName','title') || currentStore);
+        applyBasicLinks(storeNameForLang(storeNames, currentLang));
 
-        // language availability
+        // languages available
         const order = ['zh','en','ko','ja','fr','es'];
         availableLangs = order.filter(k => langHasContent(k, data));
         if (availableLangs.length===0) availableLangs = ['zh','en'];
         if (!availableLangs.includes(currentLang)) currentLang = availableLangs[0];
 
-        // images (tolerant picks)
+        // images
         const heroUrl = pick(data,'heroUrl','cover','banner','placePhotoUrl','photoUrl');
         const logoUrl = pick(data,'logoUrl','logo','image','icon');
-
         setImgEl($hero, heroUrl, pick(data,'placePhotoUrl','photoUrl'));
         setImgEl($logo, logoUrl, pick(data,'placePhotoUrl','photoUrl'), $logoBadge);
 
@@ -353,28 +392,32 @@
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }catch(e){
         console.error('loadStoreMeta error:', e);
-        applyBasicLinks('Store');
-        // fallback: still render UI so頁面不是空白
+        storeNames = parseStoreNameMulti(currentStore);
+        applyBasicLinks(storeNameForLang(storeNames, currentLang));
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
     // init
     applyBasicLinks('Store');
+    renderUI(); // ensures button exists before listeners
     loadStoreMeta();
     addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
     /* ---------- generate / copy ---------- */
     async function generate(){
       const storeid = (currentStore || '').trim();
-      if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
+      if (!storeid){
+        $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.';
+        return;
+      }
       const selectedTags = Array.from(selected);
       const body = { storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang: currentLang };
 
       $gen.classList.add('loading'); $gen.disabled=true; $copy.disabled=true;
-      const prev = $gen.innerHTML;
       const loadingText = { en:'Composing…', zh:'撰寫中…', ko:'작성 중…', ja:'作成中…', fr:'Rédaction…', es:'Redactando…' }[currentLang] || 'Composing…';
-      $gen.innerHTML = '<span class="spinner"></span>' + loadingText;
+      // show spinner + localized loading text
+      $gen.innerHTML = `<span class="spinner"></span>${loadingText}`;
       $status.textContent='';
 
       try{
@@ -389,7 +432,9 @@
         const errPrefix = { en:'❌ Error: ', zh:'❌ 發生錯誤：', ko:'❌ 오류: ', ja:'❌ エラー: ', fr:'❌ Erreur : ', es:'❌ Error: ' }[currentLang] || '❌ Error: ';
         $output.value=''; $status.textContent = errPrefix + err.message;
       }finally{
-        $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false; $gen.innerHTML = prev;
+        $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false;
+        // rebuild button with CURRENT language (fixes “stuck language”)
+        $gen.innerHTML = genButtonTemplate();
       }
     }
 
@@ -407,7 +452,6 @@
   </script>
 </body>
 </html>
-
 
 
 
