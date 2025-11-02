@@ -12,24 +12,24 @@
       --fg:#0F172A;
       --muted:#64748B;
 
-      /* === Single blue scale (base only; others由JS動態計算) === */
-      --blue:#0A84FF;          /* Apple-like default */
-      /* 以下會在JS裡被覆蓋（宣告在這避免FOUT） */
-      --blue-700:#086BD1;
-      --blue-600:#0A78E8;
-      --blue-500:#0A84FF;
-      --blue-400:#49A2FF;
-      --blue-300:#7CB9FF;
-      --blue-200:#CDE5FF;
-      --blue-100:#EAF4FF;
-      --blue-050:#F3F9FF;
-      --blue-hover:#096DEB;
-      --blue-active:#075FCD;
+      /* 基色（會被 JS 依 AD 欄覆蓋） */
+      --blue:#0A84FF;
+
+      /* 其餘 token 先給預設，首屏避免 FOUT；稍後由 JS 覆蓋 */
+      --blue-600:#0A84FF; /* = base，不走更深 */
+      --blue-500:#0A84FF; /* = base */
+      --blue-400:#49A2FF; /* 變亮 */
+      --blue-300:#7CB9FF; /* 變亮 */
+      --blue-200:#CDE5FF; /* 變亮 */
+      --blue-100:#EAF4FF; /* 變亮 */
+      --blue-050:#F3F9FF; /* 變亮 */
+      --blue-hover:#49A2FF;  /* 比 base 淺一點 */
+      --blue-active:#0A84FF; /* 回到 base，不更深 */
       --on-blue:#FFFFFF;
 
-      /* Components using the scale */
+      /* Components */
       --chip-bg:var(--blue-100);
-      --chip-bg-on:var(--blue-600);
+      --chip-bg-on:var(--blue-500);
       --chip-fg:#0F172A;
       --chip-fg-on:#FFFFFF;
 
@@ -41,8 +41,10 @@
       --radius-lg: 16px;
       --radius-md: 12px;
       --radius-sm: 10px;
+
       --shadow: 0 10px 30px rgba(15,23,42,0.08);
       --shadow-soft: 0 6px 20px rgba(15,23,42,0.06);
+
       --ring: 0 0 0 3px color-mix(in oklab, var(--blue-300) 60%, transparent);
     }
 
@@ -93,7 +95,7 @@
       border:1px solid var(--blue-200); transition:all .15s ease; box-shadow:var(--shadow-soft);
       min-height:48px;
     }
-    .chip:hover{transform:translateY(-1px);}
+    .chip:hover{transform:translateY(-1px); background:color-mix(in oklab, var(--blue-100) 60%, white);}
     .chip.on{ background:var(--chip-bg-on); color:var(--chip-fg-on); border-color:transparent; }
     .chip:focus-visible{ outline:none; box-shadow:var(--ring); }
 
@@ -108,26 +110,42 @@
     .btn{
       flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn);
       display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-soft);
-      transition:transform .08s ease, background-color .12s ease;
+      transition:transform .08s ease, background-color .12s ease, box-shadow .12s ease;
     }
+
+    /* 主要 CTA：實心品牌色，陰影很淡（品牌色混透明） */
     .btn.primary{
       color:var(--on-blue);
-      background:linear-gradient(180deg, var(--blue-500), var(--blue-600));
+      background:var(--blue-500);
+      box-shadow:0 6px 16px color-mix(in oklab, var(--blue-500) 14%, transparent);
     }
-    .btn.primary:hover{ background:linear-gradient(180deg, var(--blue-hover), var(--blue-600)); }
-    .btn.primary:active{ transform:translateY(1px); background:linear-gradient(180deg, var(--blue-active), var(--blue-600)); }
+    .btn.primary:hover{
+      background:var(--blue-hover); /* 比 base 更亮 */
+      box-shadow:0 6px 16px color-mix(in oklab, var(--blue-500) 18%, transparent);
+    }
+    .btn.primary:active{
+      transform:translateY(1px);
+      background:var(--blue-active); /* 回到 base（不更深） */
+      box-shadow:0 4px 10px color-mix(in oklab, var(--blue-500) 12%, transparent);
+    }
     .btn.primary:focus-visible{ outline:none; box-shadow:var(--ring); }
 
     .btn.ghost{
       background:var(--blue-050); color:var(--blue-600); border:1px solid var(--blue-200);
     }
     .btn.ghost:hover{ background:var(--blue-100); }
+
     .btn.secondary{
       background:#0B1220; color:#fff; height:52px; border-radius:16px;
     }
     .btn:disabled{opacity:.7; cursor:not-allowed;}
-    .spinner{width:18px; height:18px; border:2px solid color-mix(in oklab, var(--on-blue) 45%, transparent);
-      border-top-color:var(--on-blue); border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
+
+    .spinner{
+      width:18px; height:18px;
+      border:2px solid color-mix(in oklab, var(--on-blue) 45%, transparent);
+      border-top-color:var(--on-blue);
+      border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;
+    }
     @keyframes spin{to{transform:rotate(360deg)}}
     .btn.loading .spinner{display:inline-block;}
 
@@ -171,7 +189,7 @@
   </div>
 
   <script>
-    /* ------------------- Color algorithm (HSL) + AE on-color ------------------- */
+    /* ------------------- 色彩工具（僅做“變亮”，不做“加深”） + AE on-color ------------------- */
     function hexToRgb(hex){ hex = hex.replace('#',''); if(hex.length===3){ hex = hex.split('').map(c=>c+c).join(''); }
       const num = parseInt(hex,16); return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 }; }
     function rgbToHex(r,g,b){ const to=h=>('0'+h.toString(16)).slice(-2); return '#'+to(r)+to(g)+to(b); }
@@ -214,46 +232,44 @@
       }
       return /^#([0-9a-fA-F]{6})$/.test(s)? s.toUpperCase() : '';
     }
-    // adjust lightness by +/- percent (e.g., -0.12 => darker 12%)
-    function tone(hex, deltaL){
+    // 只做「變亮」：將 L 提高（deltaL 正值）
+    function lighten(hex, deltaL){
       const {r,g,b}=hexToRgb(hex); const hsl=rgbToHsl(r,g,b);
-      hsl.l = Math.max(0, Math.min(1, hsl.l + deltaL));
-      // gentle saturation clamp to keep Apple-like softness
+      hsl.l = Math.max(0, Math.min(1, hsl.l + Math.abs(deltaL)));
       hsl.s = Math.max(0, Math.min(0.92, hsl.s*1.00));
       const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);
       return rgbToHex(rgb.r,rgb.g,rgb.b);
     }
-    // 自動 on-color（按鈕文字/Spinner）確保對比
+    // 自動 on-color（若 AE 未提供）
     function autoOnColor(bgHex){
       const {r,g,b}=hexToRgb(bgHex);
-      const L = (0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255)); // 相對亮度
+      // 簡化相對亮度門檻，偏亮底就用深色字
+      const L = 0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255);
       return (L < 0.56) ? '#FFFFFF' : '#0B1220';
     }
-    // 套用單一藍色系（含 hover/active）與 on-blue（支援 AE 覆蓋）
+    // 套用單一色階（全部“更亮”），hover 更亮、active 回 base；支援 AE 覆蓋 on-color
     function applyBlueScale(baseHex, onHex){
       const base = normHex(baseHex) || '#0A84FF';
       const on   = normHex(onHex)   || autoOnColor(base);
       const root = document.documentElement;
       const vars = {
-        '--blue-700': tone(base, -0.18),
-        '--blue-600': tone(base, -0.12),
-        '--blue-500': base,
-        '--blue-400': tone(base,  +0.08),
-        '--blue-300': tone(base,  +0.16),
-        '--blue-200': tone(base,  +0.26),
-        '--blue-100': tone(base,  +0.32),
-        '--blue-050': tone(base,  +0.40),
-        '--blue-hover': tone(base, -0.06),
-        '--blue-active': tone(base,-0.12),
+        '--blue-600': base,                 // 不更深
+        '--blue-500': base,                 // = base
+        '--blue-400': lighten(base, 0.08),  // 淺
+        '--blue-300': lighten(base, 0.16),  // 更淺
+        '--blue-200': lighten(base, 0.26),
+        '--blue-100': lighten(base, 0.34),
+        '--blue-050': lighten(base, 0.42),
+        '--blue-hover': lighten(base, 0.06), // hover 比 base 更亮
+        '--blue-active': base,               // active 回到 base
         '--on-blue': on,
       };
       Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
-      // derived tokens
       root.style.setProperty('--chip-bg', 'var(--blue-100)');
-      root.style.setProperty('--chip-bg-on', 'var(--blue-600)');
+      root.style.setProperty('--chip-bg-on', 'var(--blue-500)'); // 點擊＝base，不超過 AD 深度
     }
 
-    /* ------------------- existing helpers ------------------- */
+    /* ------------------- helpers ------------------- */
     function getStoreFromURL(){
       const url = new URL(location.href);
       const byQuery = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
@@ -428,6 +444,14 @@
       });
     }
 
+    // 套用 AD/AE（themeBlue / themeOnBlue）
+    function applyThemeFromMeta(data){
+      const apiBlue = (pick(data,'themeBlue') || '').trim();
+      const apiOn   = (pick(data,'themeOnBlue') || '').trim();
+      const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
+      applyBlueScale(apiBlue || cssBase, apiOn);
+    }
+
     async function loadStoreMeta(){
       try{
         const res = await fetch('/api/store?storeid=' + encodeURIComponent(currentStore));
@@ -435,11 +459,7 @@
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
 
-        /* ✅ 套用 AD/AE：themeBlue（主色）、themeOnBlue（主按鈕文字色） */
-        const apiBlue = (pick(data,'themeBlue') || '').trim();
-        const apiOn   = (pick(data,'themeOnBlue') || '').trim();
-        const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
-        applyBlueScale(apiBlue || cssBase, apiOn);
+        applyThemeFromMeta(data);
 
         storeNames = parseStoreNameMulti(pick(data,'name','storeName','title') || currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
@@ -460,23 +480,18 @@
       }catch(e){
         console.error('loadStoreMeta error:', e);
         const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
-        applyBlueScale(cssBase, '');  // 沒有 AE 時自動對比
+        applyBlueScale(cssBase, '');  // 沒 AE 時自動對比
         storeNames = parseStoreNameMulti(currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
-    /* init */
+    /* 首屏先用 CSS 內建主色，避免閃爍；API 回來再覆蓋 */
     (function initThemeFirstPaint(){
-      // 先用CSS內建主色，避免首屏閃爍；API 回來後再覆蓋
       const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
       applyBlueScale(cssBase, '');
     })();
-
-    function getStoreFromURLOnce(){ return getStoreFromURL(); }
-    let tmp = getStoreFromURLOnce(); if (tmp) { /* noop */ }
-    function noop(){}
 
     applyBasicLinks('Store');
     renderUI();
