@@ -1,168 +1,241 @@
 // functions/store.js
 // GET /api/store?storeid=xxx
 //
-// 讀 Google Sheet（A..I 欄）回傳：name / placeId / logoUrl / heroUrl / placePhotoUrl
-// - 將 Google Drive 連結轉為 uc?export=view&id=... 直出格式
-// - 若 LOGO/Hero 空、或圖片失敗，可用 Place Photos 備援
+// 強化版：
+// - SHEET_CSV_URL 或 SHEET_ID+SHEET_NAME 擇一讀表（CSV）
+// - 多語欄位：En/Cn/Ko/Fr/Ja/Es ⇒ top3XX, featuresXX, ambianceXX, newItemsXX
+// - 逗號/頓號/分號正規化、trim、去重
+// - Drive 連結自動轉 uc?export=view&id=...；/assets/... 轉絕對 URL
+// - placePhotoUrl：先讀表的 placePhotoRef；沒有就用 Place Details 拿第一張
+// - CORS + OPTIONS、Cache-Control: public, max-age=60
 
-const SHEET_ID   = process.env.SHEET_ID;
-const SHEET_NAME = process.env.SHEET_NAME || "stores";
-const GMAPS_KEY  = process.env.GOOGLE_MAPS_API_KEY || "";
+const DEFAULT_SHEET_NAME = '工作表1';
+const PLACE_PHOTO_MAX = 1000;
 
-function json(data, statusCode = 200) {
+const LANG_SUFFIXES = { En: 'En', Cn: 'Cn', Ko: 'Ko', Fr: 'Fr', Ja: 'Ja', Es: 'Es' };
+const LIST_FIELD_BASES = ['top3', 'features', 'ambiance', 'newItems'];
+
+const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_API_KEY || '';
+
+// ---------- Utils ----------
+function jsonResponse(body, status = 200) {
   return {
-    statusCode: statusCode,
+    statusCode: status,
     headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=60',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   };
 }
 
-exports.handler = async function(event) {
-  if (event.httpMethod === "OPTIONS") {
+function parseCSV(text) {
+  const rows = [];
+  let cur = [], val = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], n = text[i + 1];
+    if (c === '"') {
+      if (inQ && n === '"') { val += '"'; i++; } else { inQ = !inQ; }
+    } else if (c === ',' && !inQ) {
+      cur.push(val); val = '';
+    } else if ((c === '\n' || (c === '\r' && n !== '\n')) && !inQ) {
+      cur.push(val); rows.push(cur); cur = []; val = '';
+    } else if (c === '\r' && n === '\n' && !inQ) {
+      cur.push(val); rows.push(cur); cur = []; val = ''; i++;
+    } else {
+      val += c;
+    }
+  }
+  cur.push(val); rows.push(cur);
+  return rows;
+}
+
+function rowsToObjects(rows) {
+  if (!rows.length) return { headers: [], lower: [], objs: [] };
+  const headers = rows[0].map(h => (h || '').toString().trim());
+  const lower = headers.map(h => h.toLowerCase());
+  const objs = [];
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i] ?? ''; obj[lower[i]] = row[i] ?? ''; });
+    objs.push(obj);
+  }
+  return { headers, lower, objs };
+}
+
+function normalizeListCell(s) {
+  if (!s) return '';
+  const unified = String(s)
+    .replace(/[、，；;]/g, ',')
+    .split(',')
+    .map(x => (x || '').trim())
+    .filter(Boolean);
+  const uniq = [];
+  const seen = new Set();
+  for (const x of unified) if (!seen.has(x)) { seen.add(x); uniq.push(x); }
+  return uniq.join(',');
+}
+
+function normalizeDriveUrl(u) {
+  if (!u) return '';
+  try {
+    const s = String(u).trim();
+    if (/drive\.google\.com\/uc\?/.test(s)) return s;
+    let m = s.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    m = s.match(/[?&]id=([^&]+)/);
+    if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    return s;
+  } catch { return u; }
+}
+
+function absolutizeAsset(u, event) {
+  if (!u) return '';
+  const s = String(u).trim();
+  if (s.startsWith('/')) {
+    const host = event.headers['x-forwarded-host'] || event.headers.host || '';
+    const proto = event.headers['x-forwarded-proto'] || 'https';
+    return `${proto}://${host}${s}`;
+  }
+  return s;
+}
+
+function pickField(row, aliases) {
+  for (const a of aliases) {
+    if (a in row && row[a]) return row[a];
+    const al = a.toLowerCase();
+    if (al in row && row[al]) return row[al];
+  }
+  return '';
+}
+
+async function fetchSheetCSV() {
+  const csvUrl = process.env.SHEET_CSV_URL;
+  if (csvUrl) {
+    const res = await fetch(csvUrl);
+    if (!res.ok) throw new Error(`Fetch SHEET_CSV_URL failed: ${res.status}`);
+    return await res.text();
+  }
+  const id = process.env.SHEET_ID;
+  const name = process.env.SHEET_NAME || DEFAULT_SHEET_NAME;
+  if (!id) throw new Error('Missing SHEET_CSV_URL or SHEET_ID');
+  const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Fetch sheet CSV failed: ${res.status}`);
+  return await res.text();
+}
+
+function buildPlacePhotoUrlFromRef(ref) {
+  if (!ref || !GMAPS_KEY) return '';
+  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${PLACE_PHOTO_MAX}&photo_reference=${encodeURIComponent(ref)}&key=${encodeURIComponent(GMAPS_KEY)}`;
+}
+
+async function fetchFirstPhotoRefByPlaceId(placeId) {
+  if (!placeId || !GMAPS_KEY) return '';
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=photos&key=${encodeURIComponent(GMAPS_KEY)}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    const ref = j?.result?.photos?.[0]?.photo_reference || '';
+    return ref || '';
+  } catch {
+    return '';
+  }
+}
+
+// ---------- Normalize one row ----------
+function normalizeRowToStore(row, event) {
+  const storeId   = String(pickField(row, ['StoreID'])).trim();
+  const storeName = String(pickField(row, ['StoreName','Name'])).trim();
+  const placeId   = String(pickField(row, ['PlaceID','GooglePlaceID'])).trim();
+
+  let logoUrl = pickField(row, ['LOGO','Logo','LogoUrl']);
+  let heroUrl = pickField(row, ['Hero圖片','Hero','HeroUrl','HeroImage']);
+  logoUrl = absolutizeAsset(normalizeDriveUrl(logoUrl), event);
+  heroUrl = absolutizeAsset(normalizeDriveUrl(heroUrl), event);
+
+  const base = {
+    top3:       normalizeListCell(pickField(row, ['top3','Top3Items'])),
+    features:   normalizeListCell(pickField(row, ['features','StoreFeatures'])),
+    ambiance:   normalizeListCell(pickField(row, ['ambiance'])),
+    newItems:   normalizeListCell(pickField(row, ['newItems','新品','NewItems'])),
+  };
+
+  const multi = {};
+  for (const sufKey of Object.keys(LANG_SUFFIXES)) {
+    const suf = LANG_SUFFIXES[sufKey]; // En/Cn/Ko/Fr/Ja/Es
+    for (const baseName of LIST_FIELD_BASES) {
+      const colName = `${baseName}${suf}`;      // e.g. top3En
+      multi[colName] = normalizeListCell(pickField(row, [colName]));
+    }
+  }
+
+  // placePhotoUrl：優先表格 placePhotoRef，否則由 placeId 取第一張
+  const photoRef = pickField(row, ['placePhotoRef','photoReference','PlacePhotoRef']);
+  const placePhotoUrl = photoRef ? buildPlacePhotoUrlFromRef(photoRef) : '';
+
+  return {
+    storeid: storeId,
+    name: storeName || storeId,
+    placeId,
+    logoUrl,
+    heroUrl,
+    placePhotoUrl,
+    ...base,
+    ...multi,
+  };
+}
+
+// ---------- Handler ----------
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
-      body: ""
+      body: '',
     };
   }
-  if (event.httpMethod !== "GET") return json({ error: "Method not allowed" }, 405);
+  if (event.httpMethod !== 'GET') return jsonResponse({ error: 'Method not allowed' }, 405);
 
   try {
-    var qs = event && event.queryStringParameters ? event.queryStringParameters : {};
-    var storeid = (qs.storeid || qs.store || "").trim();
-    if (!storeid) return json({ error: "storeid required" }, 400);
-    if (!SHEET_ID) return json({ error: "Missing SHEET_ID" }, 500);
+    const url = new URL(event.rawUrl || `https://${event.headers.host}${event.path}${event.rawQuery ? '?' + event.rawQuery : ''}`);
+    const storeid = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
+    if (!storeid) return jsonResponse({ error: 'Missing storeid' }, 400);
 
-    var row = await fetchRow(storeid.toLowerCase());
-    if (!row) return json({ error: "store not found" }, 404);
+    // 讀表（CSV）
+    const csv = await fetchSheetCSV();
+    const rows = parseCSV(csv);
+    const { objs } = rowsToObjects(rows);
 
-    // 轉換 Drive 連結
-    var logoUrl = normalizeDrive(row.logoUrl);
-    var heroUrl = normalizeDrive(row.heroUrl);
+    // 比對 StoreID（大小寫不敏感）
+    const row = objs.find(o => {
+      const a = (o.StoreID || o.storeid || '').toString().trim().toLowerCase();
+      return a === storeid.toLowerCase();
+    });
+    if (!row) return jsonResponse({ error: `StoreID not found: ${storeid}` }, 404);
 
-    // 先準備 Place Photo 備援 URL（如果有 placeId 與 key）
-    var placePhotoUrl = null;
-    if (row.placeId && GMAPS_KEY) {
-      var ref = await fetchPlacePhotoRef(row.placeId);
-      if (ref) placePhotoUrl = buildPlacePhotoUrl(ref);
+    // 正規化
+    let payload = normalizeRowToStore(row, event);
+
+    // 若 placePhotoUrl 還是空，而有 placeId + 金鑰，就嘗試用 Place Details
+    if (!payload.placePhotoUrl && payload.placeId && GMAPS_KEY) {
+      const ref = await fetchFirstPhotoRefByPlaceId(payload.placeId);
+      if (ref) payload.placePhotoUrl = buildPlacePhotoUrlFromRef(ref);
     }
 
-    return json({
-      storeid: row.storeid,
-      name: row.name || row.storeid,
-      placeId: row.placeId || "",
-      logoUrl: logoUrl || null,
-      heroUrl: heroUrl || null,
-      placePhotoUrl: placePhotoUrl, // 給前端 onerror fallback
-      top3: row.top3,
-      features: row.features,
-      ambiance: row.ambiance,
-      newItems: row.newItems
-    });
-  } catch (e) {
-    console.error(e);
-    return json({ error: e.message || "server error" }, 500);
+    return jsonResponse(payload, 200);
+  } catch (err) {
+    console.error('store handler error:', err);
+    return jsonResponse({ error: String(err.message || err) }, 500);
   }
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────
-
-// A..I：StoreID, StoreName, PlaceID, Top3Items, StoreFeatures, Ambiance, 新品, LOGO, Hero圖
-async function fetchRow(storeidLower) {
-  var base = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq";
-  var tq = encodeURIComponent("select A,B,C,D,E,F,G,H,I where lower(A)='" + storeidLower + "' limit 1");
-  var url = base + "?sheet=" + encodeURIComponent(SHEET_NAME) + "&tq=" + tq;
-  var r = await fetch(url);
-  var txt = await r.text();
-  var jsonStr = txt.replace(/^[\s\S]*setResponse\(/, "").replace(/\);?\s*$/, "");
-  var obj = JSON.parse(jsonStr);
-
-  var table = obj && obj.table ? obj.table : null;
-  var rows = table && table.rows ? table.rows : null;
-  var first = rows && rows[0] ? rows[0] : null;
-  var c = first && first.c ? first.c : null;
-  if (!c) return null;
-
-  function v(i) {
-    var cell = c[i];
-    var val = (cell && typeof cell.v !== "undefined") ? cell.v : "";
-    return ("" + val).trim();
-    }
-
-  return {
-    storeid:  v(0),
-    name:     v(1) || v(0),
-    placeId:  v(2),
-    top3:     v(3),
-    features: v(4),
-    ambiance: v(5),
-    newItems: v(6),
-    logoUrl:  v(7),
-    heroUrl:  v(8)
-  };
-}
-
-// 把各種 Google Drive 連結轉成能直接出圖的格式
-function normalizeDrive(u) {
-  if (!u) return '';
-  try {
-    // 已是 uc 直連則直接回傳（但我們仍會補上可能的 resourcekey）
-    const isUC = /^https:\/\/drive\.google\.com\/uc/i.test(u);
-
-    // 取出 id
-    const mId = u.match(/\/file\/d\/([^/]+)/) || u.match(/[?&]id=([^&]+)/i);
-    const id = mId ? mId[1] : '';
-    if (!id) return u;
-
-    // 取出 resourcekey（若有就保留）
-    const rkMatch = u.match(/[?&]resourcekey=([^&]+)/i);
-    const rk = rkMatch ? rkMatch[1] : '';
-
-    let out = isUC ? u : `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
-    // 若原本不是 uc 或 uc 上沒有 resourcekey，補上它
-    if (rk && !/[?&]resourcekey=/.test(out)) {
-      out += (out.includes('?') ? '&' : '?') + `resourcekey=${encodeURIComponent(rk)}`;
-    }
-    return out;
-  } catch {
-    return u;
-  }
-}
-
-// 取 Place Details 的第一張 photo_reference
-async function fetchPlacePhotoRef(placeId) {
-  try {
-    var url = "https://maps.googleapis.com/maps/api/place/details/json"
-      + "?place_id=" + encodeURIComponent(placeId)
-      + "&fields=photos"
-      + "&key=" + encodeURIComponent(GMAPS_KEY);
-    var r = await fetch(url);
-    var j = await r.json();
-    var result = j && j.result ? j.result : null;
-    var photos = result && result.photos ? result.photos : null;
-    var first = photos && photos[0] ? photos[0] : null;
-    var ref = first && first.photo_reference ? first.photo_reference : "";
-    return ref || "";
-  } catch (_e) {
-    return "";
-  }
-}
-
-// 把 photo_reference 變成圖片 URL
-function buildPlacePhotoUrl(photoRef, maxwidth) {
-  var mw = maxwidth || 1000;
-  return "https://maps.googleapis.com/maps/api/place/photo"
-    + "?maxwidth=" + mw
-    + "&photo_reference=" + encodeURIComponent(photoRef)
-    + "&key=" + encodeURIComponent(GMAPS_KEY);
-}
 
