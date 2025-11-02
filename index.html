@@ -6,156 +6,151 @@
   <title>Smart Google Review · AI 一則短評</title>
   <style>
     :root{
-      /* ===== Cupertino palette (單一主色 + 中性色) ===== */
-      --bg:#f6f7f9;          /* 系統底色 */
-      --card:#ffffff;        /* 卡片底色 */
-      --fg:#0f172a;          /* 主要文字 (slate-900) */
-      --muted:#667085;       /* 次要文字 */
-      --tint:#0a84ff;        /* iOS 系統藍 */
-      --tint-700:#0668c8;    /* 深按 */
-      --tint-50:#e6f0ff;     /* 淺底 */
-      --chip:#ecf3ff;        /* 未選中標籤底 */
-      --chip-on:#0a84ff;     /* 已選中標籤底 */
-      --chip-on-fg:#fff;
+      /* Colors – Apple-ish */
+      --bg:#F5F7FB;
+      --card:#FFFFFF;
+      --fg:#0F172A;
+      --muted:#64748B;
 
-      /* 排版尺寸（壓縮垂直空間） */
-      --fs-h1: clamp(20px, 2.4vw + 12px, 28px);
-      --fs-h1b: clamp(18px, 2.0vw + 10px, 24px); /* 店名行 */
-      --fs-body: clamp(14px, 1.1vw + 10px, 16px);
-      --fs-chip: clamp(13px, 1.0vw + 9px, 15px);
-      --fs-btn:  clamp(15px, 1.1vw + 10px, 17px);
+      /* one blue, many tints */
+      --blue:#0A84FF;
+      --blue-600:#0A84FF;
+      --blue-500:#1B8BFF;
+      --blue-400:#4CA0FF;
+      --blue-200:#E8F2FF;
 
-      --radius:14px;
-      --radius-lg:18px;
-      --shadow:0 4px 16px rgba(0,0,0,.08);
-      --shadow-strong:0 10px 30px rgba(0,0,0,.16);
+      --chip-bg:#EAF2FE;
+      --chip-bg-on:#0A84FF;
+      --chip-fg:#0F172A;
+      --chip-fg-on:#FFFFFF;
+
+      --fs-title-max: 28px;
+      --fs-title-min: 18px;
+      --fs-body:  clamp(13px, 1.2vw + 10px, 16px);
+      --fs-chip:  clamp(12px, 1vw  + 8px, 14px);
+      --fs-btn:   clamp(14px, 1.2vw + 11px, 16px);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --shadow: 0 10px 30px rgba(15,23,42,0.08);
+      --shadow-soft: 0 6px 20px rgba(15,23,42,0.06);
     }
+
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-    body{margin:0; background:var(--bg); color:var(--fg); font:var(--fs-body)/1.5 ui-sans-serif,system-ui,'Inter','SF Pro Text','PingFang TC','Noto Sans TC',sans-serif;}
-    .wrap{max-width:720px; margin:auto; padding:12px;}
+    body{margin:0; background:var(--bg); color:var(--fg); font:var(--fs-body)/1.55 system-ui, -apple-system, 'Inter','PingFang TC','Noto Sans TC',sans-serif;}
+    .wrap{max-width:760px; margin:auto; padding:12px;}
     .card{background:var(--card); border-radius:20px; box-shadow:var(--shadow); overflow:hidden; position:relative;}
 
-    /* ===== HERO + 浮層 ===== */
+    /* HERO */
     .hero-wrap{position:relative;}
-    .hero{width:100%; height:200px; object-fit:cover; display:block;}
-    @media (max-width:520px){ .hero{height:168px;} }
+    .hero{width:100%; height:220px; object-fit:cover; display:none;}
+    @media (max-width:520px){ .hero{height:180px;} }
 
-    /* 語言膠囊（固定右上） */
+    /* Lang pill – floats on hero */
     .lang-pill{
-      position:absolute; right:12px; top:12px;
-      display:flex; gap:6px; padding:4px; border-radius:999px;
-      background:rgba(16,18,27,.46); backdrop-filter:blur(6px);
+      position:absolute; right:12px; top:12px; display:flex; gap:6px; padding:6px;
+      border-radius:999px; background:rgba(15,23,42,.45); backdrop-filter:blur(6px);
     }
     .lang-pill button{
-      border:0; background:transparent; padding:6px 10px; border-radius:999px;
-      font-weight:700; cursor:pointer; color:#fff; min-width:40px; font-size:12px;
+      border:0; background:transparent; padding:6px 12px; border-radius:999px; font-weight:700;
+      color:#fff; min-width:42px; font-size:12px; cursor:pointer;
     }
-    .lang-pill button.active{background:#0b1220; color:#fff;}
+    .lang-pill button.active{background:#0B1020; color:#fff;}
 
-    /* Logo 徽章：置中跨界 */
+    /* Logo badge pinned at seam */
     .logo-badge{
       position:absolute; left:50%; bottom:-22px; transform:translateX(-50%);
-      width:60px; height:60px; border-radius:16px; object-fit:cover; display:none;
-      background:#fff; padding:8px; box-shadow:var(--shadow-strong);
+      width:64px; height:64px; border-radius:14px; background:#fff; padding:8px;
+      box-shadow:0 10px 30px rgba(15,23,42,.18), 0 2px 6px rgba(15,23,42,.1);
+      display:none;
     }
+    .logo-badge img{width:100%; height:100%; object-fit:contain;}
     @media (max-width:520px){ .logo-badge{width:56px; height:56px; bottom:-20px;} }
 
-    /* ===== 內容區 ===== */
-    .content{padding:22px 14px 14px; margin-top:12px;} /* 讓出徽章空間 + 壓縮垂直 */
-    .title-wrap{margin:0 0 8px 0;}
-    .h1{margin:0 0 6px 0; font-weight:800; font-size:var(--fs-h1); line-height:1.22;}
-    .h1b{margin:0; font-weight:800; font-size:var(--fs-h1b); line-height:1.25; color:#1f2937;}
-    .sub{color:var(--muted); margin:6px 0 12px 0;}
+    /* Content */
+    .content{padding:26px 16px 14px; margin-top:14px;}
+    .title{margin:0 0 6px 0; font-weight:800; line-height:1.2; font-size:var(--fs-title-max);}
+    /* allow wrapping; auto-fit if too long */
+    .title.fit{white-space:normal;}
+    .sub{color:var(--muted); margin:0 0 10px 0;}
 
-    /* 標籤網格：手機 2 欄，桌面 3 欄；兩行字固定高度 */
-    #chips{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }
-    @media (max-width:640px){ #chips{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
-    .chip{
-      display:flex; align-items:center; justify-content:center; text-align:center;
-      padding:10px 12px; border-radius:999px; background:var(--chip);
-      color:#0f172a; cursor:pointer; font-size:var(--fs-chip); font-weight:700;
-      min-height:56px; max-height:56px; line-height:1.15;
-      box-shadow:inset 0 0 0 1px rgba(10,132,255,.15);
-      transition:transform .06s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+    /* Chips – two rows in a pill (no overflow …) */
+    #chips{
+      display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:10px 0 12px;
     }
-    .chip:active{ transform:translateY(1px); }
-    .chip.on{ background:var(--chip-on); color:var(--chip-on-fg); box-shadow:none; }
-    .chip > span{ display:block; white-space:normal; word-break:break-word; max-width:100%;
-      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    @media (min-width:540px){ #chips{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 
-    /* 動作按鈕列：緊湊 */
-    .actions{display:flex; gap:10px; margin:12px 0 10px;}
+    .chip{
+      border-radius:999px; padding:10px 14px; background:var(--chip-bg); color:var(--chip-fg);
+      display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;
+      border:1px solid #E5EAF5; transition:all .15s ease; box-shadow:var(--shadow-soft);
+      min-height:48px; /* fixed height; allow two lines */
+    }
+    .chip:hover{transform:translateY(-1px);}
+    .chip.on{ background:var(--chip-bg-on); color:var(--chip-fg-on); border-color:transparent; }
+
+    .chip-text{
+      font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+      max-width:95%;
+    }
+
+    /* Actions */
+    .actions{display:flex; gap:10px; margin:8px 0 8px;}
     .btn{
-      flex:1; height:46px; border:0; border-radius:14px; font-weight:800;
-      font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; cursor:pointer;
+      flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn);
+      display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-soft);
     }
     .btn.primary{
-      color:#fff; background:linear-gradient(180deg, #0a84ff, #096fe6);
-      box-shadow:0 6px 16px rgba(10,132,255,.28), inset 0 -1px 0 rgba(255,255,255,.2);
+      color:#fff;
+      background:linear-gradient(180deg, var(--blue-500), var(--blue-600));
     }
-    .btn.primary:active{ background:linear-gradient(180deg, #096fe6, #085ec2); }
-    .btn.secondary{background:#f3f5f8; color:#185adb; box-shadow:inset 0 0 0 1px rgba(10,132,255,.18);}
-    .btn.secondary:active{ background:#e9eef6; }
-    .btn:disabled{opacity:.75; cursor:not-allowed;}
+    .btn.primary:active{transform:translateY(1px);}
+    .btn.ghost{
+      background:#F6F8FC; color:#1D4ED8; border:1px solid #E6ECFA;
+    }
+    .btn.secondary{
+      background:#0B1220; color:#fff; height:52px; border-radius:16px;
+    }
+    .btn:disabled{opacity:.7; cursor:not-allowed;}
     .spinner{width:18px; height:18px; border:2px solid rgba(255,255,255,.45);
       border-top-color:#fff; border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
     .btn.loading .spinner{display:inline-block;}
 
-    /* 文本框：預設加高，聚焦再加高，圓角與描邊一致 */
     textarea{
-      width:100%; padding:12px; border:1px solid #d9e2f1; border-radius:16px;
-      font-size:var(--fs-body); min-height:120px; transition:min-height .15s ease, border-color .15s ease, box-shadow .15s ease;
-      outline:none; box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 0 0 0 rgba(10,132,255,.2);
+      width:100%; margin:0; padding:12px 14px; min-height:120px; /* higher for editing */
+      border:1px solid #E6ECFA; border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);
     }
-    textarea:focus{ min-height:160px; border-color:rgba(10,132,255,.55); box-shadow:0 0 0 4px rgba(10,132,255,.15); }
-
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
-    .anchor{ width:100%; height:54px; border-radius:18px; display:flex; align-items:center; justify-content:center;
-      background:#0b1220; color:#fff; text-decoration:none; font-weight:800; box-shadow:var(--shadow); }
-    .anchor span{ text-decoration:underline; }
-    .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 6px;}
-
-    /* 只有沒帶 store 參數時才顯示（相容） */
-    #storeRow{display:none;}
-    .row{display:flex; flex-wrap:wrap; gap:6px;}
+    .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <!-- HERO + 浮層 -->
+      <!-- HERO + overlays -->
       <div class="hero-wrap">
-        <img id="hero" class="hero" alt="hero" onerror="this.style.display='none'"/>
-        <img id="logo" class="logo-badge" alt="logo" onerror="this.style.display='none'"/>
+        <img id="hero" class="hero" alt="hero"/>
         <div id="langBar" class="lang-pill" aria-label="language switch"></div>
+        <div id="logoBadge" class="logo-badge"><img id="logo" alt="logo"/></div>
       </div>
 
       <div class="content">
-        <!-- 兩段式標題：動作句 + 店名行（長名完整顯示） -->
-        <div class="title-wrap">
-          <h1 id="titleAction" class="h1">為這家店寫一則短評</h1>
-          <p id="titleName" class="h1b">「<span id="title-store-name">門市</span>」</p>
-        </div>
-
-        <p id="subtitle" class="sub">挑選今天你最有感的重點，點一下下方按鈕，我們會幫你整理成短評。</p>
-
-        <div id="storeRow" class="row" style="margin-bottom:10px;">
-          <div class="field"><label class="status" id="labStore">StoreID：</label><input id="store-input" placeholder="leegarnei" /></div>
-          <div class="field"><label class="status" id="labAddTag">新增標籤：</label><input id="addTag" placeholder="輸入後按 Enter" /></div>
-        </div>
+        <h1 id="title" class="title fit">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
+        <p id="subtitle" class="sub">挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。</p>
 
         <div id="chips"></div>
 
         <div class="actions">
           <button id="gen" class="btn primary"><span class="spinner"></span><span id="btnGen">✍️ 幫我撰寫</span></button>
-          <button id="copy" class="btn secondary"><span id="btnCopy">📋 複製</span></button>
+          <button id="copy" class="btn ghost"><span id="btnCopy">📋 複製</span></button>
         </div>
 
         <textarea id="output" placeholder="這裡會顯示整理後的一段短評…"></textarea>
 
         <div class="footer-actions">
-          <a id="openGoogle" class="anchor" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen" style="margin-left:6px;">開啟 Google 評論</span></a>
+          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
         </div>
 
         <div id="status" class="status" aria-live="polite"></div>
@@ -164,8 +159,8 @@
   </div>
 
   <script>
-    /* ===== 工具 ===== */
-    function getStoreFromURL() {
+    /* ---------- helpers ---------- */
+    function getStoreFromURL(){
       const url = new URL(location.href);
       const byQuery = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
       if (byQuery) return byQuery;
@@ -175,99 +170,77 @@
       if (first === 's' && parts[1]) return (parts[1] || '').trim();
       return parts[0] || '';
     }
-    function uniq(arr){ const out=[], seen={}; arr.forEach(s=>{ s=(s||'').trim(); if(s && !seen[s]){ seen[s]=1; out.push(s);} }); return out; }
-    function withBuster(u){ if(!u) return ''; const sep = u.includes('?') ? '&':'?'; return u + sep + 'v=' + Date.now(); }
-    function setImg(img, primary, fallback){
-      if (primary) {
-        img.onerror = function(){
-          if (fallback && img.src !== fallback) { img.onerror = function(){ img.style.display='none'; }; img.src = withBuster(fallback); }
-          else { img.style.display='none'; }
-        };
-        img.src = withBuster(primary); img.style.display='block'; return;
-      }
-      if (fallback) { img.onerror=function(){img.style.display='none'}; img.src=withBuster(fallback); img.style.display='block'; return; }
-      img.style.display='none';
-    }
+    const uniq = a => Array.from(new Set((a||[]).map(s => String(s||'').trim()).filter(Boolean)));
 
-    /* ===== 多語設定 ===== */
-    const LANGS = {
-      en:{label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn'],
-        ui:{
-          action:'Write a short review',
-          nameTitle:'“{name}”',
-          sub:'Pick what stood out today, then tap the button — we’ll help you turn it into a short review.',
-          store:'StoreID:', addtag:'Add tag:',
-          gen:'✍️ Compose', copy:'📋 Copy', open:'Open Google Reviews',
-          placeholder:'Your summarized review will appear here…',
-          loading:'Composing…', done:'✅ Done (latency ', err:'❌ Error: '
-        }},
-      zh:{label:'中', chips:['top3Cn','featuresCn','ambianceCn','newItemsCn'],
-        ui:{
-          action:'為這家店寫一則短評',
-          nameTitle:'「{name}」',
-          sub:'挑選今天你最有感的重點，點一下下方按鈕，我們會幫你整理成短評。',
-          store:'StoreID：', addtag:'新增標籤：',
-          gen:'✍️ 幫我撰寫', copy:'📋 複製', open:'開啟 Google 評論',
-          placeholder:'這裡會顯示整理後的一段短評…',
-          loading:'撰寫中…', done:'✅ 完成（延遲 ', err:'❌ 發生錯誤：'
-        }},
-      ko:{label:'한국어', chips:['top3Ko','featuresKo','ambianceKo','newItemsKo'],
-        ui:{
-          action:'한 줄 리뷰 작성',
-          nameTitle:'“{name}”',
-          sub:'오늘 인상 깊었던 포인트를 고른 뒤 버튼을 누르면, 한 줄 리뷰로 정리해 드려요.',
-          store:'StoreID:', addtag:'태그 추가:',
-          gen:'✍️ 작성', copy:'📋 복사', open:'Google 리뷰 열기',
-          placeholder:'요약된 리뷰가 여기에 표시됩니다…',
-          loading:'작성 중…', done:'✅ 완료(지연 ', err:'❌ 오류: '
-        }},
-      ja:{label:'日本語', chips:['top3Ja','featuresJa','ambianceJa','newItemsJa'],
-        ui:{
-          action:'一言レビューを書く',
-          nameTitle:'「{name}」',
-          sub:'今日印象に残ったポイントを選んでボタンを押すと、一言レビューにまとめます。',
-          store:'StoreID:', addtag:'タグ追加：',
-          gen:'✍️ 作成', copy:'📋 コピー', open:'Google 口コミを開く',
-          placeholder:'要約したレビューが表示されます…',
-          loading:'作成中…', done:'✅ 完了（遅延 ', err:'❌ エラー: '
-        }},
-      fr:{label:'FR', chips:['top3Fr','featuresFr','ambianceFr','newItemsFr'],
-        ui:{
-          action:'Rédiger un court avis',
-          nameTitle:'« {name} »',
-          sub:'Choisissez ce qui vous a marqué aujourd’hui, puis touchez le bouton — on le résume en un court avis.',
-          store:'StoreID:', addtag:'Nouveau tag :',
-          gen:'✍️ Rédiger', copy:'📋 Copier', open:'Ouvrir les avis Google',
-          placeholder:'Votre avis synthétisé s’affichera ici…',
-          loading:'Rédaction…', done:'✅ Terminé (latence ', err:'❌ Erreur : '
-        }},
-      es:{label:'ES', chips:['top3Es','featuresEs','ambianceEs','newItemsEs'],
-        ui:{
-          action:'Escribe una reseña breve',
-          nameTitle:'«{name}»',
-          sub:'Elige lo que más te llamó la atención y pulsa el botón: lo convertimos en una reseña breve.',
-          store:'StoreID:', addtag:'Añadir etiqueta:',
-          gen:'✍️ Redactar', copy:'📋 Copiar', open:'Abrir reseñas de Google',
-          placeholder:'Aquí aparecerá tu reseña resumida…',
-          loading:'Redactando…', done:'✅ Listo (latencia ', err:'❌ Error: '
-        }},
+    // tolerant key picker: pick(data,'a','b','c') => first truthy
+    const pick = (obj, ...keys) => {
+      for (const k of keys) {
+        const v = obj && obj[k];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+      }
+      return '';
     };
 
-    /* ===== DOM & 狀態 ===== */
+    function withBuster(u){ if(!u) return ''; const sep = u.includes('?') ? '&':'?'; return u + sep + 'v=' + Date.now(); }
+
+    function setImgEl(imgEl, url, fallback, showWrapper){
+      const show = (ok) => {
+        const wrap = showWrapper || imgEl;
+        wrap.style.display = ok ? (wrap.classList.contains('hero') ? 'block' : 'flex') : 'none';
+      };
+      const src = url || fallback;
+      if (!src) return show(false);
+      imgEl.onload  = () => show(true);
+      imgEl.onerror = () => show(false);
+      imgEl.src = withBuster(src);
+    }
+
+    /* ---------- i18n config ---------- */
+    const LANGS = {
+      en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],
+        ui:{title:'Write a short review for “{name}”',
+            sub:'Pick what stood out today, then tap “Compose”.',
+            gen:'✍️ Compose', copy:'📋 Copy', open:'Open Google Reviews',
+            placeholder:'Your summarized review will appear here…'} },
+      zh: { label:'中', chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],
+        ui:{title:'為「{name}」寫一則短評',
+            sub:'挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。',
+            gen:'✍️ 幫我撰寫', copy:'📋 複製', open:'開啟 Google 評論',
+            placeholder:'這裡會顯示整理後的一段短評…'} },
+      ko: { label:'한국어', chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],
+        ui:{title:'“{name}” 리뷰 한 줄',
+            sub:'오늘 인상 깊었던 포인트 몇 가지를 고르고 ‘작성’을 눌러 주세요.',
+            gen:'✍️ 작성', copy:'📋 복사', open:'Google 리뷰 열기',
+            placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
+      ja: { label:'日本語', chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],
+        ui:{title:'「{name}」へ一言レビュー',
+            sub:'今日印象に残ったポイントをいくつか選び、「作成」を押してください。',
+            gen:'✍️ 作成', copy:'📋 コピー', open:'Google 口コミを開く',
+            placeholder:'要約したレビューが表示されます…'} },
+      fr: { label:'FR', chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],
+        ui:{title:'Écrire un avis court pour « {name} »',
+            sub:'Choisissez ce qui vous a marqué aujourd’hui, puis touchez « Rédiger ».',
+            gen:'✍️ Rédiger', copy:'📋 Copier', open:'Ouvrir les avis Google',
+            placeholder:'Votre avis synthétisé s’affichera ici…'} },
+      es: { label:'ES', chips:['top3Es','featuresEs','ambianceEs','newItemsEs','top3','features','ambiance','newItems'],
+        ui:{title:'Escribe una reseña corta para «{name}»',
+            sub:'Elige lo que más te llamó la atención hoy y pulsa «Redactar».',
+            gen:'✍️ Redactar', copy:'📋 Copiar', open:'Abrir reseñas de Google',
+            placeholder:'Aquí aparecerá tu reseña resumida…'} },
+    };
+
+    /* ---------- DOM ---------- */
     const $chips = document.getElementById('chips');
-    const $storeRow = document.getElementById('storeRow');
-    const $storeInput = document.getElementById('store-input');
-    const $addTag = document.getElementById('addTag');
     const $gen = document.getElementById('gen');
     const $copy = document.getElementById('copy');
     const $output = document.getElementById('output');
     const $status = document.getElementById('status');
     const $openGoogle = document.getElementById('openGoogle');
     const $logo = document.getElementById('logo');
+    const $logoBadge = document.getElementById('logoBadge');
     const $hero = document.getElementById('hero');
     const $langBar = document.getElementById('langBar');
-    const $titleAction = document.getElementById('titleAction');
-    const $titleName = document.getElementById('titleName');
+    const $title = document.getElementById('title');
     const $subtitle = document.getElementById('subtitle');
     const $btnGen = document.getElementById('btnGen');
     const $btnCopy = document.getElementById('btnCopy');
@@ -279,9 +252,6 @@
     let currentLang = 'zh';
     let storeMeta = null;
     let availableLangs = [];
-    let storeNames = null;
-
-    if (!getStoreFromURL()) { $storeRow.style.display='flex'; if ($storeInput) $storeInput.value=currentStore; }
 
     function applyBasicLinks(nameText){
       $titleStoreName.textContent = nameText || currentStore || 'Store';
@@ -289,162 +259,122 @@
       $openGoogle.href = 'https://www.google.com/search?q=' + q + '+google+reviews';
     }
 
-    /* 多語店名解析 */
-    function parseStoreNameMulti(s){
-      const out = { zh:'', en:'', ko:'', ja:'', fr:'', es:'', _raw:(s||'').trim() };
-      if (!s) return out;
-      const str = String(s).trim();
-      const hasEq = /[a-z]{2}\s*=/.test(str);
-      if (hasEq) {
-        str.split(',').forEach(pair=>{
-          const [kRaw,vRaw] = pair.split('=');
-          if (!kRaw || !vRaw) return;
-          const k = kRaw.trim().toLowerCase();
-          const v = vRaw.trim();
-          if (['zh','en','ko','ja','fr','es'].includes(k)) out[k] = v;
-        });
-        return out;
-      }
-      const parts = str.split(',').map(x=>x.trim()).filter(Boolean);
-      const isLatin = t => /[A-Za-z]/.test(t);
-      const isKorean = t => /[가-힣]/.test(t);
-      const isJapanese = t => /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9D]/.test(t);
-      parts.forEach(p=>{
-        if (!out.en && isLatin(p)) { out.en = p; return; }
-        if (!out.ko && isKorean(p)) { out.ko = p; return; }
-        if (!out.ja && isJapanese(p)) { out.ja = p; return; }
-        if (!out.zh) { out.zh = p; return; }
-      });
-      return out;
-    }
-    function storeNameForLang(nameMap, lang){
-      if (!nameMap) return '';
-      const tryOrder = {
-        zh: ['zh','en','ko','ja','fr','es'],
-        en: ['en','zh','ko','ja','fr','es'],
-        ko: ['ko','zh','en','ja','fr','es'],
-        ja: ['ja','zh','en','ko','fr','es'],
-        fr: ['fr','en','zh','ko','ja','es'],
-        es: ['es','en','zh','ko','ja','fr'],
-      }[lang] || ['en','zh','ko','ja','fr','es'];
-      for (const code of tryOrder) {
-        const v = (nameMap[code]||'').trim();
-        if (v) return v;
-      }
-      return (nameMap._raw || '').trim();
-    }
-
-    /* 語言與 Chips */
     function langHasContent(langKey, data){
       const cfg = LANGS[langKey]; if(!cfg) return false;
-      return cfg.chips.some(k => (data[k]||'').trim());
+      return cfg.chips.some(k => (data && String(data[k]||'').trim()));
     }
+
     function buildLangBar(){
       $langBar.innerHTML = '';
       availableLangs.forEach(k=>{
         const btn = document.createElement('button');
         btn.textContent = LANGS[k].label;
         btn.className = (k===currentLang)?'active':'';
-        btn.onclick = ()=>{
-          currentLang = k;
-          renderUI();
-          buildLangBar();
-          buildChipsFromMeta();
-        };
+        btn.onclick = ()=>{ currentLang=k; renderUI(); buildLangBar(); buildChipsFromMeta(); };
         $langBar.appendChild(btn);
       });
     }
+
+    function fitTitle(){
+      // downsize a bit if overflows container
+      const max = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-max')) || 28;
+      const min = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fs-title-min')) || 18;
+      let size = max;
+      $title.style.fontSize = size + 'px';
+      const w = $title.clientWidth;
+      while ($title.scrollWidth > w && size > min) {
+        size -= 1;
+        $title.style.fontSize = size + 'px';
+      }
+    }
+
     function renderUI(){
       const ui = LANGS[currentLang].ui;
-      const name = storeNameForLang(storeNames, currentLang) || storeMeta?.name || currentStore || 'Store';
-      $titleAction.textContent = ui.action;
-      $titleName.innerHTML = ui.nameTitle.replace('{name}', `<span id="title-store-name">${name}</span>`);
+      const name = pick(storeMeta,'name') || currentStore || 'Store';
+      $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${name}</span>`);
       $subtitle.textContent = ui.sub;
-      document.getElementById('labStore')?.textContent = ui.store || 'StoreID:';
-      document.getElementById('labAddTag')?.textContent = ui.addtag || 'Add tag:';
       $btnGen.textContent = ui.gen;
       $btnCopy.textContent = ui.copy;
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
+      requestAnimationFrame(fitTitle);
     }
+
     function buildChipsFromMeta(){
-      const cfg = LANGS[currentLang]; const data = storeMeta || {};
+      const cfg = LANGS[currentLang];
+      const data = storeMeta || {};
       let tags = [];
-      cfg.chips.forEach(k=>{ if(data[k]) tags = tags.concat(String(data[k]).split(',')); });
+      // gather by language keys; if沒有語系欄位則吃通用 top3/features/ambiance/newItems
+      cfg.chips.forEach(k=>{
+        const raw = pick(data, k); // pick handles undefined
+        if (raw) tags = tags.concat(String(raw).split(','));
+      });
       tags = uniq(tags).slice(0,18);
       if (tags.length===0){
-        if (currentLang!=='en' && storeMeta && langHasContent('en', storeMeta)){
-          currentLang='en'; renderUI(); buildLangBar(); return buildChipsFromMeta();
-        }
+        // fallback to a small default set
         tags = ['boba','rice','dumpling','Nice service','clean environment','Couple date','family reunion','Fried noodles'];
       }
       selected.clear();
       $chips.innerHTML = '';
       tags.forEach(tag=>{
         const el = document.createElement('div');
-        el.className='chip'; el.innerHTML=`<span>${tag.trim()}</span>`;
+        el.className='chip';
+        el.innerHTML = `<span class="chip-text">${tag.trim()}</span>`;
         el.onclick=()=>{ if(selected.has(tag)) selected.delete(tag); else selected.add(tag); el.classList.toggle('on'); };
         $chips.appendChild(el);
       });
     }
 
-    /* 載入店家 meta */
     async function loadStoreMeta(){
       try{
         const res = await fetch('/api/store?storeid=' + encodeURIComponent(currentStore));
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
-        storeNames = parseStoreNameMulti(data.name || '');
 
-        applyBasicLinks(storeNameForLang(storeNames, currentLang) || data.name || currentStore);
+        const storeName = pick(data,'name','storeName','title') || currentStore;
+        applyBasicLinks(storeName);
 
-        const order = ['en','zh','ko','fr','ja','es'];
+        // language availability
+        const order = ['zh','en','ko','ja','fr','es'];
         availableLangs = order.filter(k => langHasContent(k, data));
-        if (availableLangs.length===0) availableLangs = ['en'];
+        if (availableLangs.length===0) availableLangs = ['zh','en'];
         if (!availableLangs.includes(currentLang)) currentLang = availableLangs[0];
 
-        setImg($logo, data.logoUrl, data.placePhotoUrl);
-        setImg($hero, data.heroUrl, data.placePhotoUrl);
-        $logo.style.display = 'block';
+        // images (tolerant picks)
+        const heroUrl = pick(data,'heroUrl','cover','banner','placePhotoUrl','photoUrl');
+        const logoUrl = pick(data,'logoUrl','logo','image','icon');
+
+        setImgEl($hero, heroUrl, pick(data,'placePhotoUrl','photoUrl'));
+        setImgEl($logo, logoUrl, pick(data,'placePhotoUrl','photoUrl'), $logoBadge);
 
         if (data.placeId) $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
 
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }catch(e){
         console.error('loadStoreMeta error:', e);
-        applyBasicLinks('Store'); $logo.style.display='none'; $hero.style.display='none';
+        applyBasicLinks('Store');
+        // fallback: still render UI so頁面不是空白
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
-    // 相容：手動輸入 StoreID
-    const $storeInputEl = document.getElementById('store-input');
-    if ($storeInputEl) $storeInputEl.addEventListener('input', ()=>{ currentStore = ($storeInputEl.value||'').trim(); applyBasicLinks(); });
+    // init
+    applyBasicLinks('Store');
+    loadStoreMeta();
+    addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
-    // 新增自訂標籤
-    if ($addTag) $addTag.addEventListener('keydown', e=>{
-      if (e.key==='Enter'){
-        const v = ($addTag.value||'').trim(); if(!v) return;
-        const el = document.createElement('div'); el.className='chip on'; el.innerHTML=`<span>${v}</span>`;
-        selected.add(v); el.onclick=()=>{ if(selected.has(v)) selected.delete(v); else selected.add(v); el.classList.toggle('on'); };
-        $chips.prepend(el); $addTag.value='';
-      }
-    });
-
-    // 初始化
-    applyBasicLinks('Store'); loadStoreMeta();
-
-    /* 產生 / 複製 */
+    /* ---------- generate / copy ---------- */
     async function generate(){
       const storeid = (currentStore || '').trim();
       if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
       const selectedTags = Array.from(selected);
-      const body = { storeid, selectedTags, lang: currentLang, variant:1, minChars:90, maxChars:160 };
+      const body = { storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang: currentLang };
 
-      const loadingLabel = LANGS[currentLang].ui.loading || 'Generating…';
       $gen.classList.add('loading'); $gen.disabled=true; $copy.disabled=true;
-      const prev = $gen.innerHTML; $gen.innerHTML = '<span class="spinner"></span>' + loadingLabel;
+      const prev = $gen.innerHTML;
+      const loadingText = { en:'Composing…', zh:'撰寫中…', ko:'작성 중…', ja:'作成中…', fr:'Rédaction…', es:'Redactando…' }[currentLang] || 'Composing…';
+      $gen.innerHTML = '<span class="spinner"></span>' + loadingText;
       $status.textContent='';
 
       try{
@@ -452,29 +382,32 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         $output.value = data.reviewText || JSON.stringify(data,null,2);
-        const okText = (LANGS[currentLang].ui.done || '✅ Done (latency ') + (data.latencyMs || '-') + ' ms)';
-        $status.textContent = okText;
+        const okText = { en:'✅ Done (latency ', zh:'✅ 完成（延遲 ', ko:'✅ 완료(지연 ', ja:'✅ 完了（遅延 ', fr:'✅ Terminé (latence ', es:'✅ Listo (latencia ' }[currentLang] || '✅ Done (latency ';
+        $status.textContent = okText + (data.latencyMs || '-') + ' ms)';
         if (data?.store?.placeId) $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.store.placeId);
       }catch(err){
-        $output.value='';
-        $status.textContent = (LANGS[currentLang].ui.err || '❌ Error: ') + err.message;
+        const errPrefix = { en:'❌ Error: ', zh:'❌ 發生錯誤：', ko:'❌ 오류: ', ja:'❌ エラー: ', fr:'❌ Erreur : ', es:'❌ Error: ' }[currentLang] || '❌ Error: ';
+        $output.value=''; $status.textContent = errPrefix + err.message;
       }finally{
         $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false; $gen.innerHTML = prev;
       }
     }
+
     async function copyText(){
       const t = ($output.value||'').trim();
-      const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié', es:'📋 Copiado' }[currentLang];
-      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement', es:'Copia manualmente' }[currentLang];
+      const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
+      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement, svp', es:'Copia manualmente, por favor' }[currentLang];
       if(!t){ $status.textContent = { en:'Nothing to copy', zh:'尚無內容可複製', ko:'복사할 내용이 없습니다', ja:'コピーする内容がありません', fr:'Rien à copier', es:'Nada para copiar' }[currentLang]; return; }
       try{ await navigator.clipboard.writeText(t); $status.textContent = msgOK; }
       catch{ $status.textContent = msgNG; }
     }
+
     document.getElementById('gen').addEventListener('click', generate);
     document.getElementById('copy').addEventListener('click', copyText);
   </script>
 </body>
 </html>
+
 
 
 
