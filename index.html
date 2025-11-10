@@ -307,41 +307,41 @@
       return (nameMap._raw||'').trim();
     }
 
-    /* ---------- i18n config (✅ V6 MODIFIED) ---------- */
+    /* ---------- i18n config (✅ V7 MODIFIED) ---------- */
     const LANGS = {
       en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],
         ui:{title:'Write a short review for “{name}”', sub:'Pick what stood out today. We’ll generate a review & prepare your reward.',
             gen:'✍️ Generate & Claim Reward', copy:'📋 Copy', 
-            copyAndOpen: '📋 Copy & Open Google', // ✅ V6 NEW
+            copyAndOpen: '📋 Copy & Open Google', // ✅ V7 NEW
             open:'Open Google Reviews', placeholder:'Your summarized review will appear here…'} },
       zh: { label:'中', chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],
         ui:{title:'為「{name}」寫一則短評', sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評並準備獎勵。',
             gen:'✍️ 產生評論並領取獎勵', copy:'📋 複製', 
-            copyAndOpen: '📋 複製並開啟 Google', // ✅ V6 NEW
+            copyAndOpen: '📋 複製並開啟 Google', // ✅ V7 NEW
             open:'開啟 Google 評論', placeholder:'這裡會顯示整理後的一段短評…'} },
       ko: { label:'한국어', chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],
         ui:{title:'“{name}” 리뷰 한 줄', sub:'오늘 인상 깊었던 포인트를 고르고 ‘작성’을 눌러주시면, 리뷰와 리워드를 준비해 드립니다.',
             gen:'✍️ 작성 및 리워드 받기', copy:'📋 복사', 
-            copyAndOpen: '📋 복사 및 Google 열기', // ✅ V6 NEW
+            copyAndOpen: '📋 복사 및 Google 열기', // ✅ V7 NEW
             open:'Google 리뷰 열기', placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
       ja: { label:'日本語', chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],
         ui:{title:'「{name}」へ一言レビュー', sub:'今日印象に残ったポイントを選び、「作成」を押してください。レビューと特典をご用意します。',
             gen:'✍️ 作成して特典を受け取る', copy:'📋 コピー', 
-            copyAndOpen: '📋 コピーして Google を開く', // ✅ V6 NEW
+            copyAndOpen: '📋 コピーして Google を開く', // ✅ V7 NEW
             open:'Google 口コミを開く', placeholder:'要約したレビューが表示されます…'} },
       fr: { label:'FR', chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],
         ui:{title:'Écrire un avis court pour « {name} »', sub:'Choisissez ce qui vous a marqué, touchez « Rédiger » pour générer l\'avis et recevoir votre récompense.',
             gen:'✍️ Rédiger & Recevoir Récompense', copy:'📋 Copier', 
-            copyAndOpen: '📋 Copier & Ouvrir Google', // ✅ V6 NEW
+            copyAndOpen: '📋 Copier & Ouvrir Google', // ✅ V7 NEW
             open:'Ouvrir les avis Google', placeholder:'Votre avis synthétisé s’affichera ici…'} },
       es: { label:'ES', chips:['top3Es','featuresEs','ambianceEs','newItemsEs','top3','features','ambiance','newItems'],
         ui:{title:'Escribe una reseña corta para «{name}»', sub:'Elige lo que más te llamó la atención y pulsa «Redactar» para generar tu reseña y reclamar tu recompensa.',
             gen:'✍️ Redactar y Reclamar Recompensa', copy:'📋 Copiar', 
-            copyAndOpen: '📋 Copiar y Abrir Google', // ✅ V6 NEW
+            copyAndOpen: '📋 Copiar y Abrir Google', // ✅ V7 NEW
             open:'Abrir reseñas de Google', placeholder:'Aquí aparecerá tu reseña resumida…'} },
     };
 
-    /* ---------- DOM (✅ V6 MODIFIED) ---------- */
+    /* ---------- DOM (✅ V7 MODIFIED) ---------- */
     const $chips = document.getElementById('chips');
     const $gen = document.getElementById('gen');
     const $copy = document.getElementById('copy');
@@ -358,7 +358,7 @@
     const $btnOpen = document.getElementById('btnOpen');
     const $titleStoreName = document.getElementById('title-store-name');
 
-    // ✅ V6 NEW DOM Elements
+    // ✅ V7 NEW DOM Elements
     const $rewardDisplay = document.getElementById('rewardDisplay');
     const $rewardText = document.getElementById('rewardText');
 
@@ -369,7 +369,7 @@
     let availableLangs = [];
     let storeNames = null;
     
-    // ✅ V6 NEW State Variables
+    // ✅ V7 NEW State Variables
     let isGenerated = false;
     let googleReviewUrl_global = '';
 
@@ -380,7 +380,7 @@
       $titleStoreName.textContent = nameText || currentStore || 'Store';
       const q = encodeURIComponent(currentStore || 'Big Way');
       $openGoogle.href = 'https://www.google.com/search?q=' + q + '+google+reviews';
-      googleReviewUrl_global = $openGoogle.href; // ✅ V6: Set initial fallback
+      googleReviewUrl_global = $openGoogle.href; // ✅ V7: Set initial fallback
     }
 
     function langHasContent(langKey, data){
@@ -394,7 +394,12 @@
         const btn = document.createElement('button');
         btn.textContent = LANGS[k].label;
         btn.className = (k===currentLang)?'active':'';
-        btn.onclick = ()=>{ currentLang = k; renderUI(); buildLangBar(); buildChipsFromMeta(); };
+        btn.onclick = ()=>{ 
+          currentLang = k; 
+          renderUI(); // ✅ V7: renderUI will now respect 'isGenerated' flag
+          buildLangBar(); 
+          buildChipsFromMeta(); 
+        };
         $langBar.appendChild(btn);
       });
     }
@@ -408,7 +413,7 @@
       while ($title.scrollWidth > w && size > min) { size -= 1; $title.style.fontSize = size + 'px'; }
     }
 
-    /* ✅ V6 MODIFIED renderUI function */
+    /* ✅ V7 MODIFIED renderUI function */
     function renderUI(){
       const ui = LANGS[currentLang].ui;
       const localizedName = storeNameForLang(storeNames, currentLang) || pick(storeMeta,'name') || currentStore || 'Store';
@@ -416,19 +421,18 @@
       $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${localizedName}</span>`);
       $subtitle.textContent = ui.sub;
       
-      // ✅ V6: Set button text based on state
+      // ✅ V7: Set button text based on state
       if (isGenerated) {
-        $btnCopy.textContent = ui.copyAndOpen;
-        $gen.innerHTML = genButtonTemplate(); // Re-render gen button in case lang changed
+        $btnCopy.textContent = ui.copyAndOpen; // 顯示 "複製並開啟"
       } else {
-        $btnCopy.textContent = ui.copy;
-        $gen.innerHTML = genButtonTemplate();
+        $btnCopy.textContent = ui.copy; // 顯示 "複製"
       }
       
+      $gen.innerHTML = genButtonTemplate(); // 主要按鈕文案
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
       
-      // ✅ V6: Set reward text
+      // ✅ V7: Set reward text
       $rewardText.innerHTML = {
         en: `Thank you for your feedback.<br/>**Show this screen** to redeem:<br/><strong style="color:var(--fg); font-size: 16px;">"One Free Drink"</strong>`,
         zh: `感謝您提供寶貴回饋。<br/>**請出示此畫面** 即可向店員兌換：<br/><strong style="color:var(--fg); font-size: 16px;">「免費飲料一杯」</strong>`,
@@ -485,7 +489,7 @@
         setImgEl($hero, heroUrl, pick(data,'placePhotoUrl','photoUrl'));
         setImgEl($logo, logoUrl, pick(data,'placePhotoUrl','photoUrl'), $logoBadge);
 
-        // ✅ V6: Update global URL if we have a placeId
+        // ✅ V7: Update global URL if we have a placeId
         if (data.placeId) {
           const url = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
           $openGoogle.href = url;
@@ -513,8 +517,11 @@
     loadStoreMeta();
     addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
     
+    // ✅ V7: Disable copy button initially
+    $copy.disabled = true;
+
     
-    /* ✅ V6 NEW HELPER FUNCTION */
+    /* ✅ V7 NEW HELPER FUNCTION */
     async function copyAndOpen(textToCopy, urlToOpen) {
       // 1. 複製文字
       try {
@@ -530,15 +537,19 @@
         window.open(urlToOpen, '_blank');
       } catch (e) {
         // 如果被阻擋，至少文字已經複製了
-        $status.textContent = { en:'Copied! Please open Google manually.', zh:'已複製！請手動開啟 Google。', ko:'복사되었습니다! Google을 수동으로 열어주세요.', ja:'コピーしました！Google を手動で開いてください。', fr:'Copié ! Veuillez ouvrir Google manuellement.', es:'¡Copiado! Abre Google manually.' }[currentLang] || 'Copied! Please open Google manually.';
+        $status.textContent = { en:'Copied! Please open Google manually.', zh:'已複製！請手動開啟 Google。', ko:'복사되었습니다! Google을 수동으로 열어주세요.', ja:'コピーしました！Google を手動で開いてください。', fr:'Copié ! Veuillez ouvrir Google manuellement.', es:'¡Copiado! Abre Google manualmente.' }[currentLang] || 'Copied! Please open Google manually.';
       }
     }
 
-    /* ✅ V6 MODIFIED generate function */
+    /* ✅ V7 MODIFIED generate function */
     async function generate(){
       const storeid = (currentStore || '').trim();
       if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
       const selectedTags = Array.from(selected);
+      if (selectedTags.length === 0) {
+        $status.textContent = { en:'Please select at least one tag.', zh:'請至少選擇一個標籤。', ko:'태그를 하나 이상 선택하세요.', ja:'タグを1つ以上選択してください。', fr:'Veuillez sélectionner au moins un tag.', es:'Selecciona al menos una etiqueta.' }[currentLang] || 'Please select at least one tag.';
+        return;
+      }
       const body = { storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang: currentLang };
 
       $gen.classList.add('loading'); $gen.disabled=true; $copy.disabled=true;
@@ -551,13 +562,15 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
 
-        // 🛑🛑🛑 V6 Logic Starts Here 🛑🛑🛑
+        // 🛑🛑🛑 V7 Logic Starts Here 🛑🛑🛑
 
         const reviewText = data.reviewText || '';
         
         // 1. 更新 global URL (如果 API 回傳 placeId)
         if (data?.store?.placeId) {
-          googleReviewUrl_global = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.store.placeId);
+          const url = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.store.placeId);
+          $openGoogle.href = url;
+          googleReviewUrl_global = url;
         }
 
         // 2. (合規) 填入評論 & 顯示獎勵
@@ -569,23 +582,27 @@
         $btnCopy.textContent = LANGS[currentLang].ui.copyAndOpen; // ✅ 改變複製按鈕文字
         $openGoogle.style.display = 'none'; // ✅ 隱藏底部黑色按鈕
         
-        // 4. 更新狀態列
+        // 4. (UX 升級) 讓「複製並開啟」按鈕變成主要按鈕
+        $gen.style.display = 'none'; // 隱藏「產生」按鈕
+        $copy.classList.remove('ghost');
+        $copy.classList.add('primary'); // 讓「複製並開啟」按鈕變色
+        
+        // 5. 更新狀態列
         const okText = { en:'✅ Review generated!', zh:'✅ 評論已產生！', ko:'✅ 리뷰 생성 완료!', ja:'✅ レビューが作成されました！', fr:'✅ Avis généré !', es:'✅ ¡Reseña generada!' }[currentLang] || '✅ Done';
         $status.textContent = okText + ' (' + (data.latencyMs || '-') + ' ms)';
 
-        // 🛑🛑🛑 V6 Logic Ends Here 🛑🛑🛑
+        // 🛑🛑🛑 V7 Logic Ends Here 🛑🛑🛑
 
       }catch(err){
         const errPrefix = { en:'❌ Error: ', zh:'❌ 發生錯誤：', ko:'❌ 오류: ', ja:'❌ エラー: ', fr:'❌ Erreur : ', es:'❌ Error: ' }[currentLang] || '❌ Error: ';
         $output.value=''; $status.textContent = errPrefix + err.message;
       }finally{
-        // ✅ V6 MODIFIED: 
-        // 保持 $gen 禁用，因為已產生。啟用 $copy
+        // ✅ V7 MODIFIED: 
         $gen.classList.remove('loading');
-        // $gen.disabled = true; // 保持禁用 (已在 try 中設置)
-        $copy.disabled = false;
+        $copy.disabled = false; // 無論成功失敗，都解鎖複製鈕
         
-        // 如果發生錯誤，重設 $gen
+        // 如果成功了，$gen 保持隱藏 (已在 try 中設置)
+        // 如果失敗了，重設 $gen
         if (!isGenerated) {
           $gen.disabled = false;
           $gen.innerHTML = genButtonTemplate();
@@ -593,25 +610,28 @@
       }
     }
     
-    /* ✅ V6 MODIFIED copyText function (Hijacked) */
+    /* ✅ V7 MODIFIED copyText function (Hijacked) */
     async function copyText(){
-      // V6 "Hijack": 檢查 flag
+      // V7 "Hijack": 檢查 flag
       if (isGenerated) {
+        // 這是「複製並開啟」按鈕
         await copyAndOpen($output.value, googleReviewUrl_global);
         return;
       }
 
-      // --- 原始的複製功能 (如果尚未產生) ---
+      // --- 原始的複製功能 (如果尚未產生, 雖然按鈕是 disabled) ---
       const t = ($output.value||'').trim();
-      const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
-      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manVEMENT, svp', es:'Copia manually, por favor' }[currentLang];
       if(!t){ $status.textContent = { en:'Nothing to copy', zh:'尚無內容可複製', ko:'복사할 내용이 없습니다', ja:'コピーする内容がありません', fr:'Rien à copier', es:'Nada para copiar' }[currentLang]; return; }
+      
+      const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
+      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement, svp', es:'Copia manually, por favor' }[currentLang];
+
       try{ await navigator.clipboard.writeText(t); $status.textContent = msgOK; }
       catch{ $status.textContent = msgNG; }
     }
 
     document.getElementById('gen').addEventListener('click', generate);
-    document.getElementById('copy').addEventListener('click', copyText); // ✅ V6: 這個監聽器現在會被 "hijack"
+    document.getElementById('copy').addEventListener('click', copyText); // ✅ V7: 這個監聽器現在會被 "hijack"
   </script>
 </body>
 </html>
