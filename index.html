@@ -184,23 +184,19 @@
             <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
           </div>
         </div>
+        
         <div id="step2-reward" style="display: none;">
           
           <h3 id="step2-title" style="margin: 0 0 12px; text-align: center; font-weight: 700;">感謝您的回饋！</h3>
-          <p id="step2-sub" style="color:var(--muted); margin:0 0 16px; text-align: center; font-size: 14px;">我們已為您開啟 Google 評論分頁</p>
-
+          
           <div id="reviewTextDisplay" style="background:var(--blue-050); border:1px solid var(--blue-200); border-radius:14px; padding:12px 14px; min-height:100px; font-size:var(--fs-body); line-height:1.5; margin-bottom:12px; box-shadow:var(--shadow-soft); white-space: pre-wrap; word-break: break-word;">
             </div>
 
           <div class="actions">
-            <button id="copyRewardBtn" class="btn primary">
-              <span id="btnCopyReward">📋 複製評論</span>
+            <button id="primaryStep2Btn" class="btn primary" style="flex: 1;">
+              <span id="btnCopyAndOpen">📋 複製評論並開啟 Google</span>
             </button>
-            <a id="switchGoogleBtn" class="btn ghost" target="_blank" rel="noopener noreferrer">
-              <span id="btnSwitchGoogle">🚀 切換至 Google 分頁</span>
-            </a>
           </div>
-
           <div id="rewardNotice" style="margin-top:24px; padding:14px; background:var(--bg); border-radius:var(--radius-md); text-align:center;">
             <div style="font-size:16px; font-weight:700; margin-bottom:4px;">🎁 您的專屬獎勵</div>
             <div id="rewardText" style="font-size:14px; color:var(--muted); line-height: 1.4;">
@@ -210,13 +206,14 @@
             </div>
           </div>
         </div>
+        
         <div id="status" class="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
 
   <script>
-    /* ------------------- 色彩工具（僅做“變亮”，不做“加深”） + AE on-color ------------------- */
+    /* ------------------- 色彩工具（...） ------------------- */
     function hexToRgb(hex){ hex = hex.replace('#',''); if(hex.length===3){ hex = hex.split('').map(c=>c+c).join(''); }
       const num = parseInt(hex,16); return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 }; }
     function rgbToHex(r,g,b){ const to=h=>('0'+h.toString(16)).slice(-2); return '#'+to(r)+to(g)+to(b); }
@@ -259,7 +256,6 @@
       }
       return /^#([0-9a-fA-F]{6})$/.test(s)? s.toUpperCase() : '';
     }
-    // 只做「變亮」：將 L 提高（deltaL 正值）
     function lighten(hex, deltaL){
       const {r,g,b}=hexToRgb(hex); const hsl=rgbToHsl(r,g,b);
       hsl.l = Math.max(0, Math.min(1, hsl.l + Math.abs(deltaL)));
@@ -267,40 +263,33 @@
       const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);
       return rgbToHex(rgb.r,rgb.g,rgb.b);
     }
-    // 自動 on-color（若 AE 未提供）
     function autoOnColor(bgHex){
       const {r,g,b}=hexToRgb(bgHex);
-      // 簡化相對亮度門檻，偏亮底就用深色字
       const L = 0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255);
       return (L < 0.56) ? '#FFFFFF' : '#0B1220';
     }
-    // 套用單一色階（全部“更亮”），hover 更亮、active 回 base；支援 AE 覆蓋 on-color
     function applyBlueScale(baseHex, onHex){
-  const base = normHex(baseHex) || '#0A84FF';
-  const on   = normHex(onHex)   || autoOnColor(base);
-  const root = document.documentElement;
-
-  const vars = {
-    '--blue-600': base,                 // 主色＝品牌色
-    '--blue-500': base,                 // 主色（CTA用）
-    '--blue-450': lighten(base, 0.04),  // chip-on 用，略亮一層，保持層次
-    '--blue-400': lighten(base, 0.10),
-    '--blue-300': lighten(base, 0.20),
-    '--blue-200': lighten(base, 0.30),
-    '--blue-100': lighten(base, 0.38),
-    '--blue-050': lighten(base, 0.45),
-    '--blue-hover': lighten(base, 0.06),
-    '--blue-active': base,
-    '--on-blue': on,
-  };
-
-  Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
-
-  // Chip 狀態調整：點擊後略亮但不搶主按鈕
-  root.style.setProperty('--chip-bg', 'var(--blue-100)');
-  root.style.setProperty('--chip-bg-on', 'var(--blue-450)'); // 比 CTA 淡一階
-  root.style.setProperty('--chip-fg-on', 'var(--on-blue)');
-}
+      const base = normHex(baseHex) || '#0A84FF';
+      const on   = normHex(onHex)   || autoOnColor(base);
+      const root = document.documentElement;
+      const vars = {
+        '--blue-600': base,
+        '--blue-500': base,
+        '--blue-450': lighten(base, 0.04),
+        '--blue-400': lighten(base, 0.10),
+        '--blue-300': lighten(base, 0.20),
+        '--blue-200': lighten(base, 0.30),
+        '--blue-100': lighten(base, 0.38),
+        '--blue-050': lighten(base, 0.45),
+        '--blue-hover': lighten(base, 0.06),
+        '--blue-active': base,
+        '--on-blue': on,
+      };
+      Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
+      root.style.setProperty('--chip-bg', 'var(--blue-100)');
+      root.style.setProperty('--chip-bg-on', 'var(--blue-450)');
+      root.style.setProperty('--chip-fg-on', 'var(--on-blue)');
+    }
 
     /* ------------------- helpers ------------------- */
     function getStoreFromURL(){
@@ -367,7 +356,7 @@
       return (nameMap._raw||'').trim();
     }
 
-    /* ---------- i18n config (✅ MODIFIED) ---------- */
+    /* ---------- i18n config (✅ V3/V5) ---------- */
     const LANGS = {
       en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],
         ui:{title:'Write a short review for “{name}”', sub:'Pick what stood out today. We’ll generate a review & prepare your reward.',
@@ -389,7 +378,7 @@
             gen:'✍️ Redactar y Reclamar Recompensa', copy:'📋 Copiar', open:'Abrir reseñas de Google', placeholder:'Aquí aparecerá tu reseña resumida…'} },
     };
 
-    /* ---------- DOM (✅ MODIFIED) ---------- */
+    /* ---------- DOM (✅ V5 MODIFIED) ---------- */
     const $chips = document.getElementById('chips');
     const $gen = document.getElementById('gen');
     const $copy = document.getElementById('copy');
@@ -406,18 +395,16 @@
     const $btnOpen = document.getElementById('btnOpen');
     const $titleStoreName = document.getElementById('title-store-name');
 
-    // ✅ NEW DOM Elements
+    // ✅ V5 DOM Elements
     const $step1 = document.getElementById('step1-generate');
     const $step2 = document.getElementById('step2-reward');
     const $reviewTextDisplay = document.getElementById('reviewTextDisplay');
-    const $copyRewardBtn = document.getElementById('copyRewardBtn');
-    const $switchGoogleBtn = document.getElementById('switchGoogleBtn');
+    const $primaryStep2Btn = document.getElementById('primaryStep2Btn'); // ✅ V5 New
     
-    // ✅ NEW i18n DOM Elements
+    // ✅ V5 i18n DOM Elements
     const $step2Title = document.getElementById('step2-title');
-    const $step2Sub = document.getElementById('step2-sub');
-    const $btnCopyReward = document.getElementById('btnCopyReward');
-    const $btnSwitchGoogle = document.getElementById('btnSwitchGoogle');
+    // $step2Sub is removed
+    const $btnCopyAndOpen = document.getElementById('btnCopyAndOpen'); // ✅ V5 New
     const $rewardText = document.getElementById('rewardText');
 
 
@@ -461,7 +448,7 @@
       while ($title.scrollWidth > w && size > min) { size -= 1; $title.style.fontSize = size + 'px'; }
     }
 
-    /* ✅ MODIFIED renderUI function */
+    /* ✅ V5 MODIFIED renderUI function */
     function renderUI(){
       const ui = LANGS[currentLang].ui;
       const localizedName = storeNameForLang(storeNames, currentLang) || pick(storeMeta,'name') || currentStore || 'Store';
@@ -476,9 +463,16 @@
       
       // Step 2
       $step2Title.textContent = { en:'Thank You!', zh:'感謝您的回饋！', ko:'감사합니다!', ja:'ありがとうございます！', fr:'Merci!', es:'¡Gracias!' }[currentLang] || 'Thank You!';
-      $step2Sub.textContent = { en:'We\'ve opened the Google Review tab for you.', zh:'我們已為您開啟 Google 評論分頁。', ko:'Google 리뷰 탭을 열었습니다.', ja:'Google レビューのタブを開きました。', fr:'Nous avons ouvert l\'onglet Avis Google.', es:'Hemos abierto la pestaña de Reseñas de Google.' }[currentLang] || 'We\'ve opened...';
-      $btnCopyReward.textContent = { en:'📋 Copy Review', zh:'📋 複製評論', ko:'📋 리뷰 복사', ja:'📋 レビューをコピー', fr:'📋 Copier l\'avis', es:'📋 Copiar Reseña' }[currentLang] || '📋 Copy Review';
-      $btnSwitchGoogle.textContent = { en:'🚀 Switch to Google Tab', zh:'🚀 切換至 Google 分頁', ko:'🚀 Google 탭으로 이동', ja:'🚀 Google タブに切り替え', fr:'🚀 Aller à l\'onglet Google', es:'🚀 Cambiar a la pestaña de Google' }[currentLang] || '🚀 Switch to Google Tab';
+      // $step2Sub removed
+      $btnCopyAndOpen.textContent = { 
+        en:'📋 Copy & Open Google', 
+        zh:'📋 複製評論並開啟 Google', 
+        ko:'📋 복사 및 Google 열기', 
+        ja:'📋 コピーして Google を開く', 
+        fr:'📋 Copier & Ouvrir Google', 
+        es:'📋 Copiar y Abrir Google' 
+      }[currentLang] || '📋 Copy & Open Google';
+      
       $rewardText.innerHTML = {
         en: `Thank you for your feedback.<br/>**Show this screen** to redeem:<br/><strong style="color:var(--fg); font-size: 16px;">"One Free Drink"</strong>`,
         zh: `感謝您提供寶貴回饋。<br/>**請出示此畫面** 即可向店員兌換：<br/><strong style="color:var(--fg); font-size: 16px;">「免費飲料一杯」</strong>`,
@@ -510,7 +504,6 @@
       });
     }
 
-    // 套用 AD/AE（themeBlue / themeOnBlue）
     function applyThemeFromMeta(data){
       const apiBlue = (pick(data,'themeBlue') || '').trim();
       const apiOn   = (pick(data,'themeOnBlue') || '').trim();
@@ -524,36 +517,29 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
         storeMeta = data;
-
         applyThemeFromMeta(data);
-
         storeNames = parseStoreNameMulti(pick(data,'name','storeName','title') || currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
-
         const order = ['zh','en','ko','ja','fr','es'];
         availableLangs = order.filter(k => langHasContent(k, data));
         if (availableLangs.length===0) availableLangs = ['zh','en'];
         if (!availableLangs.includes(currentLang)) currentLang = availableLangs[0];
-
         const heroUrl = pick(data,'heroUrl','cover','banner','placePhotoUrl','photoUrl');
         const logoUrl = pick(data,'logoUrl','logo','image','icon');
         setImgEl($hero, heroUrl, pick(data,'placePhotoUrl','photoUrl'));
         setImgEl($logo, logoUrl, pick(data,'placePhotoUrl','photoUrl'), $logoBadge);
-
         if (data.placeId) $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.placeId);
-
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }catch(e){
         console.error('loadStoreMeta error:', e);
         const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
-        applyBlueScale(cssBase, '');  // 沒 AE 時自動對比
+        applyBlueScale(cssBase, '');
         storeNames = parseStoreNameMulti(currentStore);
         applyBasicLinks(storeNameForLang(storeNames, currentLang));
         renderUI(); buildLangBar(); buildChipsFromMeta();
       }
     }
 
-    /* 首屏先用 CSS 內建主色，避免閃爍；API 回來再覆蓋 */
     (function initThemeFirstPaint(){
       const cssBase = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#0A84FF';
       applyBlueScale(cssBase, '');
@@ -564,7 +550,27 @@
     loadStoreMeta();
     addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
-    /* actions (✅ MODIFIED) */
+    /* ✅ V5 NEW HELPER FUNCTION */
+    async function copyAndOpen(textToCopy, urlToOpen) {
+      // 1. 複製文字
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        $status.textContent = { en:'📋 Copied!', zh:'📋 已複製！', ko:'📋 복사 완료!', ja:'📋 コピーしました！', fr:'📋 Copié !', es:'📋 ¡Copiado!' }[currentLang] || 'Copied!';
+      } catch (err) {
+        $status.textContent = { en:'Please copy manually', zh:'請手動複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement', es:'Copia manually' }[currentLang] || 'Please copy manually';
+        // 就算複製失敗，我們還是要繼續
+      }
+      
+      // 2. 開啟 Google (在複製之後)
+      try {
+        window.open(urlToOpen, '_blank');
+      } catch (e) {
+        // 如果被阻擋，至少文字已經複製了
+        $status.textContent = { en:'Copied! Please open Google manually.', zh:'已複製！請手動開啟 Google。', ko:'복사되었습니다! Google을 수동으로 열어주세요.', ja:'コピーしました！Google を手動で開いてください。', fr:'Copié ! Veuillez ouvrir Google manuellement.', es:'¡Copiado! Abre Google manualmente.' }[currentLang] || 'Copied! Please open Google manually.';
+      }
+    }
+
+    /* ✅ V5 MODIFIED actions */
     async function generate(){
       const storeid = (currentStore || '').trim();
       if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
@@ -581,7 +587,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
 
-        // 🛑🛑🛑 NEW: V3 Logic Starts Here 🛑🛑🛑
+        // 🛑🛑🛑 V5 Logic Starts Here 🛑🛑🛑
 
         const reviewText = data.reviewText || '';
         const placeId = data?.store?.placeId || storeMeta?.placeId || '';
@@ -589,20 +595,14 @@
           ? 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(placeId)
           : $openGoogle.href; // Fallback
 
-        // 1. (合規) 嘗試開啟 Google 評論分頁
-        try {
-          window.open(googleReviewUrl, '_blank');
-        } catch (e) {
-          console.warn('Popup blocked by browser. User will use the fallback button.');
-        }
+        // 1. (合規) 移除自動開啟
+        // window.open(...) removed
 
         // 2. 填充 Step 2 (獎勵/引導頁) 的內容
         $reviewTextDisplay.textContent = reviewText;
-        $copyRewardBtn.onclick = () => copyText(reviewText); // 綁定帶有參數的複製功能
-        $switchGoogleBtn.href = googleReviewUrl; // 綁定「切換分頁」按鈕的 URL
+        $primaryStep2Btn.onclick = () => copyAndOpen(reviewText, googleReviewUrl); // ✅ 綁定 V5 新功能
 
         // 3. (合規) 切換視圖：隱藏 Step 1，顯示 Step 2 (獎勵頁面)
-        // 在這一刻，獎勵已經「交付」給用戶 (顯示在畫面上)
         $step1.style.display = 'none';
         $step2.style.display = 'block';
 
@@ -610,7 +610,7 @@
         const okText = { en:'✅ Review generated!', zh:'✅ 評論已產生！', ko:'✅ 리뷰 생성 완료!', ja:'✅ レビューが作成されました！', fr:'✅ Avis généré !', es:'✅ ¡Reseña generada!' }[currentLang] || '✅ Done';
         $status.textContent = okText + ' (' + (data.latencyMs || '-') + ' ms)';
 
-        // 🛑🛑🛑 NEW: V3 Logic Ends Here 🛑🛑🛑
+        // 🛑🛑🛑 V5 Logic Ends Here 🛑🛑🛑
 
       }catch(err){
         const errPrefix = { en:'❌ Error: ', zh:'❌ 發生錯誤：', ko:'❌ 오류: ', ja:'❌ エラー: ', fr:'❌ Erreur : ', es:'❌ Error: ' }[currentLang] || '❌ Error: ';
@@ -624,7 +624,7 @@
       }
     }
     
-    /* ✅ MODIFIED copyText function */
+    /* ✅ V5 MODIFIED copyText function (參數化) */
     async function copyText(textToCopy){ // 增加 textToCopy 參數
       const t = (textToCopy || $output.value || '').trim(); // 優先使用傳入的參數
       const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
