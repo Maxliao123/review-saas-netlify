@@ -537,7 +537,7 @@
         window.open(urlToOpen, '_blank');
       } catch (e) {
         // 如果被阻擋，至少文字已經複製了
-        $status.textContent = { en:'Copied! Please open Google manually.', zh:'已複製！請手動開啟 Google。', ko:'복사되었습니다! Google을 수동으로 열어주세요.', ja:'コピーしました！Google を手動で開いてください。', fr:'Copié ! Veuillez ouvrir Google manuellement.', es:'¡Copiado! Abre Google manualmente.' }[currentLang] || 'Copied! Please open Google manually.';
+        $status.textContent = { en:'Copied! Please open Google manually.', zh:'已複製！請手動開啟 Google。', ko:'복사되었습니다! Google을 수동으로 열어주세요.', ja:'コピーしました！Google を手動で開いてください。', fr:'Copié ! Veuillez ouvrir Google manuellement.', es:'¡Copiado! Abre Google manually.' }[currentLang] || 'Copied! Please open Google manually.';
       }
     }
 
@@ -619,7 +619,7 @@
         return;
       }
 
-      // --- 原始的複製功能 (如果尚未產生, 雖然按鈕是 disabled) ---
+      // --- 原始的複製功能 (如果尚未產生, Sui ran an niu shi disabled) ---
       const t = ($output.value||'').trim();
       if(!t){ $status.textContent = { en:'Nothing to copy', zh:'尚無內容可複製', ko:'복사할 내용이 없습니다', ja:'コピーする内容がありません', fr:'Rien à copier', es:'Nada para copiar' }[currentLang]; return; }
       
