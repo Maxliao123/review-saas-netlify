@@ -170,19 +170,46 @@
         <h1 id="title" class="title fit">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
         <p id="subtitle" class="sub">挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。</p>
 
-        <div id="chips"></div>
+        <div id="step1-generate">
+          <div id="chips"></div>
 
-        <div class="actions">
-          <button id="gen" class="btn primary"></button>
-          <button id="copy" class="btn ghost"><span id="btnCopy">📋 複製</span></button>
+          <div class="actions">
+            <button id="gen" class="btn primary"></button>
+            <button id="copy" class="btn ghost"><span id="btnCopy">📋 複製</span></button>
+          </div>
+
+          <textarea id="output" placeholder="這裡會顯示整理後的一段短評…"></textarea>
+
+          <div class="footer-actions">
+            <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
+          </div>
         </div>
+        <div id="step2-reward" style="display: none;">
+          
+          <h3 id="step2-title" style="margin: 0 0 12px; text-align: center; font-weight: 700;">感謝您的回饋！</h3>
+          <p id="step2-sub" style="color:var(--muted); margin:0 0 16px; text-align: center; font-size: 14px;">我們已為您開啟 Google 評論分頁</p>
 
-        <textarea id="output" placeholder="這裡會顯示整理後的一段短評…"></textarea>
+          <div id="reviewTextDisplay" style="background:var(--blue-050); border:1px solid var(--blue-200); border-radius:14px; padding:12px 14px; min-height:100px; font-size:var(--fs-body); line-height:1.5; margin-bottom:12px; box-shadow:var(--shadow-soft); white-space: pre-wrap; word-break: break-word;">
+            </div>
 
-        <div class="footer-actions">
-          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">🔍 <span id="btnOpen">開啟 Google 評論</span></a>
+          <div class="actions">
+            <button id="copyRewardBtn" class="btn primary">
+              <span id="btnCopyReward">📋 複製評論</span>
+            </button>
+            <a id="switchGoogleBtn" class="btn ghost" target="_blank" rel="noopener noreferrer">
+              <span id="btnSwitchGoogle">🚀 切換至 Google 分頁</span>
+            </a>
+          </div>
+
+          <div id="rewardNotice" style="margin-top:24px; padding:14px; background:var(--bg); border-radius:var(--radius-md); text-align:center;">
+            <div style="font-size:16px; font-weight:700; margin-bottom:4px;">🎁 您的專屬獎勵</div>
+            <div id="rewardText" style="font-size:14px; color:var(--muted); line-height: 1.4;">
+              感謝您提供寶貴回饋。<br/>
+              **請出示此畫面** 即可向店員兌換：<br/>
+              <strong style="color:var(--fg); font-size: 16px;">「免費飲料一杯」</strong>
+            </div>
+          </div>
         </div>
-
         <div id="status" class="status" aria-live="polite"></div>
       </div>
     </div>
@@ -340,29 +367,29 @@
       return (nameMap._raw||'').trim();
     }
 
-    /* ---------- i18n config ---------- */
+    /* ---------- i18n config (✅ MODIFIED) ---------- */
     const LANGS = {
       en: { label:'EN', chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],
-        ui:{title:'Write a short review for “{name}”', sub:'Pick what stood out today, then tap “Compose”.',
-            gen:'✍️ Compose', copy:'📋 Copy', open:'Open Google Reviews', placeholder:'Your summarized review will appear here…'} },
+        ui:{title:'Write a short review for “{name}”', sub:'Pick what stood out today. We’ll generate a review & prepare your reward.',
+            gen:'✍️ Generate & Claim Reward', copy:'📋 Copy', open:'Open Google Reviews', placeholder:'Your summarized review will appear here…'} },
       zh: { label:'中', chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],
-        ui:{title:'為「{name}」寫一則短評', sub:'挑選今天你最有感的幾個重點，點一下下方按鈕，我們會幫你整理成短評。',
-            gen:'✍️ 幫我撰寫', copy:'📋 複製', open:'開啟 Google 評論', placeholder:'這裡會顯示整理後的一段短評…'} },
+        ui:{title:'為「{name}」寫一則短評', sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評並準備獎勵。',
+            gen:'✍️ 產生評論並領取獎勵', copy:'📋 複製', open:'開啟 Google 評論', placeholder:'這裡會顯示整理後的一段短評…'} },
       ko: { label:'한국어', chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],
-        ui:{title:'“{name}” 리뷰 한 줄', sub:'오늘 인상 깊었던 포인트 몇 가지를 고르고 ‘작성’을 눌러 주세요.',
-            gen:'✍️ 작성', copy:'📋 복사', open:'Google 리뷰 열기', placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
+        ui:{title:'“{name}” 리뷰 한 줄', sub:'오늘 인상 깊었던 포인트를 고르고 ‘작성’을 눌러주시면, 리뷰와 리워드를 준비해 드립니다.',
+            gen:'✍️ 작성 및 리워드 받기', copy:'📋 복사', open:'Google 리뷰 열기', placeholder:'요약된 리뷰가 여기에 표시됩니다…'} },
       ja: { label:'日本語', chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],
-        ui:{title:'「{name}」へ一言レビュー', sub:'今日印象に残ったポイントをいくつか選び、「作成」を押してください。',
-            gen:'✍️ 作成', copy:'📋 コピー', open:'Google 口コミを開く', placeholder:'要約したレビューが表示されます…'} },
+        ui:{title:'「{name}」へ一言レビュー', sub:'今日印象に残ったポイントを選び、「作成」を押してください。レビューと特典をご用意します。',
+            gen:'✍️ 作成して特典を受け取る', copy:'📋 コピー', open:'Google 口コミを開く', placeholder:'要約したレビューが表示されます…'} },
       fr: { label:'FR', chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],
-        ui:{title:'Écrire un avis court pour « {name} »', sub:'Choisissez ce qui vous a marqué aujourd’hui, puis touchez « Rédiger ».',
-            gen:'✍️ Rédiger', copy:'📋 Copier', open:'Ouvrir les avis Google', placeholder:'Votre avis synthétisé s’affichera ici…'} },
+        ui:{title:'Écrire un avis court pour « {name} »', sub:'Choisissez ce qui vous a marqué, touchez « Rédiger » pour générer l\'avis et recevoir votre récompense.',
+            gen:'✍️ Rédiger & Recevoir Récompense', copy:'📋 Copier', open:'Ouvrir les avis Google', placeholder:'Votre avis synthétisé s’affichera ici…'} },
       es: { label:'ES', chips:['top3Es','featuresEs','ambianceEs','newItemsEs','top3','features','ambiance','newItems'],
-        ui:{title:'Escribe una reseña corta para «{name}»', sub:'Elige lo que más te llamó la atención hoy y pulsa «Redactar».',
-            gen:'✍️ Redactar', copy:'📋 Copiar', open:'Abrir reseñas de Google', placeholder:'Aquí aparecerá tu reseña resumida…'} },
+        ui:{title:'Escribe una reseña corta para «{name}»', sub:'Elige lo que más te llamó la atención y pulsa «Redactar» para generar tu reseña y reclamar tu recompensa.',
+            gen:'✍️ Redactar y Reclamar Recompensa', copy:'📋 Copiar', open:'Abrir reseñas de Google', placeholder:'Aquí aparecerá tu reseña resumida…'} },
     };
 
-    /* ---------- DOM ---------- */
+    /* ---------- DOM (✅ MODIFIED) ---------- */
     const $chips = document.getElementById('chips');
     const $gen = document.getElementById('gen');
     const $copy = document.getElementById('copy');
@@ -378,6 +405,21 @@
     const $btnCopy = document.getElementById('btnCopy');
     const $btnOpen = document.getElementById('btnOpen');
     const $titleStoreName = document.getElementById('title-store-name');
+
+    // ✅ NEW DOM Elements
+    const $step1 = document.getElementById('step1-generate');
+    const $step2 = document.getElementById('step2-reward');
+    const $reviewTextDisplay = document.getElementById('reviewTextDisplay');
+    const $copyRewardBtn = document.getElementById('copyRewardBtn');
+    const $switchGoogleBtn = document.getElementById('switchGoogleBtn');
+    
+    // ✅ NEW i18n DOM Elements
+    const $step2Title = document.getElementById('step2-title');
+    const $step2Sub = document.getElementById('step2-sub');
+    const $btnCopyReward = document.getElementById('btnCopyReward');
+    const $btnSwitchGoogle = document.getElementById('btnSwitchGoogle');
+    const $rewardText = document.getElementById('rewardText');
+
 
     let selected = new Set();
     let currentStore = getStoreFromURL() || 'leegarnei';
@@ -419,15 +461,33 @@
       while ($title.scrollWidth > w && size > min) { size -= 1; $title.style.fontSize = size + 'px'; }
     }
 
+    /* ✅ MODIFIED renderUI function */
     function renderUI(){
       const ui = LANGS[currentLang].ui;
       const localizedName = storeNameForLang(storeNames, currentLang) || pick(storeMeta,'name') || currentStore || 'Store';
+      
+      // Step 1
       $title.innerHTML = ui.title.replace('{name}', `<span id="title-store-name">${localizedName}</span>`);
       $subtitle.textContent = ui.sub;
       $btnCopy.textContent = ui.copy;
       $btnOpen.textContent = ui.open;
       $output.placeholder = ui.placeholder;
       $gen.innerHTML = genButtonTemplate();
+      
+      // Step 2
+      $step2Title.textContent = { en:'Thank You!', zh:'感謝您的回饋！', ko:'감사합니다!', ja:'ありがとうございます！', fr:'Merci!', es:'¡Gracias!' }[currentLang] || 'Thank You!';
+      $step2Sub.textContent = { en:'We\'ve opened the Google Review tab for you.', zh:'我們已為您開啟 Google 評論分頁。', ko:'Google 리뷰 탭을 열었습니다.', ja:'Google レビューのタブを開きました。', fr:'Nous avons ouvert l\'onglet Avis Google.', es:'Hemos abierto la pestaña de Reseñas de Google.' }[currentLang] || 'We\'ve opened...';
+      $btnCopyReward.textContent = { en:'📋 Copy Review', zh:'📋 複製評論', ko:'📋 리뷰 복사', ja:'📋 レビューをコピー', fr:'📋 Copier l\'avis', es:'📋 Copiar Reseña' }[currentLang] || '📋 Copy Review';
+      $btnSwitchGoogle.textContent = { en:'🚀 Switch to Google Tab', zh:'🚀 切換至 Google 分頁', ko:'🚀 Google 탭으로 이동', ja:'🚀 Google タブに切り替え', fr:'🚀 Aller à l\'onglet Google', es:'🚀 Cambiar a la pestaña de Google' }[currentLang] || '🚀 Switch to Google Tab';
+      $rewardText.innerHTML = {
+        en: `Thank you for your feedback.<br/>**Show this screen** to redeem:<br/><strong style="color:var(--fg); font-size: 16px;">"One Free Drink"</strong>`,
+        zh: `感謝您提供寶貴回饋。<br/>**請出示此畫面** 即可向店員兌換：<br/><strong style="color:var(--fg); font-size: 16px;">「免費飲料一杯」</strong>`,
+        ko: `소중한 피드백 감사합니다.<br/>**이 화면을 보여주시면** 교환 가능합니다:<br/><strong style="color:var(--fg); font-size: 16px;">"무료 음료 1잔"</strong>`,
+        ja: `貴重なご意見ありがとうございます。<br/>**この画面をご提示ください**:<br/><strong style="color:var(--fg); font-size: 16px;">「無料ドリンク1杯」</strong>`,
+        fr: `Merci pour votre avis.<br/>**Montrez cet écran** pour échanger:<br/><strong style="color:var(--fg); font-size: 16px;">"Une Boisson Gratuite"</strong>`,
+        es: `Gracias por tu opinión.<br/>**Muestra esta pantalla** para canjear:<br/><strong style="color:var(--fg); font-size: 16px;">"Una Bebida Gratis"</strong>`
+      }[currentLang] || `Show this screen...`;
+
       requestAnimationFrame(fitTitle);
     }
 
@@ -504,7 +564,7 @@
     loadStoreMeta();
     addEventListener('resize', ()=> requestAnimationFrame(fitTitle));
 
-    /* actions */
+    /* actions (✅ MODIFIED) */
     async function generate(){
       const storeid = (currentStore || '').trim();
       if (!storeid){ $status.textContent = (currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
@@ -520,29 +580,62 @@
         const res = await fetch('/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || ('HTTP '+res.status));
-        $output.value = data.reviewText || JSON.stringify(data,null,2);
-        const okText = { en:'✅ Done (latency ', zh:'✅ 完成（延遲 ', ko:'✅ 완료(지연 ', ja:'✅ 完了（遅延 ', fr:'✅ Terminé (latence ', es:'✅ Listo (latencia ' }[currentLang] || '✅ Done (latency ';
-        $status.textContent = okText + (data.latencyMs || '-') + ' ms)';
-        if (data?.store?.placeId) $openGoogle.href = 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(data.store.placeId);
+
+        // 🛑🛑🛑 NEW: V3 Logic Starts Here 🛑🛑🛑
+
+        const reviewText = data.reviewText || '';
+        const placeId = data?.store?.placeId || storeMeta?.placeId || '';
+        const googleReviewUrl = placeId
+          ? 'https://search.google.com/local/writereview?placeid=' + encodeURIComponent(placeId)
+          : $openGoogle.href; // Fallback
+
+        // 1. (合規) 嘗試開啟 Google 評論分頁
+        try {
+          window.open(googleReviewUrl, '_blank');
+        } catch (e) {
+          console.warn('Popup blocked by browser. User will use the fallback button.');
+        }
+
+        // 2. 填充 Step 2 (獎勵/引導頁) 的內容
+        $reviewTextDisplay.textContent = reviewText;
+        $copyRewardBtn.onclick = () => copyText(reviewText); // 綁定帶有參數的複製功能
+        $switchGoogleBtn.href = googleReviewUrl; // 綁定「切換分頁」按鈕的 URL
+
+        // 3. (合規) 切換視圖：隱藏 Step 1，顯示 Step 2 (獎勵頁面)
+        // 在這一刻，獎勵已經「交付」給用戶 (顯示在畫面上)
+        $step1.style.display = 'none';
+        $step2.style.display = 'block';
+
+        // 4. 更新狀態列文字
+        const okText = { en:'✅ Review generated!', zh:'✅ 評論已產生！', ko:'✅ 리뷰 생성 완료!', ja:'✅ レビューが作成されました！', fr:'✅ Avis généré !', es:'✅ ¡Reseña generada!' }[currentLang] || '✅ Done';
+        $status.textContent = okText + ' (' + (data.latencyMs || '-') + ' ms)';
+
+        // 🛑🛑🛑 NEW: V3 Logic Ends Here 🛑🛑🛑
+
       }catch(err){
         const errPrefix = { en:'❌ Error: ', zh:'❌ 發生錯誤：', ko:'❌ 오류: ', ja:'❌ エラー: ', fr:'❌ Erreur : ', es:'❌ Error: ' }[currentLang] || '❌ Error: ';
         $output.value=''; $status.textContent = errPrefix + err.message;
       }finally{
-        $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false;
-        $gen.innerHTML = genButtonTemplate();
+        // ✅ MODIFIED: 只在發生錯誤 (還停在 Step 1) 時才重設按鈕
+        if ($step2.style.display === 'none') {
+          $gen.classList.remove('loading'); $gen.disabled=false; $copy.disabled=false;
+          $gen.innerHTML = genButtonTemplate();
+        }
       }
     }
-    async function copyText(){
-      const t = ($output.value||'').trim();
+    
+    /* ✅ MODIFIED copyText function */
+    async function copyText(textToCopy){ // 增加 textToCopy 參數
+      const t = (textToCopy || $output.value || '').trim(); // 優先使用傳入的參數
       const msgOK = { en:'📋 Copied to clipboard', zh:'📋 已複製到剪貼簿', ko:'📋 복사 완료', ja:'📋 クリップボードにコピー', fr:'📋 Copié dans le presse-papiers', es:'📋 Copiado al portapapeles' }[currentLang];
-      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement, svp', es:'Copia manualmente, por favor' }[currentLang];
+      const msgNG = { en:'Please copy manually', zh:'請手動選取文字複製', ko:'수동으로 복사해 주세요', ja:'手動でコピーしてください', fr:'Copiez manuellement, svp', es:'Copia manually, por favor' }[currentLang];
       if(!t){ $status.textContent = { en:'Nothing to copy', zh:'尚無內容可複製', ko:'복사할 내용이 없습니다', ja:'コピーする内容がありません', fr:'Rien à copier', es:'Nada para copiar' }[currentLang]; return; }
       try{ await navigator.clipboard.writeText(t); $status.textContent = msgOK; }
       catch{ $status.textContent = msgNG; }
     }
+
     document.getElementById('gen').addEventListener('click', generate);
-    document.getElementById('copy').addEventListener('click', copyText);
+    document.getElementById('copy').addEventListener('click', () => copyText()); // 舊按鈕的綁定
   </script>
 </body>
 </html>
-
