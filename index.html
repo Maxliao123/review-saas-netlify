@@ -302,6 +302,53 @@
 
     document.getElementById('gen').addEventListener('click', generate);
   </script>
+
+  <!-- 🔥 HOTFIX：強制不自動開頁、標籤不被取代、只保留單一按鈕 -->
+  <script>
+  (function hotfix(){
+    const chips = document.getElementById('chips');
+    const output = document.getElementById('output');
+    const openBtn = document.getElementById('openGoogle');
+    const status = document.getElementById('status');
+    // 任何時候 chips 被隱藏/移除，立即復原
+    if (chips) {
+      const mo = new MutationObserver(()=>{
+        chips.style.display='grid';
+        chips.hidden=false;
+      });
+      mo.observe(document.body,{childList:true,subtree:true});
+    }
+    // 確保黑色按鈕就在 textarea 下方（如果有其他程式移走）
+    if (openBtn && output && openBtn.previousElementSibling!==output) {
+      output.insertAdjacentElement('afterend', openBtn);
+    }
+    // 禁止背景程式自動 window.open（只允許從 openBtn 的點擊觸發）
+    const _open = window.open;
+    window.open = function(url, target, features){
+      const fromBtn = (document.activeElement === openBtn) || (url && String(url).includes('writereview'));
+      return fromBtn ? _open.call(window, url, target, features) : null;
+    };
+    // 移除任何「感謝您的回饋！我們已為您開啟 Google 評論分頁。」提示區塊
+    const killThanks = ()=>{
+      document.querySelectorAll('*').forEach(el=>{
+        const t=(el.textContent||'').trim();
+        if (t.includes('感謝您的回饋') || t.includes('我們已為您開啟 Google 評論分頁')) {
+          if (!el.contains(chips) && el.remove) el.remove();
+        }
+      });
+    };
+    new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
+    killThanks();
+    // 再保險：給 openBtn 再綁一次行為（先複製再開啟）
+    openBtn && openBtn.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      const txt=(output.value||'').trim();
+      if(!txt){ status && (status.textContent='尚無內容可複製'); return; }
+      try{ await navigator.clipboard.writeText(txt); status && (status.textContent='📋 已複製！'); }catch{ status && (status.textContent='請手動複製'); }
+      try{ _open.call(window, window.googleReviewUrl_global || openBtn.href, '_blank'); }catch{}
+    }, { capture:false });
+  })();
+  </script>
 </body>
 </html>
 
