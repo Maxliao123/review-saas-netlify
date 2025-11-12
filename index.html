@@ -41,7 +41,7 @@
     .chip:focus-visible{outline:none; box-shadow:var(--ring);}
     .chip-text{font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
     .actions{display:flex; gap:10px; margin:8px 0 8px;}
-    .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s;}
+    .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s;}
     .btn.primary{color:var(--on-blue); background:var(--blue-500); box-shadow:0 6px 16px color-mix(in oklab,var(--blue-500) 14%,transparent);}
     .btn.primary:hover{background:var(--blue-hover);}
     .btn.primary:active{transform:translateY(1px); background:var(--blue-active);}
@@ -50,6 +50,7 @@
     .spinner{width:18px; height:18px; border:2px solid color-mix(in oklab, var(--on-blue) 45%, transparent); border-top-color:var(--on-blue); border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
     textarea{width:100%; margin:0; padding:12px 14px; min-height:120px; border:1px solid var(--blue-200); border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);}
+    .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:var(--blue-050); color:var(--fg); box-shadow:var(--shadow-soft); font-size:14px; line-height:1.5; text-align:center;}
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
     .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
   </style>
@@ -73,16 +74,16 @@
           <button id="gen" class="btn primary"></button>
         </div>
 
-        <textarea id="output" placeholder="這裡會顯示整理後的一段短評…"></textarea>
+        <textarea id="output" placeholder="這裡會顯示整理後的一段短評…" style="display:none;"></textarea>
 
         <!-- 複製並開啟：一開始隱藏，產生後顯示；程式會把它移到 textarea 下方 -->
         <div class="footer-actions">
-          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟 Google 評論</a>
+          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
         </div>
 
-        <!-- 獎勵行：顯示在按鈕下方 -->
-        <div id="rewardDisplay" style="display:none; margin-top:10px; padding:10px 14px; background:var(--bg); border-radius:var(--radius-md); text-align:center;">
-          <div id="rewardText" style="font-size:14px; color:var(--muted); line-height:1.4;"></div>
+        <!-- 成功提示：保持在下方區域 -->
+        <div id="thanksNotice" class="thanks-notice" data-keep-thanks="true" style="display:none;">
+          <div id="thanksMessage"></div>
         </div>
 
         <div id="status" class="status" aria-live="polite"></div>
@@ -125,7 +126,7 @@
 
     const LANGS={
       en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
-      zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟 Google 評論',placeholder:'這裡會顯示整理後的一段短評…'}},
+      zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
       ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
       ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
       fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
@@ -145,8 +146,8 @@
     const $title=document.getElementById('title');
     const $subtitle=document.getElementById('subtitle');
     const $titleStoreName=document.getElementById('title-store-name');
-    const $rewardDisplay=document.getElementById('rewardDisplay');
-    const $rewardText=document.getElementById('rewardText');
+    const $thanksNotice=document.getElementById('thanksNotice');
+    const $thanksMessage=document.getElementById('thanksMessage');
 
     let selected=new Set();
     let currentStore=getStoreFromURL()||'leegarnei';
@@ -198,15 +199,19 @@
       $gen.innerHTML=genButtonTemplate();
       $openGoogle.textContent=ui.open;
       $output.placeholder=ui.placeholder;
-      // 預設獎勵文案（實際在成功後顯示）
-      $rewardText.innerHTML={
-        zh:`🎁 您的專屬獎勵<br/>感謝您提供寶貴回饋。<b>請出示此畫面</b> 即可向店員兌換`,
-        en:`🎁 Your reward<br/>Thank you for your feedback. <b>Show this screen</b> to redeem.`,
-        ko:`🎁 전용 리워드<br/>소중한 의견 감사합니다. <b>이 화면을 제시</b>해주세요.`,
-        ja:`🎁 あなたへの特典<br/>ご意見ありがとうございます。<b>この画面を提示</b>してください。`,
-        fr:`🎁 Votre récompense<br/>Merci pour votre avis. <b>Montrez cet écran</b> pour l’échanger.`,
-        es:`🎁 Tu recompensa<br/>Gracias por tu opinión. <b>Muestra esta pantalla</b> para canjearla.`
-      }[currentLang];
+      const thanksCopy={
+        zh:'感謝您提供寶貴回饋。<b>請出示此畫面</b>即可向店員兌換',
+        en:'Thank you for your feedback. <b>Show this screen</b> to redeem with the staff.',
+        ko:'소중한 의견 감사합니다. <b>이 화면을 제시</b>하시면 직원이 리워드를 드립니다.',
+        ja:'ご意見ありがとうございます。<b>この画面をご提示</b>いただくとスタッフから特典を受け取れます。',
+        fr:'Merci pour votre avis. <b>Présentez cet écran</b> pour l’échanger auprès du personnel.',
+        es:'Gracias por tu opinión. <b>Muestra esta pantalla</b> al personal para canjearla.'
+      }[currentLang]||'Thank you for your feedback. <b>Show this screen</b> to redeem with the staff.';
+      $thanksMessage.innerHTML=thanksCopy;
+      const hasReview=isGenerated && ($output.value||'').trim()!=='';
+      $thanksNotice.style.display=hasReview?'block':'none';
+      $output.style.display=hasReview?'block':'none';
+      $openGoogle.style.display=hasReview?'block':'none';
       requestAnimationFrame(fitTitle);
     }
 
@@ -280,21 +285,17 @@
         const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
-        // 成功：只更新 textarea、顯示單一按鈕與獎勵；不自動開頁、不改動標籤區
+        // 成功：更新 textarea，顯示複製按鈕與提示文字；不自動開頁、不改動標籤區
         const reviewText=data.reviewText||''; $output.value=reviewText;
         if(data?.store?.placeId){ googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId); $openGoogle.href=googleReviewUrl_global; }
 
-        // 顯示「複製並開啟 Google 評論」按鈕（已位於 textarea 下方）
-        $openGoogle.style.display='block';
-
-        // 顯示獎勵行（按鈕下）
-        $rewardDisplay.style.display='block';
-        $openGoogle.insertAdjacentElement('afterend',$rewardDisplay);
-
         isGenerated=true;
+        renderUI();
+
+        // 顯示狀態訊息
         $status.textContent=({zh:'✅ 評論已產生！',en:'✅ Review generated!'}[currentLang]||'✅ Done')+' ('+(data.latencyMs||'-')+' ms)';
       }catch(err){
-        $output.value=''; $status.textContent=({zh:'❌ 發生錯誤：',en:'❌ Error: '}[currentLang]||'❌ Error: ')+err.message;
+        $status.textContent=({zh:'❌ 發生錯誤：',en:'❌ Error: '}[currentLang]||'❌ Error: ')+err.message;
       }finally{
         $gen.classList.remove('loading'); $gen.disabled=false; $gen.innerHTML=genButtonTemplate();
       }
@@ -332,7 +333,8 @@
     const killThanks = ()=>{
       document.querySelectorAll('*').forEach(el=>{
         const t=(el.textContent||'').trim();
-        if (t.includes('感謝您的回饋') || t.includes('我們已為您開啟 Google 評論分頁')) {
+        const keep = el.closest('[data-keep-thanks="true"]');
+        if ((t.includes('感謝您的回饋') || t.includes('我們已為您開啟 Google 評論分頁')) && !keep) {
           if (!el.contains(chips) && el.remove) el.remove();
         }
       });
