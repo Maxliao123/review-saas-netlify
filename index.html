@@ -69,14 +69,20 @@
 
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
     .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
-    /* FIX: keep text perfectly centered vertically in the black button */
+/* --- FIX: perfectly center text/emoji inside the black button --- */
 #openGoogle.btn.secondary{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:52px;
-  padding:0 18px;        /* 水平內距 */
-  line-height:1;         /* 移除多餘行高導致的上緣貼齊 */
+  display: grid !important;
+  place-items: center !important;   /* 水平 + 垂直置中 */
+  height: 52px !important;
+  padding: 0 18px !important;
+  line-height: 1 !important;        /* 移除多餘行高 */
+  white-space: nowrap;               /* 避免換行造成視覺偏移 */
+}
+
+/* 避免內容物（span 等）有預設 margin/line-height 影響置中 */
+#openGoogle.btn.secondary *{
+  margin: 0 !important;
+  line-height: 1 !important;
 }
   </style>
 </head>
