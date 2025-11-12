@@ -69,6 +69,15 @@
 
     .footer-actions{display:flex; justify-content:center; margin-top:12px;}
     .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
+    /* FIX: keep text perfectly centered vertically in the black button */
+#openGoogle.btn.secondary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:52px;
+  padding:0 18px;        /* 水平內距 */
+  line-height:1;         /* 移除多餘行高導致的上緣貼齊 */
+}
   </style>
 </head>
 <body>
