@@ -41,11 +41,15 @@
     .chip:focus-visible{outline:none; box-shadow:var(--ring);}
     .chip-text{font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
     .actions{display:flex; gap:10px; margin:8px 0 8px;}
+
+    .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s; line-height:1.2;}
+
     .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s;}
+
     .btn.primary{color:var(--on-blue); background:var(--blue-500); box-shadow:0 6px 16px color-mix(in oklab,var(--blue-500) 14%,transparent);}
     .btn.primary:hover{background:var(--blue-hover);}
     .btn.primary:active{transform:translateY(1px); background:var(--blue-active);}
-    .btn.secondary{background:#0B1220; color:#fff; height:52px; border-radius:16px;}
+    .btn.secondary{background:#0B1220; color:#fff; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;}
     .btn:disabled{opacity:.7; cursor:not-allowed;}
     .spinner{width:18px; height:18px; border:2px solid color-mix(in oklab, var(--on-blue) 45%, transparent); border-top-color:var(--on-blue); border-radius:50%; margin-right:8px; display:none; animation:spin .9s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
