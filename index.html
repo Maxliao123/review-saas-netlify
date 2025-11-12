@@ -67,22 +67,22 @@
 
     .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:var(--blue-050); color:var(--fg); box-shadow:var(--shadow-soft); font-size:14px; line-height:1.5; text-align:center;}
 
-    .footer-actions{display:flex; justify-content:center; margin-top:12px;}
-    .status{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 4px;}
-/* --- FIX: perfectly center text/emoji inside the black button --- */
-#openGoogle.btn.secondary{
-  display: grid !important;
-  place-items: center !important;   /* 水平 + 垂直置中 */
-  height: 52px !important;
-  padding: 0 18px !important;
-  line-height: 1 !important;        /* 移除多餘行高 */
-  white-space: nowrap;               /* 避免換行造成視覺偏移 */
-}
+    /* 預設：整個黑色按鈕區不顯示，避免用戶誤按 */
+.footer-actions{ display:none; justify-content:center; margin-top:12px; }
+.footer-actions.show{ display:flex; }
 
-/* 避免內容物（span 等）有預設 margin/line-height 影響置中 */
+/* 文字/emoji 垂直與水平置中（勝過其他重複宣告） */
+#openGoogle.btn.secondary{
+  display:grid !important;
+  place-items:center !important;
+  height:52px !important;
+  padding:0 18px !important;
+  line-height:1 !important;
+  white-space:nowrap;
+}
 #openGoogle.btn.secondary *{
-  margin: 0 !important;
-  line-height: 1 !important;
+  margin:0 !important;
+  line-height:1 !important;
 }
   </style>
 </head>
@@ -108,9 +108,9 @@
         <textarea id="output" placeholder="這裡會顯示整理後的一段短評…" style="display:none;"></textarea>
 
         <!-- 複製並開啟：一開始隱藏，產生後顯示；程式會把它移到 textarea 下方 -->
-        <div class="footer-actions">
-          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
-        </div>
+      <div id="footerActions" class="footer-actions">
+  <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
+</div>
 
         <!-- 成功提示：保持在下方區域 -->
         <div id="thanksNotice" class="thanks-notice" data-keep-thanks="true" style="display:none;">
@@ -239,12 +239,31 @@
         es:'Gracias por tu opinión. <b>Muestra esta pantalla</b> al personal para canjearla.'
       }[currentLang]||'Thank you for your feedback. <b>Show this screen</b> to redeem with the staff.';
       $thanksMessage.innerHTML=thanksCopy;
-      const hasReview=isGenerated && ($output.value||'').trim()!=='';
-      $thanksNotice.style.display=hasReview?'block':'none';
-      $output.style.display=hasReview?'block':'none';
-      $openGoogle.style.display=hasReview?'block':'none';
+      const hasReview = isGenerated && ($output.value||'').trim()!=='';
+
+      // 顯示/隱藏：thanks + textarea
+      $thanksNotice.style.display = hasReview ? 'block' : 'none';
+      $output.style.display       = hasReview ? 'block' : 'none';
+
+      // 優先以 footerActions 容器控管；若不存在，退回控制 openGoogle
+      const $footerActions = document.getElementById('footerActions');
+      if ($footerActions){
+      $footerActions.classList.toggle('show', hasReview);
+      // 同步內部按鈕的展示（避免舊狀態殘留）
+      $openGoogle.style.display = hasReview ? 'block' : 'none';
+      }else{
+      $openGoogle.style.display = hasReview ? 'block' : 'none';
+      }
+
+      // 無障礙：未顯示時避免鍵盤聚焦
+      $openGoogle.setAttribute('aria-hidden', hasReview ? 'false' : 'true');
+      $openGoogle.tabIndex = hasReview ? 0 : -1;
+
       requestAnimationFrame(fitTitle);
-    }
+      }
+
+
+    
 
     function buildChipsFromMeta(){
       const cfg=LANGS[currentLang]; const data=storeMeta||{}; let tags=[];
