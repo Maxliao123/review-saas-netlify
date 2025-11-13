@@ -185,7 +185,9 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "Write 1–2 compact sentences in natural English; no hashtags, no emojis, no bullet points, no excessive exclamation marks.",
         "Avoid templates and filler words. Vary sentence openings. Keep it trustworthy and specific.",
         "Focus on the 'Positive keywords'.",
-        "If 'Improvement keywords' are provided, include at most 1-2 as mild, constructive suggestions near the end (e.g., 'would be perfect if...', 'hope to see...').",
+        "If 'Improvement keywords' are provided, include at most 1-2 as mild, constructive suggestions near the end.",
+        // ✅ [新增] 嚴格的「封口令」
+        "If **no** 'Improvement keywords' are provided, the review must be **100% positive**. Do NOT invent any suggestions or criticisms (e.g., 'would be perfect if...', 'hope to see...').",
         "Respect allowed keywords only: the review must not invent items beyond the selected tags.",
       ].join("\n"),
       user: [
@@ -203,7 +205,9 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "你是懂在地口味的美食短評寫手。",
         "請用繁體中文撰寫 1–2 句，語氣自然可信、不要列點、不要 hashtag、不要 emoji、避免過度誇飾與口頭禪。",
         "評論整體以「正面關鍵詞」為主。",
-        "若有「改進建議」關鍵字，最多挑 1–2 個，在結尾用溫和、建設性的方式提出（例如：如果...就更好了、期待未來...）。",
+        "若有「改進建議」關鍵字，最多挑 1–2 個，在結尾用溫和、建設性的方式提出。",
+        // ✅ [新增] 嚴格的「封口令」
+        "若【沒有】提供「改進建議」關鍵字，請給予【100% 全正面好評】，嚴禁無中生有、捏造任何建議或期待（例如：如果...就更好了）。",
         "僅能使用勾選的關鍵詞，不得捏造未被選中的餐點/形容詞。",
       ].join("\n"),
       user: [
@@ -222,6 +226,8 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "자연스러운 한국어로 1–2문장만 작성하세요. 해시태그/이모지/불릿포인트/과도한 감탄사는 사용하지 마세요.",
         "'긍정적 키워드'에 집중하세요.",
         "'개선 제안' 키워드가 있다면, 마지막에 1-2개 정도만 부드러운 제안으로 포함하세요.",
+        // ✅ [新增] 嚴格的「封口令」
+        "'개선 제안' 키워드가【없다면】, 리뷰는【100% 긍정적】이어야 합니다. 어떠한 제안이나 비판도 절대 만들어내지 마세요 (예: '...라면 완벽할 것이다').",
         "선택한 키워드만 사용하고, 그 밖의 항목을 새로 만들어내지 마세요.",
       ].join("\n"),
       user: [
@@ -240,6 +246,8 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "自然な日本語で1〜2文。ハッシュタグ・絵文字・箇条書き・過度な感嘆符は使わないでください。",
         "「ポジティブキーワード」を中心に記述してください。",
         "「改善提案」がある場合、最後に1〜2点ほど、穏やかな提案として含めてください。",
+        // ✅ [新增] 嚴格的「封口令」
+        "「改善提案」キーワードが【ない】場合は、【100%肯定的な】レビューにしてください。提案や批判（例：「...すればもっと良い」）を捏造することは固く禁じます。",
         "選択したキーワードのみ使用し、それ以外の項目を新たに作らないでください。",
       ].join("\n"),
       user: [
@@ -258,6 +266,8 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "Rédigez 1–2 phrases naturelles en français; pas de hashtags, pas d’emojis, pas de listes, évitez les exclamations excessives.",
         "Concentrez-vous sur les 'Mots-clés positifs'.",
         "Si des 'Suggestions d'amélioration' sont fournies, incluez-en 1 ou 2 maximum à la fin comme suggestions constructives.",
+        // ✅ [新增] 嚴格的「封口令」
+        "Si **aucune** 'Suggestion d'amélioration' n'est fournie, l'avis doit être **100% positif**. N'inventez AUCUNE suggestion ou critique (par ex: 'ce serait parfait si...').",
         "N’utilisez que les mots-clés sélectionnés; n’inventez pas d’éléments non choisis.",
       ].join("\n"),
       user: [
@@ -276,6 +286,8 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "Escribe 1–2 frases naturales en español; sin hashtags, sin emojis, sin viñetas, evita signos de exclamación excesivos.",
         "Céntrate en las 'Palabras clave positivas'.",
         "Si se proporcionan 'Sugerencias de mejora', incluye 1 o 2 como sugerencias constructivas al final.",
+        // ✅ [新增] 嚴格的「封口令」
+        "Si **no** se proporcionan 'Sugerencias de mejora', la reseña debe ser **100% positiva**. NO inventes ninguna sugerencia o crítica (ej: 'sería perfecto si...').",
         "Usa solo las palabras clave seleccionadas; no inventes elementos no elegidos.",
       ].join("\n"),
       user: [
@@ -426,5 +438,4 @@ exports.handler = async (event) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
 
