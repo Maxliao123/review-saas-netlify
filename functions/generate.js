@@ -149,11 +149,11 @@ function checkGlobalDailyLimit() {
 // ❌ [移除] 舊的 in-memory checkIpWindow()
 
 // ✅ [新增] Netlify Blobs 版本的節流 (IP)
-async function checkIpWindowBlob(ip) {
+async function checkIpWindowBlob(ip, context) {
   // 自動取得 (或建立) 名為 "rate_limiting_ips" 的 store
   // 這是零配置的，不需要在 UI 建立
   // 它能運作，是因為 `exports.handler` 傳入了 `context` 物件
-  const store = getStore("rate_limiting_ips"); 
+  const store = getStore("rate_limiting_ips", { context });
   const key = `ip_${ip.replace(/[:.]/g, '_')}`; // 替換 IP 中的特殊字元
   
   try {
@@ -404,7 +404,7 @@ exports.handler = async (event, context) => {
     
     // 2. 檢查 (Blobs) IP 節流 (注意 await)
     //    (因為 context 存在，`getStore` 現在可以正常運作)
-    const ipCheckPassed = await checkIpWindowBlob(ip);
+const ipCheckPassed = await checkIpWindowBlob(ip, context);
     
     if (!ipCheckPassed) {
       // 區分是「節流」還是「配置錯誤」
