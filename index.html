@@ -211,13 +211,13 @@
   }
 
   // ✅ [修改] 舊的 LANGS.chips 陣列已不再需要，但保留 UI 部分
-  const LANGS={
-    en:{label:'EN',ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
-    zh:{label:'中',ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
-    ko:{label:'한국어',ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
-    ja:{label:'日本語',ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要약したレビューが表示されます…'}},
-    fr:{label:'FR',ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
-    es:{label:'ES',ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copier y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
+const LANGS={
+    en:{label:'EN',ui:{title:'How was your experience at "{name}"?',sub:'Select the tags that best match your feelings, and they will be automatically compiled into a Google Review draft for you.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
+    zh:{label:'中',ui:{title:'「{name}」的用餐體驗如何？',sub:'請點選幾個最符合您感受的標籤，將自動為您彙整成一份 Google 評論草稿。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
+    ko:{label:'한국어',ui:{title:'“{name}”에서의 경험은 어떠셨나요?',sub:'느끼신 점과 가장 일치하는 태그를 선택하시면, Google 리뷰 초안으로 자동 취합됩니다.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
+    ja:{label:'日本語',ui:{title:'「{name}」でのご体験はいかがでしたか？',sub:'ご感想に最も近いタグをいくつか選択してください。Google レビューの下書きが自動的に作成されます。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要약したレビューが表示されます…'}},
+    fr:{label:'FR',ui:{title:'Comment était votre expérience chez « {name} » ?',sub:'Sélectionnez les points qui correspondent à votre ressenti, et ils seront automatiquement compilés en un brouillon d\'avis Google.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
+    es:{label:'ES',ui:{title:'¿Qué tal tu experiencia en «{name}»?',sub:'Elige las etiquetas que mejor describan tu experiencia y se compilarán automáticamente en un borrador de reseña de Google.',gen:'✍️ Redactar y Reclamar',open:'📋 Copier y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
   };
   
   const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consEs','cons']);
