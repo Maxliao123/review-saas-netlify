@@ -48,11 +48,8 @@
     .btn.primary:active{transform:translateY(1px); background:var(--blue-active);}
     .btn.secondary{background:#0B1220; color:#fff; min-height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; line-height:1;}
 
-
     .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s; line-height:1.2;}
-
     .btn{flex:1; height:46px; border:0; border-radius:14px; font-weight:800; font-size:var(--fs-btn); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft); transition:transform .08s, background-color .12s, box-shadow .12s;}
-
     .btn.primary{color:var(--on-blue); background:var(--blue-500); box-shadow:0 6px 16px color-mix(in oklab,var(--blue-500) 14%,transparent);}
     .btn.primary:hover{background:var(--blue-hover);}
     .btn.primary:active{transform:translateY(1px); background:var(--blue-active);}
@@ -64,26 +61,25 @@
     textarea{width:100%; margin:0; padding:12px 14px; min-height:120px; border:1px solid var(--blue-200); border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);}
 
     .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:#F1F5F9; color:#94A3B8; box-shadow:none; font-size:14px; line-height:1.5; text-align:center;}
-
     .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:var(--blue-050); color:var(--fg); box-shadow:var(--shadow-soft); font-size:14px; line-height:1.5; text-align:center;}
 
     /* 預設：整個黑色按鈕區不顯示，避免用戶誤按 */
-.footer-actions{ display:none; justify-content:center; margin-top:12px; }
-.footer-actions.show{ display:flex; }
+    .footer-actions{ display:none; justify-content:center; margin-top:12px; }
+    .footer-actions.show{ display:flex; }
 
-/* 文字/emoji 垂直與水平置中（勝過其他重複宣告） */
-#openGoogle.btn.secondary{
-  display:grid !important;
-  place-items:center !important;
-  height:52px !important;
-  padding:0 18px !important;
-  line-height:1 !important;
-  white-space:nowrap;
-}
-#openGoogle.btn.secondary *{
-  margin:0 !important;
-  line-height:1 !important;
-}
+    /* 文字/emoji 垂直與水平置中（勝過其他重複宣告） */
+    #openGoogle.btn.secondary{
+      display:grid !important;
+      place-items:center !important;
+      height:52px !important;
+      padding:0 18px !important;
+      line-height:1 !important;
+      white-space:nowrap;
+    }
+    #openGoogle.btn.secondary *{
+      margin:0 !important;
+      line-height:1 !important;
+    }
   </style>
 </head>
 <body>
@@ -107,10 +103,10 @@
 
         <textarea id="output" placeholder="這裡會顯示整理後的一段短評…" style="display:none;"></textarea>
 
-        <!-- 複製並開啟：一開始隱藏，產生後顯示；程式會把它移到 textarea 下方 -->
-      <div id="footerActions" class="footer-actions">
-  <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
-</div>
+        <!-- 複製並開啟：一開始隱藏，產生後顯示；維持在容器中由 .show 控制 -->
+        <div id="footerActions" class="footer-actions">
+          <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
+        </div>
 
         <!-- 成功提示：保持在下方區域 -->
         <div id="thanksNotice" class="thanks-notice" data-keep-thanks="true" style="display:none;">
@@ -189,9 +185,9 @@
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
-  // 初始先把黑色按鈕隱藏並搬到 textarea 下方（保留原行為以相容現有頁面）
+  // 一開始不要搬動按鈕（保持在 footerActions 內），只需先隱藏 openGoogle（保險）
   $openGoogle.style.display='none';
-  $output.insertAdjacentElement('afterend',$openGoogle);
+  // ❌ 已移除：$output.insertAdjacentElement('afterend',$openGoogle);
 
   function applyBasicLinks(nameText){
     $titleStoreName.textContent=nameText||currentStore||'Store';
@@ -222,7 +218,7 @@
     while($title.scrollWidth>w && size>min){ size-=1; $title.style.fontSize=size+'px'; }
   }
 
-  // UPDATED: 控制黑色按鈕顯示與可聚焦狀態（有 footerActions 就優先用它，沒有則退回舊法）
+  // 控制黑色按鈕顯示與可聚焦狀態（容器優先）
   function renderUI(){
     const ui=LANGS[currentLang].ui;
     const localizedName=storeNameForLang(storeNames,currentLang)||pick(storeMeta,'name')||currentStore||'Store';
@@ -252,7 +248,7 @@
     const $footerActions = document.getElementById('footerActions');
     if ($footerActions){
       $footerActions.classList.toggle('show', hasReview);
-      // 同步內部按鈕的展示（避免舊狀態殘留）
+      // 同步內部按鈕顯示狀態（避免殘留）
       $openGoogle.style.display = hasReview ? 'block' : 'none';
     }else{
       $openGoogle.style.display = hasReview ? 'block' : 'none';
@@ -335,7 +331,6 @@
       const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
-      // 成功：更新 textarea；連結（若有 placeId）覆蓋；切換狀態
       const reviewText=data.reviewText||''; $output.value=reviewText;
       if(data?.store?.placeId){
         googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId);
@@ -354,7 +349,7 @@
   }
 
   document.getElementById('gen').addEventListener('click', generate);
-</script>
+  </script>
 
   <!-- 🔥 HOTFIX：強制不自動開頁、標籤不被取代、只保留單一按鈕 -->
   <script>
@@ -363,6 +358,7 @@
     const output = document.getElementById('output');
     const openBtn = document.getElementById('openGoogle');
     const status = document.getElementById('status');
+
     // 任何時候 chips 被隱藏/移除，立即復原
     if (chips) {
       const mo = new MutationObserver(()=>{
@@ -371,16 +367,19 @@
       });
       mo.observe(document.body,{childList:true,subtree:true});
     }
-    // 確保黑色按鈕就在 textarea 下方（如果有其他程式移走）
-    if (openBtn && output && openBtn.previousElementSibling!==output) {
-      output.insertAdjacentElement('afterend', openBtn);
-    }
+
+    // ❌ 已移除：把按鈕搬到 textarea 後方的程式
+    // if (openBtn && output && openBtn.previousElementSibling!==output) {
+    //   output.insertAdjacentElement('afterend', openBtn);
+    // }
+
     // 禁止背景程式自動 window.open（只允許從 openBtn 的點擊觸發）
     const _open = window.open;
     window.open = function(url, target, features){
       const fromBtn = (document.activeElement === openBtn) || (url && String(url).includes('writereview'));
       return fromBtn ? _open.call(window, url, target, features) : null;
     };
+
     // 移除任何「感謝您的回饋！我們已為您開啟 Google 評論分頁。」提示區塊
     const killThanks = ()=>{
       document.querySelectorAll('*').forEach(el=>{
@@ -393,6 +392,7 @@
     };
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
+
     // 再保險：給 openBtn 再綁一次行為（先複製再開啟）
     openBtn && openBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
@@ -405,5 +405,4 @@
   </script>
 </body>
 </html>
-
 
