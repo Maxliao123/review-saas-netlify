@@ -11,7 +11,6 @@
       --blue-300:#7CB9FF; --blue-200:#CDE5FF; --blue-100:#EAF4FF; --blue-050:#F3F9FF;
       --blue-hover:#49A2FF; --blue-active:#0A84FF; --on-blue:#FFFFFF;
       --chip-bg:var(--blue-100); --chip-bg-on:var(--blue-500); --chip-fg:#0F172A; --chip-fg-on:#FFFFFF;
-      /* ✅ [修改] 移除 hardcoded 灰色 cons 變數 */
       --fs-title-max:28px; --fs-title-min:18px; --fs-body:clamp(13px,1.2vw+10px,16px);
       --fs-chip:clamp(12px,1vw+8px,14px); --fs-btn:clamp(14px,1.2vw+11px,16px);
       --radius-lg:16px; --radius-md:12px; --radius-sm:10px;
@@ -42,26 +41,39 @@
     }
     #chips{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:10px 0 12px;}
     @media (min-width:540px){ #chips{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    
+    /* Positive chip (unselected) */
     .chip{border-radius:999px; padding:10px 14px; background:var(--chip-bg); color:var(--chip-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; border:1px solid var(--blue-200); transition:all .15s; box-shadow:var(--shadow-soft); min-height:48px;}
     .chip:hover{transform:translateY(-1px); background:color-mix(in oklab, var(--blue-100) 60%, white);}
-    .chip.on{background:var(--chip-bg-on); color:var(--chip-fg-on); border-color:transparent;}
     .chip:focus-visible{outline:none; box-shadow:var(--ring);}
+
+    /* ✅ [修改] 合併 .chip.on 和 .chip-cons.on，讓它們選中時樣式完全一樣 */
+    .chip.on,
+    .chip-cons.on {
+      background:var(--chip-bg-on); 
+      color:var(--chip-fg-on); 
+      border-color:transparent;
+    }
+    /* ✅ [修改] 讓選中狀態的 hover 顏色也一致 (使用 --blue-hover) */
+    .chip.on:hover,
+    .chip-cons.on:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+    }
     
-    /* ✅ [修改] .chip-cons 現在使用動態變數 (由 JS 注入) */
+    /* Cons chip (unselected) */
     .chip-cons{
       background:var(--chip-bg-cons);
       border-color:var(--chip-bg-cons);
       color:var(--chip-fg-cons);
     }
-    .chip-cons:hover{
-      background:var(--chip-bg-cons); /* 懸停顏色保持 */
+    /* ✅ [修改] 讓 "未選中" 的 cons chip hover 顏色也保持 */
+    .chip-cons:not(.on):hover{
+      background:var(--chip-bg-cons);
       transform:translateY(-1px);
     }
-    .chip-cons.on{
-      background:var(--chip-bg-cons-on);
-      color:var(--chip-fg-cons-on);
-      border-color:var(--chip-border-cons-on); /* 'on' 狀態使用一個較深的邊框 */
-    }
+
+    /* ✅ [修改] 刪除舊的 .chip-cons.on 規則 (因為已合併到 .chip.on) */
 
     .chip-text{font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
     .actions{display:flex; gap:10px; margin:8px 0 8px;}
@@ -88,18 +100,16 @@
   margin:12px 0 0;
   padding:14px;
   border-radius:var(--radius-md);
-  background:#F3F4F6;   /* 淡灰底 */
-  color:#6B7280;        /* 略深灰字 */
+  background:#F3F4F6;
+  color:#6B7280;
   box-shadow:var(--shadow-soft);
   font-size:14px;
   line-height:1.5;
   text-align:center;
 }
-    /* 預設：整個黑色按鈕區不顯示，避免用戶誤按 */
     .footer-actions{ display:none; justify-content:center; margin-top:12px; }
     .footer-actions.show{ display:flex; }
 
-    /* 文字/emoji 垂直與水平置中（勝過其他重複宣告） */
     #openGoogle.btn.secondary{
       display:grid !important;
       place-items:center !important;
@@ -110,8 +120,7 @@
     }
     #openGoogle.btn.secondary *{
       margin:0 !important;
-      line-height:1 !im
-      portant;
+      line-height:1 !important;
     }
   </style>
 </head>
@@ -160,26 +169,28 @@
   const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,rgb.b)}
   const autoOnColor=bg=>{const {r,g,b}=hexToRgb(bg);const L=0.2126*(r/255)+0.7152*(g/255)+0.0722*(b/255);return (L<0.56)?'#FFFFFF':'#0B1220'}
   
-  // ✅ [修改] applyBlueScale 現在會動態設置 cons chip 變數
+  // ✅ [修改] applyBlueScale 函式，移除 cons-on 相關變數
   function applyBlueScale(baseHex,onHex){
     const base=normHex(baseHex)||'#0A84FF';
     const on=normHex(onHex)||autoOnColor(base);
     const root=document.documentElement;
-    // 基礎色票
+    // 基礎色票 (包含 --blue-hover)
     const vars={'--blue-600':base,'--blue-500':base,'--blue-450':lighten(base,.04),'--blue-400':lighten(base,.10),'--blue-300':lighten(base,.20),'--blue-200':lighten(base,.30),'--blue-100':lighten(base,.38),'--blue-050':lighten(base,.45),'--blue-hover':lighten(base,.06),'--blue-active':base,'--on-blue':on};
     Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
     
-    // Positive chip (優點標籤)
-    root.style.setProperty('--chip-bg','var(--blue-100)');     // 淺色底 (lighten .38)
-    root.style.setProperty('--chip-bg-on','var(--blue-450)');  // 'on' 狀態底色
-    root.style.setProperty('--chip-fg-on','var(--on-blue)');   // 'on' 狀態文字
+    // Positive chip (優點標籤) - "未選中" 樣式
+    root.style.setProperty('--chip-bg','var(--blue-100)');
     
-    // Cons chip (建議標籤) - 使用同一色票的最淺色階
-    root.style.setProperty('--chip-bg-cons', 'var(--blue-050)');      // 最淺色底 (lighten .45)
-    root.style.setProperty('--chip-bg-cons-on', 'var(--blue-100)');   // 'on' 狀態底色 (lighten .38)
-    root.style.setProperty('--chip-fg-cons', 'var(--muted)');        // 'off' 狀態文字 (淡灰色)
-    root.style.setProperty('--chip-fg-cons-on', 'var(--fg)');         // 'on' 狀態文字 (深色)
-    root.style.setProperty('--chip-border-cons-on', 'var(--blue-200)');// 'on' 狀態邊框 (lighten .30)
+    // "選中" 樣式 (Positive 和 Cons 共用)
+    root.style.setProperty('--chip-bg-on','var(--blue-450)');
+    root.style.setProperty('--chip-fg-on','var(--on-blue)');
+    
+    // Cons chip (建議標籤) - "未選中" 樣式
+    root.style.setProperty('--chip-bg-cons', 'var(--blue-050)');
+    root.style.setProperty('--chip-fg-cons', 'var(--muted)');
+    
+    // 'on' 狀態的 cons 變數 (bg-cons-on, fg-cons-on, border-cons-on) 已被移除
+    // 因為 .chip-cons.on 現在直接使用 --chip-bg-on 和 --chip-fg-on
   }
 
   /* ---------- helpers ---------- */
@@ -204,17 +215,17 @@
     for(const k of order){const v=(map[k]||'').trim(); if(v) return v} return (map._raw||'').trim();
   }
 
- const LANGS={
-  en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','consEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
-  zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','consCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
-  ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','consKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
-  ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','consJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
-  fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','consFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
-  es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','consEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
-};
+  const LANGS={
+    en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','consEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
+    zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','consCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
+    ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','consKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
+    ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','consJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
+    fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','consFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
+    es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','consEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
+  };
   
-const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consEs','cons']);
-    
+  const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consEs','cons']);
+
   /* ---------- DOM ---------- */
   const $chips=document.getElementById('chips');
   const $gen=document.getElementById('gen');
@@ -313,9 +324,9 @@ const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consE
   function buildChipsFromMeta(){
     const cfg = LANGS[currentLang];
     const data = storeMeta || {};
-    let allChipData = []; // Store { tag: "...", isCons: false }
+    let allChipData = [];
 
-    cfg.chips.forEach(k => { // k is 'top3En', 'ConsEn', 'top3', etc.
+    cfg.chips.forEach(k => {
       const raw = pick(data, k);
       if (raw) {
         const isCons = CONS_FIELDS.has(k);
@@ -358,14 +369,13 @@ const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consE
         if (selected.has(tag)) {
           selected.delete(tag);
         } else {
-          selected.set(tag, { isCons: isCons }); // 儲存 tag 與其類型
+          selected.set(tag, { isCons: isCons });
         }
         el.classList.toggle('on');
       };
       $chips.appendChild(el);
     });
 
-    // 顯示/隱藏/設定 cons hint 文字
     if (hasCons) {
       $consHint.style.display = 'block';
       $consHint.textContent = {
@@ -382,7 +392,6 @@ const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consE
     }
   }
 
-  // ✅ [修改] applyThemeFromMeta 會被 applyBlueScale 呼叫 (在 loadStoreMeta 內)
   function applyThemeFromMeta(d){
     const apiBlue=(pick(d,'themeBlue')||'').trim();
     const apiOn=(pick(d,'themeOnBlue')||'').trim();
@@ -394,7 +403,7 @@ const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consE
     try{
       const res=await fetch('/api/store?storeid='+encodeURIComponent(currentStore));
       const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
-      storeMeta=data; applyThemeFromMeta(data); // <-- 這行會觸發新的 applyBlueScale
+      storeMeta=data; applyThemeFromMeta(data);
       storeNames=parseStoreNameMulti(pick(data,'name','storeName','title')||currentStore);
       applyBasicLinks(storeNameForLang(storeNames,currentLang));
       const order=['zh','en','ko','ja','fr','es']; availableLangs=order.filter(k=>langHasContent(k,data));
@@ -427,7 +436,7 @@ const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consE
     const storeid=(currentStore||'').trim();
     if(!storeid){ $status.textContent=(currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
 
-    const allSelections = Array.from(selected.entries()); // [ [tag, {isCons}], ... ]
+    const allSelections = Array.from(selected.entries());
     const positiveTags = allSelections.filter(([, data]) => !data.isCons).map(([tag]) => tag);
     const consTags = allSelections.filter(([, data]) => data.isCons).map(([tag]) => tag);
     
