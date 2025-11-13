@@ -4,4 +4,6 @@ functions = "functions"
 
 [functions]
 directory = "functions"
-node_bundler = "esbuild"
+# ✅ [修改] 從 "esbuild" 換成 "zisi"
+# 這是為了確保 @netlify/blobs 套件能正確讀取到 context
+node_bundler = "zisi"
