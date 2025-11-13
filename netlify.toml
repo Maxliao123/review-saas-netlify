@@ -4,6 +4,12 @@ functions = "functions"
 
 [functions]
 directory = "functions"
-# ✅ [修改] 從 "esbuild" 換成 "zisi"
-# 這是為了確保 @netlify/blobs 套件能正確讀取到 context
-node_bundler = "zisi"
+# ✅ [修改] 換回 esbuild，因為 zisi 也失敗了
+node_bundler = "esbuild"
+
+# ✅ [新增] 這是真正的解法：
+# 告訴 esbuild 不要 "打包" @netlify/blobs，
+# 而是將它作為 "外部依賴" 完整包含。
+# 這會保留 @netlify/blobs 讀取 context 的能力。
+[functions."generate"]
+external_node_modules = ["@netlify/blobs"]
