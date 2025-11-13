@@ -14,9 +14,19 @@ const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "20", 10);
 const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
 const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
+// ✅ [新增] 引入 pg 並建立 Supabase 連線池
+const { Pool } = require('pg');
+const pgPool = new Pool({
+  connectionString: process.env.SUPABASE_PG_URL,
+  ssl: {
+    rejectUnauthorized: false // Supabase 需要 SSL
+  }
+});
+
+
 // —— in-memory stores（同一 Lambda 實例有效）——
 const cache = new Map();                  // key -> { expiresAt, data }
-const ngramMemory = new Map();            // (storeid|tags) -> [{text, ts}]
+// ❌ [移除] const ngramMemory = new Map();            // (storeid|tags) -> [{text, ts}]
 const ipWindows = new Map();              // ip -> [timestamps]
 const dailyCounter = { date: dayStr(), count: 0 };
 
@@ -85,38 +95,44 @@ function pickAB(storeid) {
   return (hashStr(storeid) % 2) === 0 ? "A" : "B";
 }
 
-// 內容去重：3-gram Jaccard
-function ngrams(str, n=3) {
-  const s = String(str || "").replace(/\s+/g, "");
-  const arr = [];
-  for (let i=0;i<s.length-n;i++) arr.push(s.slice(i,i+n));
-  return new Set(arr);
-}
-function jaccard(a,b) {
-  const A = ngrams(a), B = ngrams(b);
-  let inter=0;
-  for (const x of A) if (B.has(x)) inter++;
-  const union = A.size + B.size - inter;
-  return union ? inter/union : 0;
-}
-function keyOf(storeid, tags=[]) {
-  return `${storeid}|${tags.slice().sort().join(",")}`;
-}
-function storeNgramPush(storeid, tags, text) {
-  const now = Date.now();
-  const k = keyOf(storeid, tags);
-  if (!ngramMemory.has(k)) ngramMemory.set(k, []);
-  const list = ngramMemory.get(k);
-  list.push({ text, ts: now });
-  while (list.length > 100) list.shift();
-}
-function isTooSimilar(storeid, tags, text, threshold=0.6) {
-  const list = ngramMemory.get(keyOf(storeid, tags)) || [];
-  for (const it of list) {
-    if (jaccard(text, it.text) >= threshold) return true;
+// ❌ [移除] 舊的 in-memory 內容去重函式 (ngrams, jaccard, keyOf, storeNgramPush, isTooSimilar)
+// (已全部刪除)
+
+// ✅ [新增] Supabase 去重檢查 (使用 pg_trgm)
+async function isTooSimilarSupabase(store_id, review_text, threshold = 0.6) {
+  // 我們使用 SIMILARITY 函式 (來自 pg_trgm) 來比較
+  // 這需要 review_text 欄位有 GIN/GIST 索引 (你已建立)
+  const query = `
+    SELECT 1 
+    FROM generated_reviews 
+    WHERE store_id = $1 AND similarity(review_text, $2) >= $3
+    LIMIT 1;
+  `;
+  try {
+    const { rows } = await pgPool.query(query, [store_id, review_text, threshold]);
+    // 如果 rows.length > 0，表示找到了相似的評論
+    return rows.length > 0;
+  } catch (e) {
+    console.error("Supabase similarity check error:", e.message);
+    // 發生錯誤時，暫時放行 (避免阻斷正常流程)
+    return false;
   }
-  return false;
 }
+
+// ✅ [新增] 儲存評論到 Supabase
+async function storeReviewSupabase(store_id, review_text) {
+  const query = `
+    INSERT INTO generated_reviews (store_id, review_text) 
+    VALUES ($1, $2);
+  `;
+  try {
+    await pgPool.query(query, [store_id, review_text]);
+  } catch (e) {
+    console.error("Supabase insert error:", e.message);
+    // 插入失敗不阻礙主流程，僅記錄
+  }
+}
+
 
 // 節流
 function getIP(event) {
@@ -144,7 +160,7 @@ function checkIpWindow(ip) {
 
 // OpenAI
 async function callOpenAI(system, user) {
-  const t0 = Date.now();
+  const t0 = Date.Noy();
   const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
@@ -331,7 +347,7 @@ exports.handler = async (event) => {
   try {
     if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY" }, 500);
 
-    // 成本控管
+    // 成本控管 (注意：這還是 in-memory 的，下一步才換成 KV)
     const ip = getIP(event);
     if (!checkGlobalDailyLimit()) return json({ error: "Daily quota reached" }, 429);
     if (!checkIpWindow(ip))       return json({ error: "Too many requests from this IP" }, 429);
@@ -381,8 +397,9 @@ exports.handler = async (event) => {
     // 第一次生成
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
-    // ✅ [修改] 去重使用 selectedTags (組合後的)
-    if (isTooSimilar(storeid, selectedTags, text, 0.6)) {
+    // ✅ [修改] 呼叫 Supabase 進行去重檢查 (注意 await)
+    // 舊： if (isTooSimilar(storeid, selectedTags, text, 0.6)) {
+    if (await isTooSimilarSupabase(storeid, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
       const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
       text = retry.text || text;
@@ -399,8 +416,9 @@ exports.handler = async (event) => {
       meta: { variant, abBucket, minChars, maxChars, tags: selectedTags, positiveTags, consTags, lang },
     };
 
-    // ✅ [修改] 記憶使用 selectedTags (組合後的)
-    storeNgramPush(storeid, selectedTags, text);
+    // ✅ [修改] 寫入 Supabase (注意 await)
+    // 舊： storeNgramPush(storeid, selectedTags, text);
+    await storeReviewSupabase(storeid, text);
 
     // 寫回 ReviewHistory（若有設定 webhook）
     if (REVIEW_WEBHOOK) {
@@ -438,4 +456,3 @@ exports.handler = async (event) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
