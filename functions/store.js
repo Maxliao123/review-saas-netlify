@@ -13,7 +13,8 @@ const DEFAULT_SHEET_NAME = '工作表1';
 const PLACE_PHOTO_MAX = 1000;
 
 const LANG_SUFFIXES = { En: 'En', Cn: 'Cn', Ko: 'Ko', Fr: 'Fr', Ja: 'Ja', Es: 'Es' };
-const LIST_FIELD_BASES = ['top3', 'features', 'ambiance', 'newItems'];
+// ✅ [修改] 新增 'cons'
+const LIST_FIELD_BASES = ['top3', 'features', 'ambiance', 'newItems', 'cons'];
 
 const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_API_KEY || '';
 
@@ -170,11 +171,22 @@ function normalizeRowToStore(row, event) {
   };
 
   const multi = {};
+  // ✅ [修改] AF/AG... 等 'cons' 相關欄位會在此處被自動讀取
   for (const sufKey of Object.keys(LANG_SUFFIXES)) {
     const suf = LANG_SUFFIXES[sufKey];
     for (const baseName of LIST_FIELD_BASES) {
       const colName = `${baseName}${suf}`;
-      multi[colName] = normalizeListCell(pickField(row, [colName]));
+      // ✅ [修改] 增加對 AF-AK 欄位別名的支援
+      const aliases = [colName];
+      if (baseName === 'cons') {
+        if (suf === 'En') aliases.push('AF');
+        if (suf === 'Cn') aliases.push('AG');
+        if (suf === 'Ko') aliases.push('AH');
+        if (suf === 'Fr') aliases.push('AI');
+        if (suf === 'Ja') aliases.push('AJ');
+        if (suf === 'Es') aliases.push('AK');
+      }
+      multi[colName] = normalizeListCell(pickField(row, aliases));
     }
   }
 
