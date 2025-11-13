@@ -603,7 +603,7 @@
       isGenerated=true;
       renderUI();
 
-      $status.textContent=({zh:'✅ 評論已產生！',en:'✅ Review generated!'}[currentLang]||'✅ Done')+' ('+(data.latencyMs||'-')+' ms)';
+     // $status.textContent=({zh:'✅ 評論已產生！',en:'✅ Review generated!'}[currentLang]||'✅ Done')+' ('+(data.latencyMs||'-')+' ms)';
     }catch(err){
       $status.textContent=({zh:'❌ 發生錯誤：',en:'❌ Error: '}[currentLang]||'❌ Error: ')+err.message;
     }finally{
