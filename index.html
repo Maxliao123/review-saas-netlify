@@ -60,9 +60,17 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     textarea{width:100%; margin:0; padding:12px 14px; min-height:120px; border:1px solid var(--blue-200); border-radius:14px; font-size:var(--fs-body); box-shadow:var(--shadow-soft);}
 
-    .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:#F1F5F9; color:#94A3B8; box-shadow:none; font-size:14px; line-height:1.5; text-align:center;}
-    .thanks-notice{margin:12px 0 0; padding:14px; border-radius:var(--radius-md); background:var(--blue-050); color:var(--fg); box-shadow:var(--shadow-soft); font-size:14px; line-height:1.5; text-align:center;}
-
+.thanks-notice{
+  margin:12px 0 0;
+  padding:14px;
+  border-radius:var(--radius-md);
+  background:#F3F4F6;   /* 淡灰底 */
+  color:#6B7280;        /* 略深灰字 */
+  box-shadow:var(--shadow-soft);
+  font-size:14px;
+  line-height:1.5;
+  text-align:center;
+}
     /* 預設：整個黑色按鈕區不顯示，避免用戶誤按 */
     .footer-actions{ display:none; justify-content:center; margin-top:12px; }
     .footer-actions.show{ display:flex; }
