@@ -204,17 +204,17 @@
     for(const k of order){const v=(map[k]||'').trim(); if(v) return v} return (map._raw||'').trim();
   }
 
-  const LANGS={
-    en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','ConsEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
-    zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','ConsCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
-    ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','ConsKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
-    ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','ConsJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
-    fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','ConsFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
-    es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','ConsEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
-  };
+ const LANGS={
+  en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','consEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
+  zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','consCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
+  ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','consKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
+  ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','consJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
+  fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','consFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
+  es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','consEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
+};
   
-  const CONS_FIELDS = new Set(['ConsEn','ConsCn','ConsKo','ConsJa','ConsFr','ConsEs','cons']);
-
+const CONS_FIELDS = new Set(['consEn','consCn','consKo','consJa','consFr','consEs','cons']);
+    
   /* ---------- DOM ---------- */
   const $chips=document.getElementById('chips');
   const $gen=document.getElementById('gen');
