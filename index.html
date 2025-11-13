@@ -11,6 +11,7 @@
       --blue-300:#7CB9FF; --blue-200:#CDE5FF; --blue-100:#EAF4FF; --blue-050:#F3F9FF;
       --blue-hover:#49A2FF; --blue-active:#0A84FF; --on-blue:#FFFFFF;
       --chip-bg:var(--blue-100); --chip-bg-on:var(--blue-500); --chip-fg:#0F172A; --chip-fg-on:#FFFFFF;
+      /* ✅ [修改] 移除 hardcoded 灰色 cons 變數 */
       --fs-title-max:28px; --fs-title-min:18px; --fs-body:clamp(13px,1.2vw+10px,16px);
       --fs-chip:clamp(12px,1vw+8px,14px); --fs-btn:clamp(14px,1.2vw+11px,16px);
       --radius-lg:16px; --radius-md:12px; --radius-sm:10px;
@@ -33,12 +34,35 @@
     .content{padding:26px 16px 14px; margin-top:14px;}
     .title{margin:0 0 6px 0; font-weight:800; line-height:1.2; font-size:var(--fs-title-max);}
     .sub{color:var(--muted); margin:0 0 10px 0;}
+    
+    .chip-hint{
+      margin:4px 0 2px;
+      font-size:12px;
+      color:var(--muted);
+    }
     #chips{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:10px 0 12px;}
     @media (min-width:540px){ #chips{grid-template-columns:repeat(3,minmax(0,1fr));}}
     .chip{border-radius:999px; padding:10px 14px; background:var(--chip-bg); color:var(--chip-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; border:1px solid var(--blue-200); transition:all .15s; box-shadow:var(--shadow-soft); min-height:48px;}
     .chip:hover{transform:translateY(-1px); background:color-mix(in oklab, var(--blue-100) 60%, white);}
     .chip.on{background:var(--chip-bg-on); color:var(--chip-fg-on); border-color:transparent;}
     .chip:focus-visible{outline:none; box-shadow:var(--ring);}
+    
+    /* ✅ [修改] .chip-cons 現在使用動態變數 (由 JS 注入) */
+    .chip-cons{
+      background:var(--chip-bg-cons);
+      border-color:var(--chip-bg-cons);
+      color:var(--chip-fg-cons);
+    }
+    .chip-cons:hover{
+      background:var(--chip-bg-cons); /* 懸停顏色保持 */
+      transform:translateY(-1px);
+    }
+    .chip-cons.on{
+      background:var(--chip-bg-cons-on);
+      color:var(--chip-fg-cons-on);
+      border-color:var(--chip-border-cons-on); /* 'on' 狀態使用一個較深的邊框 */
+    }
+
     .chip-text{font-size:var(--fs-chip); font-weight:600; text-align:center; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
     .actions{display:flex; gap:10px; margin:8px 0 8px;}
 
@@ -86,7 +110,8 @@
     }
     #openGoogle.btn.secondary *{
       margin:0 !important;
-      line-height:1 !important;
+      line-height:1 !im
+      portant;
     }
   </style>
 </head>
@@ -103,6 +128,7 @@
         <h1 id="title" class="title">為「<span id="title-store-name">門市</span>」寫一則短評</h1>
         <p id="subtitle" class="sub">挑選今天你最有感的幾個重點，我們會幫你整理成短評。</p>
 
+        <p id="consHint" class="chip-hint" style="display:none;"></p>
         <div id="chips"></div>
 
         <div class="actions">
@@ -111,12 +137,10 @@
 
         <textarea id="output" placeholder="這裡會顯示整理後的一段短評…" style="display:none;"></textarea>
 
-        <!-- 複製並開啟：一開始隱藏，產生後顯示；維持在容器中由 .show 控制 -->
         <div id="footerActions" class="footer-actions">
           <a id="openGoogle" class="btn secondary" target="_blank" rel="noopener noreferrer">📋 複製並開啟google評論</a>
         </div>
 
-        <!-- 成功提示：保持在下方區域 -->
         <div id="thanksNotice" class="thanks-notice" data-keep-thanks="true" style="display:none;">
           <div id="thanksMessage"></div>
         </div>
@@ -135,7 +159,28 @@
   const normHex=h=>{if(!h)return'';let s=String(h).trim();if(!s.startsWith('#'))s='#'+s;if(/^#([0-9a-fA-F]{3})$/.test(s)){const[,r,g,b]=s.match(/^#(.)(.)(.)$/);s='#'+r+r+g+g+b+b}return /^#([0-9a-fA-F]{6})$/.test(s)?s.toUpperCase():''};
   const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,rgb.b)}
   const autoOnColor=bg=>{const {r,g,b}=hexToRgb(bg);const L=0.2126*(r/255)+0.7152*(g/255)+0.0722*(b/255);return (L<0.56)?'#FFFFFF':'#0B1220'}
-  function applyBlueScale(baseHex,onHex){const base=normHex(baseHex)||'#0A84FF';const on=normHex(onHex)||autoOnColor(base);const root=document.documentElement;const vars={'--blue-600':base,'--blue-500':base,'--blue-450':lighten(base,.04),'--blue-400':lighten(base,.10),'--blue-300':lighten(base,.20),'--blue-200':lighten(base,.30),'--blue-100':lighten(base,.38),'--blue-050':lighten(base,.45),'--blue-hover':lighten(base,.06),'--blue-active':base,'--on-blue':on};Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));root.style.setProperty('--chip-bg','var(--blue-100)');root.style.setProperty('--chip-bg-on','var(--blue-450)');root.style.setProperty('--chip-fg-on','var(--on-blue)')}
+  
+  // ✅ [修改] applyBlueScale 現在會動態設置 cons chip 變數
+  function applyBlueScale(baseHex,onHex){
+    const base=normHex(baseHex)||'#0A84FF';
+    const on=normHex(onHex)||autoOnColor(base);
+    const root=document.documentElement;
+    // 基礎色票
+    const vars={'--blue-600':base,'--blue-500':base,'--blue-450':lighten(base,.04),'--blue-400':lighten(base,.10),'--blue-300':lighten(base,.20),'--blue-200':lighten(base,.30),'--blue-100':lighten(base,.38),'--blue-050':lighten(base,.45),'--blue-hover':lighten(base,.06),'--blue-active':base,'--on-blue':on};
+    Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
+    
+    // Positive chip (優點標籤)
+    root.style.setProperty('--chip-bg','var(--blue-100)');     // 淺色底 (lighten .38)
+    root.style.setProperty('--chip-bg-on','var(--blue-450)');  // 'on' 狀態底色
+    root.style.setProperty('--chip-fg-on','var(--on-blue)');   // 'on' 狀態文字
+    
+    // Cons chip (建議標籤) - 使用同一色票的最淺色階
+    root.style.setProperty('--chip-bg-cons', 'var(--blue-050)');      // 最淺色底 (lighten .45)
+    root.style.setProperty('--chip-bg-cons-on', 'var(--blue-100)');   // 'on' 狀態底色 (lighten .38)
+    root.style.setProperty('--chip-fg-cons', 'var(--muted)');        // 'off' 狀態文字 (淡灰色)
+    root.style.setProperty('--chip-fg-cons-on', 'var(--fg)');         // 'on' 狀態文字 (深色)
+    root.style.setProperty('--chip-border-cons-on', 'var(--blue-200)');// 'on' 狀態邊框 (lighten .30)
+  }
 
   /* ---------- helpers ---------- */
   function getStoreFromURL(){const url=new URL(location.href);const byQuery=(url.searchParams.get('store')||url.searchParams.get('storeid')||'').trim();if(byQuery)return byQuery;const parts=url.pathname.replace(/^\/+/,'').split('/');const first=(parts[0]||'').trim().toLowerCase();if(!first||first==='index.html'||first==='favicon.ico'||first==='api')return'';if(first==='s'&&parts[1])return(parts[1]||'').trim();return parts[0]||''}
@@ -160,13 +205,15 @@
   }
 
   const LANGS={
-    en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
-    zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
-    ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
-    ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
-    fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
-    es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
+    en:{label:'EN',chips:['top3En','featuresEn','ambianceEn','newItemsEn','ConsEn','top3','features','ambiance','newItems'],ui:{title:'Write a short review for “{name}”',sub:'Pick what stood out today. We’ll generate a review.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'}},
+    zh:{label:'中',chips:['top3Cn','featuresCn','ambianceCn','newItemsCn','ConsCn','top3','features','ambiance','newItems'],ui:{title:'為「{name}」寫一則短評',sub:'挑選今天你最有感的幾個重點，我們會幫你整理短評。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'}},
+    ko:{label:'한국어',chips:['top3Ko','featuresKo','ambianceKo','newItemsKo','ConsKo','top3','features','ambiance','newItems'],ui:{title:'“{name}” 리뷰 한 줄',sub:'오늘 인상 깊었던 포인트를 골라주세요.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'}},
+    ja:{label:'日本語',chips:['top3Ja','featuresJa','ambianceJa','newItemsJa','ConsJa','top3','features','ambiance','newItems'],ui:{title:'「{name}」へ一言レビュー',sub:'印象に残ったポイントを選んでください。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'}},
+    fr:{label:'FR',chips:['top3Fr','featuresFr','ambianceFr','newItemsFr','ConsFr','top3','features','ambiance','newItems'],ui:{title:'Écrire un avis court pour « {name} »',sub:'Choisissez les points marquants, nous générons un avis.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'}},
+    es:{label:'ES',chips:['top3Es','featuresEs','ambianceEs','newItemsEs','ConsEs','top3','features','ambiance','newItems'],ui:{title:'Escribe una reseña para «{name}»',sub:'Elige lo que destacó hoy.',gen:'✍️ Redactar y Reclamar',open:'📋 Copiar y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'}}
   };
+  
+  const CONS_FIELDS = new Set(['ConsEn','ConsCn','ConsKo','ConsJa','ConsFr','ConsEs','cons']);
 
   /* ---------- DOM ---------- */
   const $chips=document.getElementById('chips');
@@ -183,8 +230,9 @@
   const $titleStoreName=document.getElementById('title-store-name');
   const $thanksNotice=document.getElementById('thanksNotice');
   const $thanksMessage=document.getElementById('thanksMessage');
+  const $consHint = document.getElementById('consHint');
 
-  let selected=new Set();
+  let selected=new Map();
   let currentStore=getStoreFromURL()||'leegarnei';
   let currentLang='zh';
   let storeMeta=null, availableLangs=[], storeNames=null;
@@ -193,9 +241,7 @@
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
-  // 一開始不要搬動按鈕（保持在 footerActions 內），只需先隱藏 openGoogle（保險）
   $openGoogle.style.display='none';
-  // ❌ 已移除：$output.insertAdjacentElement('afterend',$openGoogle);
 
   function applyBasicLinks(nameText){
     $titleStoreName.textContent=nameText||currentStore||'Store';
@@ -226,7 +272,6 @@
     while($title.scrollWidth>w && size>min){ size-=1; $title.style.fontSize=size+'px'; }
   }
 
-  // 控制黑色按鈕顯示與可聚焦狀態（容器優先）
   function renderUI(){
     const ui=LANGS[currentLang].ui;
     const localizedName=storeNameForLang(storeNames,currentLang)||pick(storeMeta,'name')||currentStore||'Store';
@@ -248,21 +293,17 @@
 
     const hasReview = isGenerated && ($output.value||'').trim()!=='';
 
-    // 顯示/隱藏：thanks + textarea
     $thanksNotice.style.display = hasReview ? 'block' : 'none';
     $output.style.display       = hasReview ? 'block' : 'none';
 
-    // 優先以 footerActions 容器控管；若不存在，退回控制 openGoogle
     const $footerActions = document.getElementById('footerActions');
     if ($footerActions){
       $footerActions.classList.toggle('show', hasReview);
-      // 同步內部按鈕顯示狀態（避免殘留）
       $openGoogle.style.display = hasReview ? 'block' : 'none';
     }else{
       $openGoogle.style.display = hasReview ? 'block' : 'none';
     }
 
-    // 無障礙：未顯示時避免鍵盤聚焦
     $openGoogle.setAttribute('aria-hidden', hasReview ? 'false' : 'true');
     $openGoogle.tabIndex = hasReview ? 0 : -1;
 
@@ -270,19 +311,78 @@
   }
 
   function buildChipsFromMeta(){
-    const cfg=LANGS[currentLang]; const data=storeMeta||{}; let tags=[];
-    cfg.chips.forEach(k=>{const raw=pick(data,k); if(raw) tags=tags.concat(String(raw).split(','));});
-    tags=uniq(tags).slice(0,18);
-    if(tags.length===0){tags=['boba','rice','dumpling','Nice service','clean environment','Couple date','family reunion','Fried noodles'];}
-    selected.clear(); $chips.innerHTML='';
-    tags.forEach(tag=>{
-      const el=document.createElement('div'); el.className='chip';
-      el.innerHTML=`<span class="chip-text">${tag.trim()}</span>`;
-      el.onclick=()=>{if(selected.has(tag))selected.delete(tag);else selected.add(tag); el.classList.toggle('on');};
+    const cfg = LANGS[currentLang];
+    const data = storeMeta || {};
+    let allChipData = []; // Store { tag: "...", isCons: false }
+
+    cfg.chips.forEach(k => { // k is 'top3En', 'ConsEn', 'top3', etc.
+      const raw = pick(data, k);
+      if (raw) {
+        const isCons = CONS_FIELDS.has(k);
+        const tags = String(raw).split(',');
+        tags.forEach(tag => {
+          const t = (tag || '').trim();
+          if (t) allChipData.push({ tag: t, isCons });
+        });
+      }
+    });
+
+    const seen = new Map();
+    allChipData.forEach(({ tag, isCons }) => {
+      if (!seen.has(tag) || (seen.get(tag).isCons && !isCons)) {
+        seen.set(tag, { tag, isCons });
+      }
+    });
+    
+    const uniqueTagsData = Array.from(seen.values()).slice(0, 18);
+
+    if (uniqueTagsData.length === 0) {
+      uniqueTagsData.push(
+        { tag: 'boba', isCons: false }, { tag: 'rice', isCons: false },
+        { tag: 'dumpling', isCons: false }, { tag: 'Nice service', isCons: false },
+        { tag: 'clean environment', isCons: false }, { tag: 'Couple date', isCons: false }
+      );
+    }
+    
+    selected.clear();
+    $chips.innerHTML = '';
+    let hasCons = false;
+
+    uniqueTagsData.forEach(({ tag, isCons }) => {
+      const el = document.createElement('div');
+      el.className = isCons ? 'chip chip-cons' : 'chip';
+      if (isCons) hasCons = true;
+      
+      el.innerHTML = `<span class="chip-text">${tag.trim()}</span>`;
+      el.onclick = () => {
+        if (selected.has(tag)) {
+          selected.delete(tag);
+        } else {
+          selected.set(tag, { isCons: isCons }); // 儲存 tag 與其類型
+        }
+        el.classList.toggle('on');
+      };
       $chips.appendChild(el);
     });
+
+    // 顯示/隱藏/設定 cons hint 文字
+    if (hasCons) {
+      $consHint.style.display = 'block';
+      $consHint.textContent = {
+        zh: '（選填）如果有覺得我們可以再更好的地方，也歡迎勾選告訴我們 🙌',
+        en: 'Optional: If there’s anything we could do better, feel free to select a few suggestions.',
+        ko: '선택 사항: 개선할 점이 있다면 제안해 주세요.',
+        ja: '任意：改善すべき点があれば、ご提案ください。',
+        fr: 'Optionnel : Si nous pouvons nous améliorer, n’hésitez pas à le suggérer.',
+        es: 'Opcional: Si hay algo que podamos mejorar, selecciona una sugerencia.'
+      }[currentLang] || 'Optional: Suggestions for improvement.';
+    } else {
+      $consHint.style.display = 'none';
+      $consHint.textContent = '';
+    }
   }
 
+  // ✅ [修改] applyThemeFromMeta 會被 applyBlueScale 呼叫 (在 loadStoreMeta 內)
   function applyThemeFromMeta(d){
     const apiBlue=(pick(d,'themeBlue')||'').trim();
     const apiOn=(pick(d,'themeOnBlue')||'').trim();
@@ -294,7 +394,7 @@
     try{
       const res=await fetch('/api/store?storeid='+encodeURIComponent(currentStore));
       const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
-      storeMeta=data; applyThemeFromMeta(data);
+      storeMeta=data; applyThemeFromMeta(data); // <-- 這行會觸發新的 applyBlueScale
       storeNames=parseStoreNameMulti(pick(data,'name','storeName','title')||currentStore);
       applyBasicLinks(storeNameForLang(storeNames,currentLang));
       const order=['zh','en','ko','ja','fr','es']; availableLangs=order.filter(k=>langHasContent(k,data));
@@ -315,7 +415,6 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
-  // 黑色按鈕點擊：先複製，再開啟
   $openGoogle.addEventListener('click', async (e)=>{
     e.preventDefault();
     const txt=($output.value||'').trim();
@@ -327,9 +426,19 @@
   async function generate(){
     const storeid=(currentStore||'').trim();
     if(!storeid){ $status.textContent=(currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
-    const selectedTags=Array.from(selected);
-    if(selectedTags.length===0){ $status.textContent={en:'Please select at least one tag.', zh:'請至少選擇一個標籤。'}[currentLang]||'Please select at least one tag.'; return; }
-    const body={storeid, selectedTags, variant:1, minChars:90, maxChars:160, lang:currentLang};
+
+    const allSelections = Array.from(selected.entries()); // [ [tag, {isCons}], ... ]
+    const positiveTags = allSelections.filter(([, data]) => !data.isCons).map(([tag]) => tag);
+    const consTags = allSelections.filter(([, data]) => data.isCons).map(([tag]) => tag);
+    
+    if(positiveTags.length === 0 && consTags.length === 0){ $status.textContent={en:'Please select at least one tag.', zh:'請至少選擇一個標籤。'}[currentLang]||'Please select at least one tag.'; return; }
+    
+    const body={
+      storeid,
+      positiveTags,
+      consTags,
+      variant:1, minChars:90, maxChars:160, lang:currentLang
+    };
 
     $gen.classList.add('loading'); $gen.disabled=true;
     $gen.innerHTML=`<span class="spinner"></span>${{en:'Composing…',zh:'撰寫中…'}[currentLang]||'Composing…'}`;
@@ -359,7 +468,6 @@
   document.getElementById('gen').addEventListener('click', generate);
   </script>
 
-  <!-- 🔥 HOTFIX：強制不自動開頁、標籤不被取代、只保留單一按鈕 -->
   <script>
   (function hotfix(){
     const chips = document.getElementById('chips');
@@ -367,7 +475,6 @@
     const openBtn = document.getElementById('openGoogle');
     const status = document.getElementById('status');
 
-    // 任何時候 chips 被隱藏/移除，立即復原
     if (chips) {
       const mo = new MutationObserver(()=>{
         chips.style.display='grid';
@@ -376,19 +483,12 @@
       mo.observe(document.body,{childList:true,subtree:true});
     }
 
-    // ❌ 已移除：把按鈕搬到 textarea 後方的程式
-    // if (openBtn && output && openBtn.previousElementSibling!==output) {
-    //   output.insertAdjacentElement('afterend', openBtn);
-    // }
-
-    // 禁止背景程式自動 window.open（只允許從 openBtn 的點擊觸發）
     const _open = window.open;
     window.open = function(url, target, features){
       const fromBtn = (document.activeElement === openBtn) || (url && String(url).includes('writereview'));
       return fromBtn ? _open.call(window, url, target, features) : null;
     };
 
-    // 移除任何「感謝您的回饋！我們已為您開啟 Google 評論分頁。」提示區塊
     const killThanks = ()=>{
       document.querySelectorAll('*').forEach(el=>{
         const t=(el.textContent||'').trim();
@@ -401,7 +501,6 @@
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
 
-    // 再保險：給 openBtn 再綁一次行為（先複製再開啟）
     openBtn && openBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
       const txt=(output.value||'').trim();
