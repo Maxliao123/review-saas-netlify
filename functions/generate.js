@@ -160,7 +160,7 @@ function checkIpWindow(ip) {
 
 // OpenAI
 async function callOpenAI(system, user) {
-  const t0 = Date.Noy();
+  const t0 = Date.now();
   const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
