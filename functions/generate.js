@@ -364,8 +364,8 @@ exports.handler = async (event) => {
 
     // ✅ [修改] cacheKey 使用 selectedTags (組合後的)
     const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars, v: variant, lang });
-    const cached = cacheGet(cacheKey);
-    if (cached) return json(cached, 200);
+    //const cached = cacheGet(cacheKey);
+    //if (cached) return json(cached, 200);
 
     const meta = (await fetchStoreRow(storeid.toLowerCase())) || { name: storeid, placeId: "" };
     const storeName = meta.name || storeid;
@@ -431,7 +431,7 @@ exports.handler = async (event) => {
       } catch (_) {}
     }
 
-    cacheSet(cacheKey, result);
+    //cacheSet(cacheKey, result);
     return json(result, 200);
   } catch (e) {
     console.error(e);
