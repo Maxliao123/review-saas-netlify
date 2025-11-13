@@ -8,7 +8,7 @@ const SHEET_NAME       = process.env.SHEET_NAME || "stores";
 const CACHE_TTL_S      = parseInt(process.env.CACHE_TTL_S || "60", 10);
 const CACHE_TTL_MS     = Math.max(10, CACHE_TTL_S) * 1000;
 
-// 成本控管 / 節流（簡易 in-memory 示範）
+// 成本控管 / 節流
 const DAILY_MAX_CALLS  = parseInt(process.env.DAILY_MAX_CALLS || "500", 10);
 const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "20", 10);
 const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
@@ -23,12 +23,15 @@ const pgPool = new Pool({
   }
 });
 
+// ✅ [新增] 引入 Netlify Blobs API
+const { getStore } = require("@netlify/blobs");
+
 
 // —— in-memory stores（同一 Lambda 實例有效）——
 const cache = new Map();                  // key -> { expiresAt, data }
-// ❌ [移除] const ngramMemory = new Map();            // (storeid|tags) -> [{text, ts}]
-const ipWindows = new Map();              // ip -> [timestamps]
-const dailyCounter = { date: dayStr(), count: 0 };
+// ❌ [移除] const ngramMemory = new Map(); (已移除)
+// ❌ [移除] const ipWindows = new Map();
+const dailyCounter = { date: dayStr(), count: 0 }; // ✅ [保留] in-memory 全域計數器 (如討論)
 
 function json(data, statusCode = 200) {
   return {
@@ -95,13 +98,8 @@ function pickAB(storeid) {
   return (hashStr(storeid) % 2) === 0 ? "A" : "B";
 }
 
-// ❌ [移除] 舊的 in-memory 內容去重函式 (ngrams, jaccard, keyOf, storeNgramPush, isTooSimilar)
-// (已全部刪除)
-
-// ✅ [新增] Supabase 去重檢查 (使用 pg_trgm)
+// Supabase 去重檢查
 async function isTooSimilarSupabase(store_id, review_text, threshold = 0.6) {
-  // 我們使用 SIMILARITY 函式 (來自 pg_trgm) 來比較
-  // 這需要 review_text 欄位有 GIN/GIST 索引 (你已建立)
   const query = `
     SELECT 1 
     FROM generated_reviews 
@@ -110,16 +108,14 @@ async function isTooSimilarSupabase(store_id, review_text, threshold = 0.6) {
   `;
   try {
     const { rows } = await pgPool.query(query, [store_id, review_text, threshold]);
-    // 如果 rows.length > 0，表示找到了相似的評論
     return rows.length > 0;
   } catch (e) {
     console.error("Supabase similarity check error:", e.message);
-    // 發生錯誤時，暫時放行 (避免阻斷正常流程)
     return false;
   }
 }
 
-// ✅ [新增] 儲存評論到 Supabase
+// 儲存評論到 Supabase
 async function storeReviewSupabase(store_id, review_text) {
   const query = `
     INSERT INTO generated_reviews (store_id, review_text) 
@@ -129,7 +125,6 @@ async function storeReviewSupabase(store_id, review_text) {
     await pgPool.query(query, [store_id, review_text]);
   } catch (e) {
     console.error("Supabase insert error:", e.message);
-    // 插入失敗不阻礙主流程，僅記錄
   }
 }
 
@@ -141,6 +136,8 @@ function getIP(event) {
       || event.headers["x-real-ip"]
       || "0.0.0.0";
 }
+
+// ✅ [保留] in-memory 全域計數器
 function checkGlobalDailyLimit() {
   const today = dayStr();
   if (dailyCounter.date !== today) { dailyCounter.date = today; dailyCounter.count = 0; }
@@ -148,19 +145,55 @@ function checkGlobalDailyLimit() {
   dailyCounter.count++;
   return true;
 }
-function checkIpWindow(ip) {
-  const now = Date.now();
-  const winMs = PER_IP_WINDOW_S * 1000;
-  if (!ipWindows.has(ip)) ipWindows.set(ip, []);
-  const arr = ipWindows.get(ip).filter(t => now - t < winMs);
-  if (arr.length >= PER_IP_MAX) return false;
-  arr.push(now); ipWindows.set(ip, arr);
-  return true;
+
+// ❌ [移除] 舊的 in-memory checkIpWindow()
+
+// ✅ [新增] Netlify Blobs 版本的節流 (IP)
+async function checkIpWindowBlob(ip) {
+  // 自動取得 (或建立) 名為 "rate_limiting_ips" 的 store
+  // 這是零配置的，不需要在 UI 建立
+  const store = getStore("rate_limiting_ips"); 
+  const key = `ip_${ip.replace(/[:.]/g, '_')}`; // 替換 IP 中的特殊字元
+  
+  try {
+    const now = Date.now();
+    const winMs = PER_IP_WINDOW_S * 1000;
+
+    // 1. 取得現有時間戳 (Blobs 存的是字串)
+    const rawTimestamps = await store.get(key);
+    let timestamps = [];
+    if (rawTimestamps) {
+      try {
+        timestamps = JSON.parse(rawTimestamps);
+        if (!Array.isArray(timestamps)) timestamps = [];
+      } catch {
+        timestamps = []; // 解析失敗，重設
+      }
+    }
+    
+    // 2. 過濾掉過期的
+    const recentTimestamps = timestamps.filter(t => now - t < winMs);
+    
+    // 3. 檢查是否超過上限
+    if (recentTimestamps.length >= PER_IP_MAX) {
+      return false; // 達到上限，阻擋
+    }
+    
+    // 4. 未達上限，加入新的時間戳，並寫回 (轉為字串)
+    recentTimestamps.push(now);
+    await store.set(key, JSON.stringify(recentTimestamps));
+    
+    return true; // 放行
+  } catch (e) {
+    console.error("Netlify Blobs checkIpWindow error:", e.message);
+    return true; // 發生錯誤時，暫時放行
+  }
 }
+
 
 // OpenAI
 async function callOpenAI(system, user) {
-  const t0 = Date.now();
+  const t0 = Date.now(); // (已修復為 Date.now())
   const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
@@ -311,7 +344,7 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         `Palabras clave positivas: ${joinedPosTags || "(ninguna)"}`,
         consTags.length > 0 ? `Sugerencias de mejora (1-2, con tacto): ${joinedConsTags}` : "",
         ref.length ? `Referencia (solo tono, no añadir ítems): ${ref.join(" | ")}` : "",
-        `Variante de estilo: ${FLAVORS[variant]}`,
+        `Variante de style : ${FLAVORS[variant]}`,
         `Objetivo de longitud: ${rangeText} caracteres (orientativo).`,
         "Devuelve SOLO el texto final de la reseña."
       ].filter(Boolean).join("\n"),
@@ -347,10 +380,17 @@ exports.handler = async (event) => {
   try {
     if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY" }, 500);
 
-    // 成本控管 (注意：這還是 in-memory 的，下一步才換成 KV)
+    // ✅ [修改] 成本控管 (混合 in-memory 和 Netlify Blobs)
     const ip = getIP(event);
-    if (!checkGlobalDailyLimit()) return json({ error: "Daily quota reached" }, 429);
-    if (!checkIpWindow(ip))       return json({ error: "Too many requests from this IP" }, 429);
+    
+    // 1. 檢查 (in-memory) 全域計數器
+    if (!checkGlobalDailyLimit()) {
+      return json({ error: "Daily quota reached" }, 429);
+    }
+    // 2. 檢查 (Blobs) IP 節流 (注意 await)
+    if (!await checkIpWindowBlob(ip)) {
+      return json({ error: "Too many requests from this IP" }, 429);
+    }
 
     const body = JSON.parse(event.body || "{}");
     const storeid = (body.storeid || "").trim();
@@ -398,7 +438,6 @@ exports.handler = async (event) => {
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
     // ✅ [修改] 呼叫 Supabase 進行去重檢查 (注意 await)
-    // 舊： if (isTooSimilar(storeid, selectedTags, text, 0.6)) {
     if (await isTooSimilarSupabase(storeid, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
       const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
@@ -417,7 +456,6 @@ exports.handler = async (event) => {
     };
 
     // ✅ [修改] 寫入 Supabase (注意 await)
-    // 舊： storeNgramPush(storeid, selectedTags, text);
     await storeReviewSupabase(storeid, text);
 
     // 寫回 ReviewHistory（若有設定 webhook）
