@@ -152,6 +152,7 @@ function checkGlobalDailyLimit() {
 async function checkIpWindowBlob(ip) {
   // 自動取得 (或建立) 名為 "rate_limiting_ips" 的 store
   // 這是零配置的，不需要在 UI 建立
+  // 它能運作，是因為 `exports.handler` 傳入了 `context` 物件
   const store = getStore("rate_limiting_ips"); 
   const key = `ip_${ip.replace(/[:.]/g, '_')}`; // 替換 IP 中的特殊字元
   
@@ -181,12 +182,17 @@ async function checkIpWindowBlob(ip) {
     
     // 4. 未達上限，加入新的時間戳，並寫回 (轉為字串)
     recentTimestamps.push(now);
-    await store.set(key, JSON.stringify(recentTimestamps));
+    // 設置 TTL (Time-To-Live)，讓舊資料自動過期
+    // 我們設置為 PER_IP_WINDOW_S (秒)
+    await store.set(key, JSON.stringify(recentTimestamps), { metadata: { updatedAt: now }, ttl: PER_IP_WINDOW_S });
     
     return true; // 放行
   } catch (e) {
     console.error("Netlify Blobs checkIpWindow error:", e.message);
-    return true; // 發生錯誤時，暫時放行
+    // ✅ [修改] 發生錯誤時回傳 false (阻擋)
+    // 這會捕獲 "environment not configured" 錯誤
+    // 我們不希望在配置錯誤時放行
+    return false;
   }
 }
 
@@ -337,7 +343,7 @@ function buildPrompt({ lang, storeid, storeName, meta, positiveTags, consTags, m
         "Si se proporcionan 'Sugerencias de mejora', incluye 1 o 2 como sugerencias constructivas al final.",
         // ✅ [新增] 嚴格的「封口令」
         "Si **no** se proporcionan 'Sugerencias de mejora', la reseña debe ser **100% positiva**. NO inventes ninguna sugerencia o crítica (ej: 'sería perfecto si...').",
-        "Usa solo las palabras clave seleccionadas; no inventes elementos no elegidos.",
+        "Usa solo las palabras clave seleccionadas; no inventes elementos non elegidos.",
       ].join("\n"),
       user: [
         `Lugar: ${storeName} (id: ${storeid})`,
@@ -362,7 +368,8 @@ const MICRO = [
   "用更中性的語氣描述，避免『真的、超級』等強烈詞。",
 ];
 
-exports.handler = async (event) => {
+// ✅ [修改] ！！！把 context 參數加回來 ！！！
+exports.handler = async (event, context) => {
   // CORS
   if (event.httpMethod === "OPTIONS") {
     return {
@@ -377,6 +384,13 @@ exports.handler = async (event) => {
   }
   if (event.httpMethod !== "POST") return json({ error: "Method not allowed" }, 405);
 
+  // 語言檢測 (提前)
+  let currentLang = 'en';
+  try {
+    const bodyCheck = JSON.parse(event.body || "{}");
+    currentLang = (bodyCheck.lang || "en").toLowerCase();
+  } catch {}
+
   try {
     if (!OPENAI_API_KEY) return json({ error: "Missing OPENAI_API_KEY" }, 500);
 
@@ -387,9 +401,20 @@ exports.handler = async (event) => {
     if (!checkGlobalDailyLimit()) {
       return json({ error: "Daily quota reached" }, 429);
     }
+    
     // 2. 檢查 (Blobs) IP 節流 (注意 await)
-    if (!await checkIpWindowBlob(ip)) {
-      return json({ error: "Too many requests from this IP" }, 429);
+    //    (因為 context 存在，`getStore` 現在可以正常運作)
+    const ipCheckPassed = await checkIpWindowBlob(ip);
+    
+    if (!ipCheckPassed) {
+      // 區分是「節流」還是「配置錯誤」
+      // 由於 checkIpWindowBlob 內部會印出 console.error，我們這裡統一回傳 429
+      const errorMsg = {
+        en: "Too many requests from this IP. Please try again later.",
+        zh: "您的請求過於頻繁，請稍後再試。"
+      }[currentLang] || "Too many requests from this IP.";
+      
+      return json({ error: errorMsg }, 429);
     }
 
     const body = JSON.parse(event.body || "{}");
@@ -408,7 +433,7 @@ exports.handler = async (event) => {
       selectedTags = Array.isArray(body.selectedTags) ? body.selectedTags.sort() : [];
     }
 
-    const lang = (body.lang || "en").toLowerCase(); // ⬅ 由前端傳入
+    // const lang = (body.lang || "en").toLowerCase(); // ⬅ 已在上面提前
     const minChars = Math.max(60, parseInt(body.minChars || 90, 10));
     const maxChars = Math.max(minChars + 20, parseInt(body.maxChars || 160, 10));
     if (!storeid) return json({ error: "storeid required" }, 400);
@@ -419,7 +444,7 @@ exports.handler = async (event) => {
     const abBucket = pickAB(storeid);
 
     // ✅ [修改] cacheKey 使用 selectedTags (組合後的)
-    const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars, v: variant, lang });
+    const cacheKey = stableKey({ storeid, selectedTags, minChars, maxChars, v: variant, lang: currentLang });
     //const cached = cacheGet(cacheKey);
     //if (cached) return json(cached, 200);
 
@@ -428,7 +453,7 @@ exports.handler = async (event) => {
 
     // ✅ [修改] 傳遞 new/old tags 給 buildPrompt
     const { sys, user } = buildPrompt({
-      lang, storeid, storeName, meta,
+      lang: currentLang, storeid, storeName, meta,
       positiveTags: useNewFormat ? positiveTags : selectedTags, // 如果是舊格式，把 selectedTags 全當 positive
       consTags: useNewFormat ? consTags : [], // 舊格式沒有 cons
       minChars, maxChars, variant
@@ -452,7 +477,7 @@ exports.handler = async (event) => {
       usage,
       latencyMs,
       // ✅ [修改] meta 也回傳 new/old tags
-      meta: { variant, abBucket, minChars, maxChars, tags: selectedTags, positiveTags, consTags, lang },
+      meta: { variant, abBucket, minChars, maxChars, tags: selectedTags, positiveTags, consTags, lang: currentLang },
     };
 
     // ✅ [修改] 寫入 Supabase (注意 await)
@@ -479,7 +504,7 @@ exports.handler = async (event) => {
             abBucket,
             latencyMs,
             usage,
-            lang,
+            lang: currentLang,
             clientIp: ip,
             userAgent: (event.headers["user-agent"] || "")
           }),
