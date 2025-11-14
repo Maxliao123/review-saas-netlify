@@ -24,7 +24,7 @@ const pgPool = new Pool({
 });
 
 // ✅ [新增] 引入 Netlify Blobs API
-const { getStore } = require("@netlify/blobs");
+const { getStore, connectLambda } = require("@netlify/blobs");
 
 
 // —— in-memory stores（同一 Lambda 實例有效）——
@@ -149,18 +149,18 @@ function checkGlobalDailyLimit() {
 // ❌ [移除] 舊的 in-memory checkIpWindow()
 
 // ✅ [新增] Netlify Blobs 版本的節流 (IP)
-async function checkIpWindowBlob(ip, context) {
-  // 自動取得 (或建立) 名為 "rate_limiting_ips" 的 store
-  // 這是零配置的，不需要在 UI 建立
-  // 它能運作，是因為 `exports.handler` 傳入了 `context` 物件
-  const store = getStore("rate_limiting_ips", { context });
-  const key = `ip_${ip.replace(/[:.]/g, '_')}`; // 替換 IP 中的特殊字元
-  
+async function checkIpWindowBlob(ip, event) {
+  // 1. 初始化 Blobs 環境（Lambda 模式必須這一步）
+  connectLambda(event);
+
+  // 2. 再取得 / 建立 store
+  const store = getStore("rate_limiting_ips"); // 不用再傳 context / siteID / token
+
+  const key = `ip_${ip.replace(/[:.]/g, "_")}`;
   try {
     const now = Date.now();
     const winMs = PER_IP_WINDOW_S * 1000;
 
-    // 1. 取得現有時間戳 (Blobs 存的是字串)
     const rawTimestamps = await store.get(key);
     let timestamps = [];
     if (rawTimestamps) {
@@ -168,30 +168,33 @@ async function checkIpWindowBlob(ip, context) {
         timestamps = JSON.parse(rawTimestamps);
         if (!Array.isArray(timestamps)) timestamps = [];
       } catch {
-        timestamps = []; // 解析失敗，重設
+        timestamps = [];
       }
     }
-    
-    // 2. 過濾掉過期的
-    const recentTimestamps = timestamps.filter(t => now - t < winMs);
-    
-    // 3. 檢查是否超過上限
+
+    const recentTimestamps = timestamps.filter((t) => now - t < winMs);
+
     if (recentTimestamps.length >= PER_IP_MAX) {
-      return false; // 達到上限，阻擋
+      // 已超過上限 → 擋掉
+      return false;
     }
-    
-    // 4. 未達上限，加入新的時間戳，並寫回 (轉為字串)
+
     recentTimestamps.push(now);
-    // 設置 TTL (Time-To-Live)，讓舊資料自動過期
-    // 我們設置為 PER_IP_WINDOW_S (秒)
-    await store.set(key, JSON.stringify(recentTimestamps), { metadata: { updatedAt: now }, ttl: PER_IP_WINDOW_S });
-    
-    return true; // 放行
+
+    await store.set(
+      key,
+      JSON.stringify(recentTimestamps),
+      {
+        metadata: { updatedAt: now },
+        ttl: PER_IP_WINDOW_S, // seconds
+      }
+    );
+
+    return true;
   } catch (e) {
     console.error("Netlify Blobs checkIpWindow error:", e.message);
-    // ✅ [修改] 發生錯誤時回傳 false (阻擋)
-    // 這會捕獲 "environment not configured" 錯誤
-    // 我們不希望在配置錯誤時放行
+    // 這裡你可以選擇擋掉(false)或放行(true)，看你要「安全」還是「體驗」
+    // 建議：保守一點就 return false;
     return false;
   }
 }
@@ -404,7 +407,7 @@ exports.handler = async (event, context) => {
     
     // 2. 檢查 (Blobs) IP 節流 (注意 await)
     //    (因為 context 存在，`getStore` 現在可以正常運作)
-const ipCheckPassed = await checkIpWindowBlob(ip, context);
+const ipCheckPassed = await checkIpWindowBlob(ip, event);
     
     if (!ipCheckPassed) {
       // 區分是「節流」還是「配置錯誤」
