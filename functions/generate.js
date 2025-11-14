@@ -10,8 +10,8 @@ const CACHE_TTL_MS     = Math.max(10, CACHE_TTL_S) * 1000;
 
 // 成本控管 / 節流
 const DAILY_MAX_CALLS  = parseInt(process.env.DAILY_MAX_CALLS || "500", 10);
-const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "20", 10);
-const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
+const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "2", 10);
+const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "60", 10); // 15 分鐘
 const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
 // ✅ [新增] 引入 pg 並建立 Supabase 連線池
