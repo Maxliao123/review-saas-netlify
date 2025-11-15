@@ -20,6 +20,7 @@ exports.handler = async (event) => {
     };
   }
 
+  // 只接受 POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -29,26 +30,26 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { storeid, reviewText } = JSON.parse(event.body || "{}");
+    // 目前不強制需要 storeid / reviewText，
+    // 但先解析 body，未來要用的話也方便擴充
+    try {
+      JSON.parse(event.body || "{}");
+    } catch (_) {}
 
-    if (!storeid || !reviewText) {
-      return {
-        statusCode: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: "Missing storeid or reviewText" }),
-      };
-    }
-
-    // 用相似度找「最像這一則文字」的那一筆，標記為 likely_posted = true
+    // 👉 最簡單穩定版：
+    // 直接把 generated_reviews 裡「最新一筆」標記為 TRUE
     const updateQuery = `
       UPDATE generated_reviews
       SET likely_posted = TRUE
-      WHERE store_id = $1
-      ORDER BY similarity(review_text, $2) DESC
-      LIMIT 1;
+      WHERE id = (
+        SELECT id
+        FROM generated_reviews
+        ORDER BY created_at DESC
+        LIMIT 1
+      );
     `;
 
-    await pgPool.query(updateQuery, [storeid, reviewText]);
+    await pgPool.query(updateQuery);
 
     return {
       statusCode: 200,
