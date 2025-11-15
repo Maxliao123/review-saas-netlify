@@ -568,13 +568,33 @@ exports.handler = async (event, context) => {
       variant,
     });
 
-    // 第一次生成
+        // 第一次生成
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
-    // 先做去重檢查：若太像，依提示重寫一次
-    if (await isTooSimilarSupabase(storeid, text)) {
+    // ✅ 若「沒有選改進建議」，但文字裡出現疑似建議語氣，用一次改寫把它變成全正向
+    if (consTags.length === 0) {
+      // 很簡單的中文關鍵字偵測：如果、建議、希望、更好
+      const suspicious = /如果|建議|希望|更好/g;
+      if (suspicious.test(text)) {
+        const fixHint =
+          currentLang === "zh"
+            ? "請把上面的評論改寫成『完全正向的好評』，移除所有「如果…就更好」、「建議」、「希望」這類句子，只保留喜歡與讚美的重點。"
+            : "Rewrite the review so that it is 100% positive only. Remove any suggestions, 'if ... it would be better', or wishes. Keep only praise and positive experience.";
+
+        const retry = await callOpenAI(
+          sys,
+          user + `\n[Rewrite constraint]\n${fixHint}`
+        );
+        text = retry.text || text;
+        usage = retry.usage || usage;
+        latencyMs += retry.latencyMs || 0;
+      }
+    }
+
+    // ✅ 呼叫 Supabase 進行去重檢查 (注意 await)
+    if (await isTooSimilarSupabase(storeid, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
-      const retry = await callOpenAI(sys, `${user}\n[Rewrite hint] ${hint}`);
+      const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
       text = retry.text || text;
       usage = retry.usage || usage;
       latencyMs += retry.latencyMs || 0;
