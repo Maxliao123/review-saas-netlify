@@ -79,10 +79,10 @@
       transform:translateY(-1px);
     }
 
-    /* ✅ [新增] 自定義輸入框標籤樣式 */
+    /* ✅ 自定義輸入框標籤樣式 */
     .chip.custom-input {
       background: #fff;
-      border: 1px dashed var(--blue-300); /* 虛線邊框，暗示可輸入 */
+      border: 1px dashed var(--blue-300);
       padding: 0;
       cursor: text;
       overflow: hidden;
@@ -240,7 +240,7 @@
     for(const k of order){const v=(map[k]||'').trim(); if(v) return v} return (map._raw||'').trim();
   }
 
-  // ✅ [修改] 新增 customPlaceholder 欄位，支援多語系輸入提示
+  // 多語系 copy
   const LANGS={
     en:{
       label:'EN',
@@ -259,7 +259,7 @@
     },
     ja:{
       label:'日本語',
-      ui:{title:'「{name}」でのご体験はいかがでしたか？',sub:'ご感想に最も近いタグをいくつか選択してください。Google レビューの下書きが自動的に作成されます。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要약したレビューが表示されます…'},
+      ui:{title:'「{name}」でのご体験はいかがでしたか？',sub:'ご感想に最も近いタグをいくつか選択してください。Google レビューの下書きが自動的に作成されます。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'},
       customPlaceholder: 'その他を入力...'
     },
     fr:{
@@ -349,6 +349,7 @@
   let storeMeta=null, availableLangs=[], storeNames=null;
   let googleReviewUrl_global='';
   let isGenerated=false;
+  let currentReviewId = null; // ⭐ 新增：目前這一則評論在 DB 的 id
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
@@ -461,9 +462,8 @@
       if (uniqueTagsData.length === 0 && group.id !== 'food') {
         return; 
       }
-      // ✅ [修改] 即使沒有預設餐點，只要是 food 群組也要渲染，因為我們要放輸入框
       if (uniqueTagsData.length === 0 && group.id === 'food') {
-        // do nothing, proceed to render group so input field can be added
+        // 仍然要渲染，因為要放輸入框
       } else if (uniqueTagsData.length === 0) {
          return;
       }
@@ -497,7 +497,7 @@
         $chipsGrid.appendChild(el);
       });
 
-      // ✅ [新增] 若為 "food" 群組，在標籤列表最後追加一個輸入框
+      // food 群組的自訂輸入框
       if (group.id === 'food') {
         const inputWrapper = document.createElement('div');
         inputWrapper.className = 'chip custom-input';
@@ -506,7 +506,6 @@
         inputEl.type = 'text';
         inputEl.id = 'custom-food-input';
         inputEl.placeholder = LANGS[currentLang]?.customPlaceholder || 'Or type here...';
-        // 防止點擊輸入框時觸發父層 click (雖然目前 wrapper 沒 onclick，但保險起見)
         inputEl.onclick = (e) => e.stopPropagation();
 
         inputWrapper.appendChild(inputEl);
@@ -555,17 +554,15 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
-    // 標記這則評論「很有可能會被貼出去」
-  async function markAsPosted(storeid, reviewText) {
-    // storeid 或內容空的話就直接略過，不影響 UX
-    if (!storeid || !reviewText) return;
+  // ⭐ 改成用 reviewId 標記
+  async function markAsPosted(reviewId) {
+    if (!reviewId) return;
     try {
       await fetch("/.netlify/functions/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ storeid, reviewText })
+        body: JSON.stringify({ reviewId })
       });
-      // 不需要處理回傳；失敗也不要打斷使用者流程
     } catch (e) {
       console.error("markAsPosted error:", e);
     }
@@ -579,16 +576,14 @@
       return;
     }
 
-    // 1. 先告訴後端：這則評論「很有可能會被貼出去」
+    // 1. 先標記這一筆評論
     try {
-      // currentStore 是你前面已經定義的目前店家 ID
-      await markAsPosted(currentStore, txt);
+      await markAsPosted(currentReviewId);
     } catch (err) {
       console.error(err);
-      // 即使這裡失敗，也不要影響後面的複製與開啟
     }
 
-    // 2. 照原本流程：複製內容
+    // 2. 複製內容
     try {
       await navigator.clipboard.writeText(txt);
       $status.textContent = '';
@@ -611,7 +606,6 @@
     const positiveTags = allSelections.filter(([, data]) => !data.isCons).map(([tag]) => tag);
     const consTags = allSelections.filter(([, data]) => data.isCons).map(([tag]) => tag);
     
-    // ✅ [新增] 讀取自定義輸入框，如果有內容則加入 positiveTags
     const customInput = document.getElementById('custom-food-input');
     if (customInput && customInput.value.trim()) {
       positiveTags.push(customInput.value.trim());
@@ -634,6 +628,9 @@
       const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
+      // ⭐ 接住後端回傳的 reviewId
+      currentReviewId = data.reviewId || null;
+
       const reviewText=data.reviewText||''; $output.value=reviewText;
       if(data?.store?.placeId){
         googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId);
@@ -643,7 +640,6 @@
       isGenerated=true;
       renderUI();
 
-     // $status.textContent=({zh:'✅ 評論已產生！',en:'✅ Review generated!'}[currentLang]||'✅ Done')+' ('+(data.latencyMs||'-')+' ms)';
     }catch(err){
       $status.textContent=({zh:'❌ 發生錯誤：',en:'❌ Error: '}[currentLang]||'❌ Error: ')+err.message;
     }finally{
@@ -687,6 +683,7 @@
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
 
+    // hotfix 裡這個 click handler 只處理瀏覽器限制，不影響上面那個 markAsPosted
     openBtn && openBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
       const txt=(output.value||'').trim();
@@ -698,4 +695,5 @@
   </script>
 </body>
 </html>
+
 </html>
