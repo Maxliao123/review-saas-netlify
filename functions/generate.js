@@ -134,18 +134,22 @@ async function isTooSimilarSupabase(store_id, review_text, threshold = 0.82) {
   }
 }
 
-// 儲存評論到 Supabase
+// 儲存評論到 Supabase，並回傳這一筆的 id
 async function storeReviewSupabase(store_id, review_text) {
   const query = `
     INSERT INTO generated_reviews (store_id, review_text) 
-    VALUES ($1, $2);
+    VALUES ($1, $2)
+    RETURNING id;
   `;
   try {
-    await pgPool.query(query, [store_id, review_text]);
+    const { rows } = await pgPool.query(query, [store_id, review_text]);
+    return rows[0]?.id || null;
   } catch (e) {
     console.error("Supabase insert error:", e.message);
+    return null;
   }
 }
+
 
 // 節流：取得 IP
 function getIP(event) {
@@ -607,11 +611,15 @@ exports.handler = async (event, context) => {
       (useNewFormat ? consTags : []).length > 0
     );
 
+       // 先寫入 DB，拿到這一筆的 id
+    const reviewId = await storeReviewSupabase(storeid, text);
+
     const result = {
       reviewText: text,
       store: { name: storeName, placeId: meta.placeId || "" },
       usage,
       latencyMs,
+      reviewId, // ⭐ 新增這一行：告訴前端這一筆在 DB 的 id
       meta: {
         variant,
         abBucket,
@@ -623,8 +631,6 @@ exports.handler = async (event, context) => {
         lang: currentLang,
       },
     };
-
-    await storeReviewSupabase(storeid, text);
 
     if (REVIEW_WEBHOOK) {
       try {
