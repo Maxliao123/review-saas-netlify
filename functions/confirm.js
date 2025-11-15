@@ -1,9 +1,10 @@
 // functions/confirm.js
 const { Pool } = require("pg");
 
+// 連線到 Supabase Postgres
 const pgPool = new Pool({
   connectionString: process.env.SUPABASE_PG_URL,
-  ssl: { rejectUnauthorized: false }, // Supabase SSL
+  ssl: { rejectUnauthorized: false }, // Supabase 需要 SSL
 });
 
 exports.handler = async (event) => {
@@ -33,6 +34,7 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || "{}");
     const reviewId = body.reviewId;
 
+    // 沒帶 reviewId 就直接回 400，方便除錯
     if (!reviewId) {
       console.warn("confirm: missing reviewId in body");
       return {
@@ -42,6 +44,7 @@ exports.handler = async (event) => {
       };
     }
 
+    // 將這一筆評論標記為 likely_posted = TRUE
     const updateSql = `
       UPDATE generated_reviews
       SET likely_posted = TRUE
@@ -49,7 +52,12 @@ exports.handler = async (event) => {
     `;
     const updateRes = await pgPool.query(updateSql, [reviewId]);
 
-    console.log("confirm: updated rows =", updateRes.rowCount, "id =", reviewId);
+    console.log(
+      "confirm: updated rows =",
+      updateRes.rowCount,
+      "id =",
+      reviewId
+    );
 
     return {
       statusCode: 200,
@@ -65,5 +73,6 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
 
