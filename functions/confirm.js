@@ -30,48 +30,31 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 先試著解析 body（目前不用，但保留擴充空間）
-    try {
-      JSON.parse(event.body || "{}");
-    } catch (e) {
-      console.error("confirm parse body error:", e.message);
-    }
+    const body = JSON.parse(event.body || "{}");
+    const reviewId = body.reviewId;
 
-    // 第一步：找出目前表裡「最新一筆」的 id
-    const selectSql = `
-      SELECT id
-      FROM generated_reviews
-      ORDER BY created_at DESC
-      LIMIT 1;
-    `;
-    const { rows } = await pgPool.query(selectSql);
-
-    if (rows.length === 0) {
-      // 表裡還沒有任何資料，直接回 OK
-      console.log("confirm: no rows in generated_reviews yet.");
+    if (!reviewId) {
+      console.warn("confirm: missing reviewId in body");
       return {
-        statusCode: 200,
+        statusCode: 400,
         headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ ok: true, note: "no rows" }),
+        body: JSON.stringify({ error: "reviewId required" }),
       };
     }
 
-    const targetId = rows[0].id;
-
-    // 第二步：把那一筆標記為 likely_posted = TRUE
     const updateSql = `
       UPDATE generated_reviews
       SET likely_posted = TRUE
       WHERE id = $1;
     `;
-    const updateRes = await pgPool.query(updateSql, [targetId]);
+    const updateRes = await pgPool.query(updateSql, [reviewId]);
 
-    console.log("confirm: updated rows =", updateRes.rowCount, "id =", targetId);
+    console.log("confirm: updated rows =", updateRes.rowCount, "id =", reviewId);
 
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ ok: true, updatedId: targetId }),
+      body: JSON.stringify({ ok: true, updatedId: reviewId }),
     };
   } catch (e) {
     console.error("confirm.js error:", e);
@@ -82,4 +65,5 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
