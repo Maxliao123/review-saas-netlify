@@ -555,13 +555,53 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
+    // 標記這則評論「很有可能會被貼出去」
+  async function markAsPosted(storeid, reviewText) {
+    // storeid 或內容空的話就直接略過，不影響 UX
+    if (!storeid || !reviewText) return;
+    try {
+      await fetch("/.netlify/functions/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeid, reviewText })
+      });
+      // 不需要處理回傳；失敗也不要打斷使用者流程
+    } catch (e) {
+      console.error("markAsPosted error:", e);
+    }
+  }
+
   $openGoogle.addEventListener('click', async (e)=>{
     e.preventDefault();
-    const txt=($output.value||'').trim();
-    if(!txt){ $status.textContent='尚無內容可複製'; return; }
-    try{ await navigator.clipboard.writeText(txt); $status.textContent=''; }catch{ $status.textContent='請手動複製'; }
-    try{ window.open(googleReviewUrl_global,'_blank'); }catch{}
+    const txt = ($output.value || '').trim();
+    if (!txt) {
+      $status.textContent = '尚無內容可複製';
+      return;
+    }
+
+    // 1. 先告訴後端：這則評論「很有可能會被貼出去」
+    try {
+      // currentStore 是你前面已經定義的目前店家 ID
+      await markAsPosted(currentStore, txt);
+    } catch (err) {
+      console.error(err);
+      // 即使這裡失敗，也不要影響後面的複製與開啟
+    }
+
+    // 2. 照原本流程：複製內容
+    try {
+      await navigator.clipboard.writeText(txt);
+      $status.textContent = '';
+    } catch {
+      $status.textContent = '請手動複製';
+    }
+
+    // 3. 打開 Google 評論頁
+    try {
+      window.open(googleReviewUrl_global, '_blank');
+    } catch {}
   });
+
 
   async function generate(){
     const storeid=(currentStore||'').trim();
