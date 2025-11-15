@@ -30,31 +30,48 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 目前不強制需要 storeid / reviewText，
-    // 但先解析 body，未來要用的話也方便擴充
+    // 先試著解析 body（目前不用，但保留擴充空間）
     try {
       JSON.parse(event.body || "{}");
-    } catch (_) {}
+    } catch (e) {
+      console.error("confirm parse body error:", e.message);
+    }
 
-    // 👉 最簡單穩定版：
-    // 直接把 generated_reviews 裡「最新一筆」標記為 TRUE
-    const updateQuery = `
+    // 第一步：找出目前表裡「最新一筆」的 id
+    const selectSql = `
+      SELECT id
+      FROM generated_reviews
+      ORDER BY created_at DESC
+      LIMIT 1;
+    `;
+    const { rows } = await pgPool.query(selectSql);
+
+    if (rows.length === 0) {
+      // 表裡還沒有任何資料，直接回 OK
+      console.log("confirm: no rows in generated_reviews yet.");
+      return {
+        statusCode: 200,
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ ok: true, note: "no rows" }),
+      };
+    }
+
+    const targetId = rows[0].id;
+
+    // 第二步：把那一筆標記為 likely_posted = TRUE
+    const updateSql = `
       UPDATE generated_reviews
       SET likely_posted = TRUE
-      WHERE id = (
-        SELECT id
-        FROM generated_reviews
-        ORDER BY created_at DESC
-        LIMIT 1
-      );
+      WHERE id = $1;
     `;
+    const updateRes = await pgPool.query(updateSql, [targetId]);
 
-    await pgPool.query(updateQuery);
+    console.log("confirm: updated rows =", updateRes.rowCount, "id =", targetId);
 
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ ok: true }),
+      body: JSON.stringify({ ok: true, updatedId: targetId }),
     };
   } catch (e) {
     console.error("confirm.js error:", e);
@@ -65,3 +82,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
