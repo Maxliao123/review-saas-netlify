@@ -699,35 +699,43 @@ exports.handler = async (event, context) => {
       },
     };
 
-    if (REVIEW_WEBHOOK) {
-      try {
-        await fetch(REVIEW_WEBHOOK, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            timestamp: new Date().toISOString(),
-            storeid,
-            store: { name: storeName, placeId: meta.placeId || "" },
-            storeName,
-            placeId: meta.placeId || "",
-            selectedTags,
-            positiveTags,
-            consTags,
-            tagBuckets,
-            similarityInfo,
-            reviewText: text,
-            variant,
-            abBucket,
-            latencyMs,
-            usage,
-            lang: currentLang,
-            reviewId,
-            clientIp: ip,
-            userAgent: event.headers["user-agent"] || "",
-          }),
-        });
-      } catch (_) {}
-    }
+   if (REVIEW_WEBHOOK) {
+  try {
+    console.log("DEBUG sending webhook to:", REVIEW_WEBHOOK);
+
+    const resp = await fetch(REVIEW_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        timestamp: new Date().toISOString(),
+        storeid,
+        store: { name: storeName, placeId: meta.placeId || "" },
+        storeName,
+        placeId: meta.placeId || "",
+        selectedTags,
+        positiveTags,
+        consTags,
+        tagBuckets,
+        similarityInfo,
+        reviewText: text,
+        variant,
+        abBucket,
+        latencyMs,
+        usage,
+        lang: currentLang,
+        reviewId,
+        clientIp: ip,
+        userAgent: event.headers["user-agent"] || "",
+      }),
+    });
+
+    const respText = await resp.text().catch(() => "");
+    console.log("DEBUG webhook status:", resp.status, "body:", respText);
+  } catch (err) {
+    console.error("WEBHOOK ERROR:", err && err.message ? err.message : err);
+  }
+}
+
 
     // cacheSet(cacheKey, result);
     return json(result, 200);
