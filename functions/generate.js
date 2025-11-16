@@ -14,6 +14,8 @@ const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "30", 10);
 const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
 const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
+console.log("DEBUG REVIEW_WEBHOOK_URL =", process.env.REVIEW_WEBHOOK_URL);
+
 // 相似度門檻（pg_trgm similarity），超過就觸發 rewrite
 const SIMILARITY_THRESHOLD = 0.5;
 
