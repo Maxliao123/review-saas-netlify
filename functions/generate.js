@@ -16,8 +16,10 @@ const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
 
 console.log("DEBUG REVIEW_WEBHOOK_URL =", process.env.REVIEW_WEBHOOK_URL);
 
-// 相似度門檻（pg_trgm similarity），超過就觸發 rewrite
-const SIMILARITY_THRESHOLD = 0.5;
+// 相似度門檻（pg_trgm similarity）
+const SIMILARITY_THRESHOLD = 0.5;   // 給 DB function 預設用
+const SIM_TIER_LOW         = 0.3;   // < 0.3 不重寫
+const SIM_TIER_HIGH        = 0.5;   // >= 0.5 重寫 2 次
 
 // ✅ 引入 pg 並建立 Supabase 連線池
 const { Pool } = require("pg");
@@ -116,6 +118,37 @@ function pickVariant(seedA, seedB) {
 }
 function pickAB(storeid) {
   return (hashStr(storeid) % 2) === 0 ? "A" : "B";
+}
+
+// ⭐ Persona 定義
+const PERSONAS = [
+  {
+    key: "family_foodie",
+    enLabel: "family customer",
+    enHint: "Warm and friendly tone, may mention good vibe for coming with family or friends.",
+    zhLabel: "家庭客",
+    zhHint: "語氣溫暖自然，適合提到一起用餐、分享的感覺，讓人覺得很適合聚餐與團聚。"
+  },
+  {
+    key: "busy_professional",
+    enLabel: "busy professional",
+    enHint: "Direct and efficient tone, cares about speed, convenience and value.",
+    zhLabel: "上班族 / 午餐客",
+    zhHint: "語氣俐落，重點放在出餐速度、方便性和CP值。"
+  },
+  {
+    key: "detail_lover",
+    enLabel: "detail-oriented foodie",
+    enHint: "Enjoys describing texture, flavour, portion size and small details.",
+    zhLabel: "細節控 / 美食控",
+    zhHint: "會多描述口感、香氣、份量等細節，讓畫面感更強。"
+  }
+];
+
+function pickPersona(storeid, lang) {
+  if (!storeid) return null;
+  const idx = hashStr(`${storeid}|${lang || ""}`) % PERSONAS.length;
+  return PERSONAS[idx];
 }
 
 // Supabase 去重檢查：回傳 tooSimilar + maxSim
@@ -298,6 +331,7 @@ function buildPrompt({
   minChars,
   maxChars,
   variant,
+  persona,
 }) {
   const ref = [];
   if (meta.top3) ref.push(`Top: ${meta.top3}`);
@@ -308,6 +342,13 @@ function buildPrompt({
   const joinedPosTags = (positiveTags || []).join(", ");
   const joinedConsTags = (consTags || []).join(", ");
   const rangeText = `${minChars}-${maxChars}`;
+
+  const personaLineEn = persona
+    ? `Write in the voice of a ${persona.enLabel} customer: ${persona.enHint}`
+    : "";
+  const personaLineZh = persona
+    ? `請用「${persona.zhLabel || persona.enLabel}」的口吻來寫：${persona.zhHint || persona.enHint}`
+    : "";
 
   const T = {
     en: {
@@ -323,6 +364,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `Store: ${storeName} (id: ${storeid})`,
+        personaLineEn,
         `Positive keywords: ${joinedPosTags || "(none provided)"}`,
         consTags.length > 0
           ? `Improvement keywords (use 1–2 as mild suggestions): ${joinedConsTags}`
@@ -351,6 +393,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `店名：${storeName}（id: ${storeid}）`,
+        personaLineZh,
         `正面關鍵詞：${joinedPosTags || "（無）"}`,
         consTags.length > 0
           ? `改進建議（溫和帶出 1–2 項即可）：${joinedConsTags}`
@@ -365,7 +408,7 @@ function buildPrompt({
         .filter(Boolean)
         .join("\n"),
     },
-    // 其他語言維持原本邏輯
+    // 其他語言維持原本邏輯，但仍可看懂 personaLineEn
     ko: {
       sys: [
         "당신은 현지에 밝은 음식 리뷰어입니다.",
@@ -377,6 +420,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `매장: ${storeName} (id: ${storeid})`,
+        personaLineEn,
         `긍정적 키워드: ${joinedPosTags || "(없음)"}`,
         consTags.length > 0
           ? `개선 제안 (1-2개, 부드럽게): ${joinedConsTags}`
@@ -402,6 +446,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `店名：${storeName}（id: ${storeid}）`,
+        personaLineEn,
         `ポジティブキーワード：${joinedPosTags || "（なし）"}`,
         consTags.length > 0
           ? `改善提案 (1-2点、穏やかに)：${joinedConsTags}`
@@ -427,6 +472,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `Établissement : ${storeName} (id : ${storeid})`,
+        personaLineEn,
         `Mots-clés positifs : ${joinedPosTags || "(aucun)"}`,
         consTags.length > 0
           ? `Suggestions d'amélioration (1–2, avec tact) : ${joinedConsTags}`
@@ -452,6 +498,7 @@ function buildPrompt({
       ].join("\n"),
       user: [
         `Lugar: ${storeName} (id: ${storeid})`,
+        personaLineEn,
         `Palabras clave positivas: ${joinedPosTags || "(ninguna)"}`,
         consTags.length > 0
           ? `Sugerencias de mejora (1–2, con tacto): ${joinedConsTags}`
@@ -481,6 +528,13 @@ const MICRO = [
   "可以稍微提到份量、價格或 CP 值，但不要像廣告文案，要像客人真實的心得。",
   "如果有改進建議，用一兩個字帶過，例如『如果…會更好』，整體仍維持正向。",
 ];
+
+function riskLevelFromSim(sim) {
+  if (sim == null || isNaN(sim)) return "unknown";
+  if (sim >= 0.6) return "High";
+  if (sim >= 0.4) return "Medium";
+  return "Low";
+}
 
 // ⭐ 若沒選 consTags，卻寫出「如果…就更好」這類句子，再做一次重寫成純好評
 async function enforceNoImprovementIfNoCons(text, lang, hasCons) {
@@ -586,6 +640,7 @@ exports.handler = async (event, context) => {
 
     const variant = pickVariant(storeid, selectedTags);
     const abBucket = pickAB(storeid);
+    const persona = pickPersona(storeid, currentLang);
 
     const cacheKey = stableKey({
       storeid,
@@ -615,6 +670,7 @@ exports.handler = async (event, context) => {
       minChars,
       maxChars,
       variant,
+      persona,
     });
 
     // 第一次生成
@@ -639,35 +695,55 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // ✅ 呼叫 Supabase 進行去重檢查 + 監控
-    const similarityCheck = await isTooSimilarSupabase(
-      storeid,
-      text,
-      SIMILARITY_THRESHOLD
-    );
+    // ✅ 呼叫 Supabase 進行去重檢查 + 監控（Rewrite V2）
     const similarityInfo = {
-      thresholdUsed: SIMILARITY_THRESHOLD,
-      maxSimBefore: similarityCheck?.maxSim ?? null,
+      thresholdUsed: { low: SIM_TIER_LOW, high: SIM_TIER_HIGH },
+      maxSimBefore: null,
       maxSimAfter: null,
       rewroteForSimilarity: false,
+      rewriteAttempts: 0,
+      riskLevel: "unknown",
     };
 
-    if (similarityCheck?.tooSimilar) {
-      similarityInfo.rewroteForSimilarity = true;
-      const hint = MICRO[hashStr(text) % MICRO.length];
-      const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
-      text = retry.text || text;
-      usage = retry.usage || usage;
-      latencyMs += retry.latencyMs || 0;
+    const initialCheck = await isTooSimilarSupabase(storeid, text, 0);
+    similarityInfo.maxSimBefore = initialCheck?.maxSim ?? null;
 
-      // 重寫後再看一次實際相似度，純做監控用途
-      const afterCheck = await isTooSimilarSupabase(
-        storeid,
-        text,
-        SIMILARITY_THRESHOLD
-      );
-      similarityInfo.maxSimAfter = afterCheck?.maxSim ?? null;
+    const simBefore = similarityInfo.maxSimBefore;
+    let rewriteAttempts = 0;
+
+    if (typeof simBefore === "number") {
+      let maxAttempts = 0;
+      if (simBefore >= SIM_TIER_HIGH) {
+        maxAttempts = 2;
+      } else if (simBefore >= SIM_TIER_LOW) {
+        maxAttempts = 1;
+      }
+
+      for (let i = 0; i < maxAttempts; i++) {
+        const hint = MICRO[hashStr(text + "|" + i) % MICRO.length];
+        const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
+        text = retry.text || text;
+        usage = retry.usage || usage;
+        latencyMs += retry.latencyMs || 0;
+        rewriteAttempts++;
+
+        const afterCheck = await isTooSimilarSupabase(storeid, text, 0);
+        similarityInfo.maxSimAfter = afterCheck?.maxSim ?? null;
+
+        if (
+          typeof similarityInfo.maxSimAfter === "number" &&
+          similarityInfo.maxSimAfter < SIM_TIER_LOW
+        ) {
+          break; // 已經夠低了
+        }
+      }
+
+      if (rewriteAttempts > 0) {
+        similarityInfo.rewroteForSimilarity = true;
+      }
     }
+
+    similarityInfo.rewriteAttempts = rewriteAttempts;
 
     // 再確保：沒有 consTags 時，不要出現「如果…更好」這類句子
     text = await enforceNoImprovementIfNoCons(
@@ -675,6 +751,13 @@ exports.handler = async (event, context) => {
       currentLang,
       (useNewFormat ? consTags : []).length > 0
     );
+
+    // risk level：優先看 maxSimAfter，沒有就看 maxSimBefore
+    const simForRisk =
+      typeof similarityInfo.maxSimAfter === "number"
+        ? similarityInfo.maxSimAfter
+        : similarityInfo.maxSimBefore;
+    similarityInfo.riskLevel = riskLevelFromSim(simForRisk);
 
     // ⭐ 先寫入 DB，拿到這一筆的 id（含標籤欄位）
     const reviewId = await storeReviewSupabase(storeid, text, tagBuckets);
@@ -688,6 +771,8 @@ exports.handler = async (event, context) => {
       meta: {
         variant,
         abBucket,
+        persona: persona ? persona.key : null,
+        personaLabel: persona ? persona.zhLabel || persona.enLabel : null,
         minChars,
         maxChars,
         tags: selectedTags,
@@ -699,43 +784,44 @@ exports.handler = async (event, context) => {
       },
     };
 
-   if (REVIEW_WEBHOOK) {
-  try {
-    console.log("DEBUG sending webhook to:", REVIEW_WEBHOOK);
+    if (REVIEW_WEBHOOK) {
+      try {
+        console.log("DEBUG sending webhook to:", REVIEW_WEBHOOK);
 
-    const resp = await fetch(REVIEW_WEBHOOK, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        timestamp: new Date().toISOString(),
-        storeid,
-        store: { name: storeName, placeId: meta.placeId || "" },
-        storeName,
-        placeId: meta.placeId || "",
-        selectedTags,
-        positiveTags,
-        consTags,
-        tagBuckets,
-        similarityInfo,
-        reviewText: text,
-        variant,
-        abBucket,
-        latencyMs,
-        usage,
-        lang: currentLang,
-        reviewId,
-        clientIp: ip,
-        userAgent: event.headers["user-agent"] || "",
-      }),
-    });
+        const resp = await fetch(REVIEW_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            timestamp: new Date().toISOString(),
+            storeid,
+            store: { name: storeName, placeId: meta.placeId || "" },
+            storeName,
+            placeId: meta.placeId || "",
+            selectedTags,
+            positiveTags,
+            consTags,
+            tagBuckets,
+            similarityInfo,
+            personaKey: persona ? persona.key : null,
+            personaLabel: persona ? persona.zhLabel || persona.enLabel : null,
+            reviewText: text,
+            variant,
+            abBucket,
+            latencyMs,
+            usage,
+            lang: currentLang,
+            reviewId,
+            clientIp: ip,
+            userAgent: event.headers["user-agent"] || "",
+          }),
+        });
 
-    const respText = await resp.text().catch(() => "");
-    console.log("DEBUG webhook status:", resp.status, "body:", respText);
-  } catch (err) {
-    console.error("WEBHOOK ERROR:", err && err.message ? err.message : err);
-  }
-}
-
+        const respText = await resp.text().catch(() => "");
+        console.log("DEBUG webhook status:", resp.status, "body:", respText);
+      } catch (err) {
+        console.error("WEBHOOK ERROR:", err && err.message ? err.message : err);
+      }
+    }
 
     // cacheSet(cacheKey, result);
     return json(result, 200);
@@ -744,3 +830,4 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
+
