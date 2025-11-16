@@ -1,6 +1,6 @@
 // functions/generate.js
 // POST /api/generate
-// Body: { storeid, positiveTags: string[], consTags: string[], lang?, minChars?, maxChars? }
+// Body: { storeid, positiveTags: string[], consTags: string[], lang?, minChars?, maxChars?, tagBuckets? }
 
 const OPENAI_API_KEY   = process.env.OPENAI_API_KEY;
 const SHEET_ID         = process.env.SHEET_ID;
@@ -134,15 +134,51 @@ async function isTooSimilarSupabase(store_id, review_text, threshold = 0.82) {
   }
 }
 
-// ⭐ 儲存評論到 Supabase，並回傳這一筆的 id
-async function storeReviewSupabase(store_id, review_text) {
+// ⭐ 儲存評論到 Supabase，並回傳這一筆的 id（含標籤欄位）
+async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
+  const {
+    posTop3 = [],
+    posFeatures = [],
+    posAmbiance = [],
+    posNewItems = [],
+    customFood = null,
+    cons = [],
+    customCons = null,
+  } = tagBuckets || {};
+
   const query = `
-    INSERT INTO generated_reviews (store_id, review_text) 
-    VALUES ($1, $2)
+    INSERT INTO generated_reviews (
+      store_id,
+      review_text,
+      pos_top3_tags,
+      pos_features_tags,
+      pos_ambiance_tags,
+      pos_newitems_tags,
+      custom_food_tag,
+      cons_tags,
+      custom_cons_tag
+    )
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
     RETURNING id;
   `;
+
+  const safeJoin = (val) =>
+    Array.isArray(val) ? val.join(",") : (val == null ? null : String(val));
+
+  const values = [
+    store_id,
+    review_text,
+    safeJoin(posTop3),
+    safeJoin(posFeatures),
+    safeJoin(posAmbiance),
+    safeJoin(posNewItems),
+    customFood == null || customFood === "" ? null : String(customFood),
+    safeJoin(cons),
+    customCons == null || customCons === "" ? null : String(customCons),
+  ];
+
   try {
-    const { rows } = await pgPool.query(query, [store_id, review_text]);
+    const { rows } = await pgPool.query(query, values);
     return rows?.[0]?.id || null;
   } catch (e) {
     console.error("Supabase insert error:", e.message);
@@ -517,6 +553,8 @@ exports.handler = async (event, context) => {
       ? body.positiveTags
       : [];
     const consTags = Array.isArray(body.consTags) ? body.consTags : [];
+    const tagBuckets = body.tagBuckets || {};
+
     let selectedTags;
     const useNewFormat = positiveTags.length > 0 || consTags.length > 0;
 
@@ -609,8 +647,8 @@ exports.handler = async (event, context) => {
       (useNewFormat ? consTags : []).length > 0
     );
 
-    // ⭐ 先寫入 DB，拿到這一筆的 id
-    const reviewId = await storeReviewSupabase(storeid, text);
+    // ⭐ 先寫入 DB，拿到這一筆的 id（含標籤欄位）
+    const reviewId = await storeReviewSupabase(storeid, text, tagBuckets);
 
     const result = {
       reviewText: text,
@@ -627,6 +665,7 @@ exports.handler = async (event, context) => {
         positiveTags,
         consTags,
         lang: currentLang,
+        tagBuckets,
       },
     };
 
@@ -644,6 +683,7 @@ exports.handler = async (event, context) => {
             selectedTags,
             positiveTags,
             consTags,
+            tagBuckets,
             reviewText: text,
             variant,
             abBucket,
@@ -664,4 +704,5 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
+
 
