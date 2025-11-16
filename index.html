@@ -199,7 +199,7 @@
   function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const M=Math.max(r,g,b),m=Math.min(r,g,b);let h,s,l=(M+m)/2;if(M===m){h=s=0}else{const d=M-m;s=l>0.5?d/(2-M-m):d/(M+m);switch(M){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break}h/=6}return{h,s,l}}
   function hslToRgb(h,s,l){let r,g,b;if(s===0){r=g=b=l}else{const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q,f=t=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};r=f(h+1/3);g=f(h);b=f(h-1/3)}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)}}
   const normHex=h=>{if(!h)return'';let s=String(h).trim();if(!s.startsWith('#'))s='#'+s;if(/^#([0-9a-fA-F]{3})$/.test(s)){const[,r,g,b]=s.match(/^#(.)(.)(.)$/);s='#'+r+r+g+g+b+b}return /^#([0-9a-fA-F]{6})$/.test(s)?s.toUpperCase():''};
-  const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,b)}
+  const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,rgb.b)}
   const autoOnColor=bg=>{const {r,g,b}=hexToRgb(bg);const L=0.2126*(r/255)+0.7152*(g/255)+0.0722*(b/255);return (L<0.56)?'#FFFFFF':'#0B1220'}
   
   function applyBlueScale(baseHex,onHex){
