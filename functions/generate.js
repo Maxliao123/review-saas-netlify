@@ -76,7 +76,7 @@ function hashStr(s) {
   return Math.abs(h);
 }
 
-// 讀店家 row（A..G）
+// 讀 Google Sheet 的店家 row（A..G）
 async function fetchStoreRow(storeidLower) {
   if (!SHEET_ID) return null;
   const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
@@ -102,6 +102,51 @@ async function fetchStoreRow(storeidLower) {
     ambiance: val(5),
     newItems: val(6),
   };
+}
+
+/**
+ * ⭐ 從 Supabase stores + Google Sheet 組合出：
+ * - storeRow: Supabase stores 列（含 tenant_id）
+ * - tenantId
+ * - meta: { name, placeId, top3, features, ambiance, newItems ... }
+ */
+async function getStoreContext(storeidRaw) {
+  const slug = (storeidRaw || "").toLowerCase();
+  let storeRow = null;
+
+  // 1) 從 Supabase stores 找 tenant_id / 自訂名稱 / place_id
+  try {
+    const { rows } = await pgPool.query(
+      "SELECT id, tenant_id, slug, name, place_id FROM stores WHERE slug = $1 LIMIT 1",
+      [slug]
+    );
+    storeRow = rows?.[0] || null;
+  } catch (e) {
+    console.error("getStoreContext: stores query error:", e.message);
+  }
+
+  // 2) 從 Google Sheet 讀 Top3 / Features / Ambiance 等
+  let sheetMeta = null;
+  try {
+    sheetMeta = await fetchStoreRow(slug);
+  } catch (e) {
+    console.error("getStoreContext: fetchStoreRow error:", e.message);
+  }
+
+  const storeName =
+    storeRow?.name || sheetMeta?.name || storeidRaw || slug || "Unknown store";
+  const placeId =
+    storeRow?.place_id || sheetMeta?.placeId || "";
+
+  const meta = {
+    ...(sheetMeta || {}),
+    name: storeName,
+    placeId,
+  };
+
+  const tenantId = storeRow?.tenant_id || null;
+
+  return { storeRow, tenantId, meta };
 }
 
 // 穩定隨機變體 + AB bucket
@@ -175,8 +220,23 @@ async function isTooSimilarSupabase(store_id, review_text, threshold = SIMILARIT
   }
 }
 
-// ⭐ 儲存評論到 Supabase，並回傳這一筆的 id（含標籤欄位）
-async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
+/**
+ * ⭐ 儲存評論到 Supabase，並回傳這一筆的 id（含標籤欄位與多租戶欄位）
+ * 入參改成一個物件，減少之後擴充時需要大改。
+ */
+async function storeReviewSupabase({
+  store_id,
+  tenant_id = null,
+  review_text,
+  lang = null,
+  personaKey = null,
+  abBucket = null,
+  variant = null,
+  latencyMs = null,
+  usage = {},
+  similarityInfo = {},
+  tagBuckets = {},
+}) {
   const {
     posTop3 = [],
     posFeatures = [],
@@ -187,10 +247,42 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
     customCons = null,
   } = tagBuckets || {};
 
+  const safeJoin = (val) =>
+    Array.isArray(val) ? val.join(",") : (val == null ? null : String(val));
+
+  const inputTokens  = usage?.prompt_tokens ?? null;
+  const outputTokens = usage?.completion_tokens ?? null;
+
+  const maxSimBefore = typeof similarityInfo.maxSimBefore === "number"
+    ? similarityInfo.maxSimBefore
+    : null;
+  const maxSimAfter  = typeof similarityInfo.maxSimAfter === "number"
+    ? similarityInfo.maxSimAfter
+    : null;
+  const rewroteForSimilarity =
+    typeof similarityInfo.rewroteForSimilarity === "boolean"
+      ? similarityInfo.rewroteForSimilarity
+      : null;
+  const riskLevel    = similarityInfo.riskLevel || null;
+  const thresholdUsed = SIM_TIER_HIGH; // 簡單紀錄我們使用的較高門檻
+
   const query = `
     INSERT INTO generated_reviews (
       store_id,
+      tenant_id,
       review_text,
+      lang,
+      persona,
+      ab_bucket,
+      variant,
+      latency_ms,
+      input_tokens,
+      output_tokens,
+      max_sim_before,
+      max_sim_after,
+      threshold_used,
+      rewrote_for_similarity,
+      risk_level,
       pos_top3_tags,
       pos_features_tags,
       pos_ambiance_tags,
@@ -199,16 +291,30 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
       cons_tags,
       custom_cons_tag
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+    VALUES (
+      $1,$2,$3,$4,$5,$6,$7,$8,
+      $9,$10,$11,$12,$13,$14,$15,
+      $16,$17,$18,$19,$20,$21,$22
+    )
     RETURNING id;
   `;
 
-  const safeJoin = (val) =>
-    Array.isArray(val) ? val.join(",") : (val == null ? null : String(val));
-
   const values = [
     store_id,
+    tenant_id,
     review_text,
+    lang,
+    personaKey,
+    abBucket,
+    typeof variant === "number" ? variant : null,
+    typeof latencyMs === "number" ? Math.round(latencyMs) : null,
+    inputTokens,
+    outputTokens,
+    maxSimBefore,
+    maxSimAfter,
+    thresholdUsed,
+    rewroteForSimilarity,
+    riskLevel,
     safeJoin(posTop3),
     safeJoin(posFeatures),
     safeJoin(posAmbiance),
@@ -653,11 +759,8 @@ exports.handler = async (event, context) => {
     // const cached = cacheGet(cacheKey);
     // if (cached) return json(cached, 200);
 
-    const meta =
-      (await fetchStoreRow(storeid.toLowerCase())) || {
-        name: storeid,
-        placeId: "",
-      };
+    // ⭐ 這裡改成從 Supabase + Google Sheet 取店家資訊 + tenant_id
+    const { tenantId, meta } = await getStoreContext(storeid);
     const storeName = meta.name || storeid;
 
     const { sys, user } = buildPrompt({
@@ -759,8 +862,20 @@ exports.handler = async (event, context) => {
         : similarityInfo.maxSimBefore;
     similarityInfo.riskLevel = riskLevelFromSim(simForRisk);
 
-    // ⭐ 先寫入 DB，拿到這一筆的 id（含標籤欄位）
-    const reviewId = await storeReviewSupabase(storeid, text, tagBuckets);
+    // ⭐ 寫入 DB（含 tenant_id / lang / persona / latency / tokens / similarity）
+    const reviewId = await storeReviewSupabase({
+      store_id: storeid,
+      tenant_id: tenantId,
+      review_text: text,
+      lang: currentLang,
+      personaKey: persona ? persona.key : null,
+      abBucket,
+      variant,
+      latencyMs,
+      usage,
+      similarityInfo,
+      tagBuckets,
+    });
 
     const result = {
       reviewText: text,
@@ -830,4 +945,5 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
+
 
