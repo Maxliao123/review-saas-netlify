@@ -343,13 +343,13 @@
   const $thanksNotice=document.getElementById('thanksNotice');
   const $thanksMessage=document.getElementById('thanksMessage');
 
-  let selected=new Map();
-  let currentStore=getStoreFromURL()||'leegarnei';
-  let currentLang='zh';
-  let storeMeta=null, availableLangs=[], storeNames=null;
-  let googleReviewUrl_global='';
-  let isGenerated=false;
-  let currentReviewId = null; // ⭐ 新增：目前這一則評論在 DB 的 id
+  let selected = new Map();
+  let currentStore = getStoreFromURL() || 'leegarnei';
+  let currentLang = 'zh';
+  let storeMeta = null, availableLangs = [], storeNames = null;
+  let googleReviewUrl_global = '';
+  let isGenerated = false;
+  let currentReviewId = null; // ⭐ 記錄這一次產生的 review 在 DB 的 id
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
@@ -554,9 +554,9 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
-  // ⭐ 改成用 reviewId 標記
+  // ⭐ 標記這則評論「很有可能會被貼出去」
   async function markAsPosted(reviewId) {
-    if (!reviewId) return;
+    if (!reviewId) return; // 沒 id 就直接略過
     try {
       await fetch("/.netlify/functions/confirm", {
         method: "POST",
@@ -568,6 +568,7 @@
     }
   }
 
+  // ⭐ 點「複製並開啟 Google 評論」時：先標記 likely_posted，再複製並開頁面
   $openGoogle.addEventListener('click', async (e)=>{
     e.preventDefault();
     const txt = ($output.value || '').trim();
@@ -576,14 +577,15 @@
       return;
     }
 
-    // 1. 先標記這一筆評論
+    // 1. 告訴後端：這一筆 id 很有可能會被貼出去
     try {
       await markAsPosted(currentReviewId);
     } catch (err) {
       console.error(err);
+      // 即使失敗也不要影響後面的複製 & 開啟
     }
 
-    // 2. 複製內容
+    // 2. 複製
     try {
       await navigator.clipboard.writeText(txt);
       $status.textContent = '';
@@ -596,7 +598,6 @@
       window.open(googleReviewUrl_global, '_blank');
     } catch {}
   });
-
 
   async function generate(){
     const storeid=(currentStore||'').trim();
@@ -626,12 +627,14 @@
 
     try{
       const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
+      const data=await res.json(); 
+      if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
-      // ⭐ 接住後端回傳的 reviewId
+      // ⭐ 接住這一筆在 Supabase 的 id
       currentReviewId = data.reviewId || null;
 
-      const reviewText=data.reviewText||''; $output.value=reviewText;
+      const reviewText=data.reviewText||''; 
+      $output.value=reviewText;
       if(data?.store?.placeId){
         googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId);
         $openGoogle.href=googleReviewUrl_global;
@@ -683,7 +686,8 @@
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
 
-    // hotfix 裡這個 click handler 只處理瀏覽器限制，不影響上面那個 markAsPosted
+    // 原本這裡有第二個 openBtn click handler，已註解掉避免與上方的 markAsPosted 邏輯衝突
+    /*
     openBtn && openBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
       const txt=(output.value||'').trim();
@@ -691,9 +695,8 @@
       try{ await navigator.clipboard.writeText(txt); status && (status.textContent=''); }catch{ status && (status.textContent='請手動複製'); }
       try{ _open.call(window, window.googleReviewUrl_global || openBtn.href, '_blank'); }catch{}
     }, { capture:false });
+    */
   })();
   </script>
 </body>
-</html>
-
 </html>
