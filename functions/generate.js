@@ -134,7 +134,7 @@ async function isTooSimilarSupabase(store_id, review_text, threshold = 0.82) {
   }
 }
 
-// 儲存評論到 Supabase，並回傳這一筆的 id
+// ⭐ 儲存評論到 Supabase，並回傳這一筆的 id
 async function storeReviewSupabase(store_id, review_text) {
   const query = `
     INSERT INTO generated_reviews (store_id, review_text) 
@@ -143,13 +143,12 @@ async function storeReviewSupabase(store_id, review_text) {
   `;
   try {
     const { rows } = await pgPool.query(query, [store_id, review_text]);
-    return rows[0]?.id || null;
+    return rows?.[0]?.id || null;
   } catch (e) {
     console.error("Supabase insert error:", e.message);
     return null;
   }
 }
-
 
 // 節流：取得 IP
 function getIP(event) {
@@ -322,7 +321,7 @@ function buildPrompt({
         .filter(Boolean)
         .join("\n"),
     },
-    // 其他語言維持原本邏輯（已有封口令）
+    // 其他語言維持原本邏輯
     ko: {
       sys: [
         "당신은 현지에 밝은 음식 리뷰어입니다.",
@@ -428,7 +427,7 @@ function buildPrompt({
   return T[lang] || T["en"];
 }
 
-// 微提示池（重試時替換）— 加強版：真人感 + Google Review 友善
+// 微提示池
 const MICRO = [
   "改成第一人稱的口吻，像是在跟朋友分享今日用餐經驗，加入一個具體的小細節。",
   "開頭不要用『整體來說』或『這次用餐』，換成直接描述最有印象的亮點，再補一句感受。",
@@ -572,12 +571,11 @@ exports.handler = async (event, context) => {
       variant,
     });
 
-        // 第一次生成
+    // 第一次生成
     let { text, usage, latencyMs } = await callOpenAI(sys, user);
 
     // ✅ 若「沒有選改進建議」，但文字裡出現疑似建議語氣，用一次改寫把它變成全正向
     if (consTags.length === 0) {
-      // 很簡單的中文關鍵字偵測：如果、建議、希望、更好
       const suspicious = /如果|建議|希望|更好/g;
       if (suspicious.test(text)) {
         const fixHint =
@@ -595,7 +593,7 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // ✅ 呼叫 Supabase 進行去重檢查 (注意 await)
+    // ✅ 呼叫 Supabase 進行去重檢查
     if (await isTooSimilarSupabase(storeid, text, 0.6)) {
       const hint = MICRO[hashStr(text) % MICRO.length];
       const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
@@ -611,7 +609,7 @@ exports.handler = async (event, context) => {
       (useNewFormat ? consTags : []).length > 0
     );
 
-       // 先寫入 DB，拿到這一筆的 id
+    // ⭐ 先寫入 DB，拿到這一筆的 id
     const reviewId = await storeReviewSupabase(storeid, text);
 
     const result = {
@@ -619,7 +617,7 @@ exports.handler = async (event, context) => {
       store: { name: storeName, placeId: meta.placeId || "" },
       usage,
       latencyMs,
-      reviewId, // ⭐ 新增這一行：告訴前端這一筆在 DB 的 id
+      reviewId, // ⭐ 回傳這一筆在 DB 的 id
       meta: {
         variant,
         abBucket,
