@@ -118,7 +118,6 @@ function pickAB(storeid) {
 
 // Supabase 去重檢查：回傳 tooSimilar + maxSim
 async function isTooSimilarSupabase(store_id, review_text, threshold = SIMILARITY_THRESHOLD) {
-  // 回傳 { tooSimilar, maxSim } 方便後面做監控與 webhook 紀錄
   const query = `
     SELECT similarity(review_text, $2) AS sim
     FROM generated_reviews 
@@ -683,7 +682,7 @@ exports.handler = async (event, context) => {
       store: { name: storeName, placeId: meta.placeId || "" },
       usage,
       latencyMs,
-      reviewId, // ⭐ 回傳這一筆在 DB 的 id
+      reviewId,
       meta: {
         variant,
         abBucket,
@@ -720,6 +719,7 @@ exports.handler = async (event, context) => {
             latencyMs,
             usage,
             lang: currentLang,
+            reviewId,
             clientIp: ip,
             userAgent: event.headers["user-agent"] || "",
           }),
@@ -734,4 +734,3 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
