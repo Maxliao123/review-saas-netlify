@@ -1,4 +1,6 @@
 // functions/confirm.js
+// 用戶按「已貼上 / 可能會貼」後，回寫 generated_reviews 的 likely_posted + 標籤欄位
+
 const { Pool } = require("pg");
 
 // 連線到 Supabase Postgres
@@ -101,5 +103,6 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
 
