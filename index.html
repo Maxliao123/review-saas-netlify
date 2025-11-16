@@ -199,7 +199,7 @@
   function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const M=Math.max(r,g,b),m=Math.min(r,g,b);let h,s,l=(M+m)/2;if(M===m){h=s=0}else{const d=M-m;s=l>0.5?d/(2-M-m):d/(M+m);switch(M){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break}h/=6}return{h,s,l}}
   function hslToRgb(h,s,l){let r,g,b;if(s===0){r=g=b=l}else{const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q,f=t=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};r=f(h+1/3);g=f(h);b=f(h-1/3)}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)}}
   const normHex=h=>{if(!h)return'';let s=String(h).trim();if(!s.startsWith('#'))s='#'+s;if(/^#([0-9a-fA-F]{3})$/.test(s)){const[,r,g,b]=s.match(/^#(.)(.)(.)$/);s='#'+r+r+g+g+b+b}return /^#([0-9a-fA-F]{6})$/.test(s)?s.toUpperCase():''};
-  const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,rgb.b)}
+  const lighten=(hex,d)=>{const {r,g,b}=hexToRgb(hex),hsl=rgbToHsl(r,g,b);hsl.l=Math.max(0,Math.min(1,hsl.l+Math.abs(d)));hsl.s=Math.max(0,Math.min(0.92,hsl.s*1.00));const rgb=hslToRgb(hsl.h,hsl.s,hsl.l);return rgbToHex(rgb.r,rgb.g,b)}
   const autoOnColor=bg=>{const {r,g,b}=hexToRgb(bg);const L=0.2126*(r/255)+0.7152*(g/255)+0.0722*(b/255);return (L<0.56)?'#FFFFFF':'#0B1220'}
   
   function applyBlueScale(baseHex,onHex){
@@ -245,32 +245,38 @@
     en:{
       label:'EN',
       ui:{title:'How was your experience at "{name}"?',sub:'Select the tags that best match your feelings, and they will be automatically compiled into a Google Review draft for you.',gen:'✍️ Generate & Claim Reward',open:'Copy & Open Google',placeholder:'Your summarized review will appear here…'},
-      customPlaceholder: 'Or type here...'
+      customPlaceholder: 'Or type here...',
+      customConsPlaceholder: 'Or type another suggestion...'
     },
     zh:{
       label:'中',
       ui:{title:'「{name}」的用餐體驗如何？',sub:'請點選幾個最符合您感受的標籤，將自動為您彙整成一份 Google 評論草稿。',gen:'✍️ 產生評論並領取獎勵',open:'📋 複製並開啟google評論',placeholder:'這裡會顯示整理後的一段短評…'},
-      customPlaceholder: '或輸入其他餐點...'
+      customPlaceholder: '或輸入其他餐點...',
+      customConsPlaceholder: '或輸入其他建議...'
     },
     ko:{
       label:'한국어',
       ui:{title:'“{name}”에서의 경험은 어떠셨나요?',sub:'느끼신 점과 가장 일치하는 태그를 선택하시면, Google 리뷰 초안으로 자동 취합됩니다.',gen:'✍️ 작성 및 리워드 받기',open:'📋 복사 및 Google 열기',placeholder:'요약된 리뷰가 여기에 표시됩니다…'},
-      customPlaceholder: '직접 입력...'
+      customPlaceholder: '직접 입력...',
+      customConsPlaceholder: '다른 제안을 입력...'
     },
     ja:{
       label:'日本語',
       ui:{title:'「{name}」でのご体験はいかがでしたか？',sub:'ご感想に最も近いタグをいくつか選択してください。Google レビューの下書きが自動的に作成されます。',gen:'✍️ 作成して特典を受け取る',open:'📋 コピーして Google を開く',placeholder:'要約したレビューが表示されます…'},
-      customPlaceholder: 'その他を入力...'
+      customPlaceholder: 'その他を入力...',
+      customConsPlaceholder: 'ほかの提案を入力...'
     },
     fr:{
       label:'FR',
       ui:{title:'Comment était votre expérience chez « {name} » ?',sub:'Sélectionnez les points qui correspondent à votre ressenti, et ils seront automatiquement compilés en un brouillon d\'avis Google.',gen:'✍️ Rédiger & Récompense',open:'📋 Copier & Ouvrir Google',placeholder:'Votre avis synthétisé s’affichera ici…'},
-      customPlaceholder: 'Ou tapez ici...'
+      customPlaceholder: 'Ou tapez ici...',
+      customConsPlaceholder: 'Ou écrivez une autre suggestion...'
     },
     es:{
       label:'ES',
       ui:{title:'¿Qué tal tu experiencia en «{name}»?',sub:'Elige las etiquetas que mejor describan tu experiencia y se compilarán automáticamente en un borrador de reseña de Google.',gen:'✍️ Redactar y Reclamar',open:'📋 Copier y Abrir Google',placeholder:'Aquí aparecerá tu reseña…'},
-      customPlaceholder: 'O escriba aquí...'
+      customPlaceholder: 'O escriba aquí...',
+      customConsPlaceholder: 'O escriba otra sugerencia...'
     }
   };
   
@@ -343,13 +349,13 @@
   const $thanksNotice=document.getElementById('thanksNotice');
   const $thanksMessage=document.getElementById('thanksMessage');
 
-  let selected = new Map();
-  let currentStore = getStoreFromURL() || 'leegarnei';
-  let currentLang = 'zh';
-  let storeMeta = null, availableLangs = [], storeNames = null;
-  let googleReviewUrl_global = '';
-  let isGenerated = false;
-  let currentReviewId = null; // ⭐ 記錄這一次產生的 review 在 DB 的 id
+  let selected=new Map();
+  let currentStore=getStoreFromURL()||'leegarnei';
+  let currentLang='zh';
+  let storeMeta=null, availableLangs=[], storeNames=null;
+  let googleReviewUrl_global='';
+  let isGenerated=false;
+  let currentReviewId = null; // ⭐ 新增：目前這一則評論在 DB 的 id
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
@@ -497,7 +503,7 @@
         $chipsGrid.appendChild(el);
       });
 
-      // food 群組的自訂輸入框
+      // ✅ [新增] 若為 "food" 群組，在標籤列表最後追加一個輸入框
       if (group.id === 'food') {
         const inputWrapper = document.createElement('div');
         inputWrapper.className = 'chip custom-input';
@@ -506,10 +512,28 @@
         inputEl.type = 'text';
         inputEl.id = 'custom-food-input';
         inputEl.placeholder = LANGS[currentLang]?.customPlaceholder || 'Or type here...';
+        // 防止點擊輸入框時觸發父層 click (雖然目前 wrapper 沒 onclick，但保險起見)
         inputEl.onclick = (e) => e.stopPropagation();
 
         inputWrapper.appendChild(inputEl);
         $chipsGrid.appendChild(inputWrapper);
+      }
+
+      // ✅ [新增] 若為「建議」群組 (isConsGroup)，也加一個可輸入的自訂標籤
+      if (isConsGroup) {
+        const consInputWrapper = document.createElement('div');
+        consInputWrapper.className = 'chip custom-input chip-cons';
+        
+        const consInputEl = document.createElement('input');
+        consInputEl.type = 'text';
+        consInputEl.id = 'custom-cons-input';
+        consInputEl.placeholder = LANGS[currentLang]?.customConsPlaceholder 
+          || LANGS[currentLang]?.customPlaceholder 
+          || 'Or type here...';
+        consInputEl.onclick = (e) => e.stopPropagation();
+
+        consInputWrapper.appendChild(consInputEl);
+        $chipsGrid.appendChild(consInputWrapper);
       }
 
       $groupWrapper.appendChild($groupTitle);
@@ -554,9 +578,9 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
-  // ⭐ 標記這則評論「很有可能會被貼出去」
+  // ⭐ 改成用 reviewId 標記
   async function markAsPosted(reviewId) {
-    if (!reviewId) return; // 沒 id 就直接略過
+    if (!reviewId) return;
     try {
       await fetch("/.netlify/functions/confirm", {
         method: "POST",
@@ -568,7 +592,6 @@
     }
   }
 
-  // ⭐ 點「複製並開啟 Google 評論」時：先標記 likely_posted，再複製並開頁面
   $openGoogle.addEventListener('click', async (e)=>{
     e.preventDefault();
     const txt = ($output.value || '').trim();
@@ -577,15 +600,14 @@
       return;
     }
 
-    // 1. 告訴後端：這一筆 id 很有可能會被貼出去
+    // 1. 先標記這一筆評論
     try {
       await markAsPosted(currentReviewId);
     } catch (err) {
       console.error(err);
-      // 即使失敗也不要影響後面的複製 & 開啟
     }
 
-    // 2. 複製
+    // 2. 複製內容
     try {
       await navigator.clipboard.writeText(txt);
       $status.textContent = '';
@@ -599,6 +621,7 @@
     } catch {}
   });
 
+
   async function generate(){
     const storeid=(currentStore||'').trim();
     if(!storeid){ $status.textContent=(currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
@@ -610,6 +633,11 @@
     const customInput = document.getElementById('custom-food-input');
     if (customInput && customInput.value.trim()) {
       positiveTags.push(customInput.value.trim());
+    }
+
+    const customConsInput = document.getElementById('custom-cons-input');
+    if (customConsInput && customConsInput.value.trim()) {
+      consTags.push(customConsInput.value.trim());
     }
 
     if(positiveTags.length === 0 && consTags.length === 0){ $status.textContent={en:'Please select at least one tag.', zh:'請至少選擇一個標籤。'}[currentLang]||'Please select at least one tag.'; return; }
@@ -627,14 +655,12 @@
 
     try{
       const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const data=await res.json(); 
-      if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
+      const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
-      // ⭐ 接住這一筆在 Supabase 的 id
+      // ⭐ 接住後端回傳的 reviewId
       currentReviewId = data.reviewId || null;
 
-      const reviewText=data.reviewText||''; 
-      $output.value=reviewText;
+      const reviewText=data.reviewText||''; $output.value=reviewText;
       if(data?.store?.placeId){
         googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId);
         $openGoogle.href=googleReviewUrl_global;
@@ -686,8 +712,7 @@
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
 
-    // 原本這裡有第二個 openBtn click handler，已註解掉避免與上方的 markAsPosted 邏輯衝突
-    /*
+    // hotfix 裡這個 click handler 只處理瀏覽器限制，不影響上面那個 markAsPosted
     openBtn && openBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
       const txt=(output.value||'').trim();
@@ -695,8 +720,8 @@
       try{ await navigator.clipboard.writeText(txt); status && (status.textContent=''); }catch{ status && (status.textContent='請手動複製'); }
       try{ _open.call(window, window.googleReviewUrl_global || openBtn.href, '_blank'); }catch{}
     }, { capture:false });
-    */
   })();
   </script>
 </body>
 </html>
+
