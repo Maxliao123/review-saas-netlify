@@ -165,6 +165,17 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
   const safeJoin = (val) =>
     Array.isArray(val) ? val.join(",") : (val == null ? null : String(val));
 
+  // ⭐ 先把 cons / customCons 拆乾淨
+  const rawConsArray = Array.isArray(cons) ? cons : [];
+  const customConsStr =
+    customCons == null || customCons === "" ? null : String(customCons);
+
+  // ⭐ 從 cons 裡面移除「自訂建議」那一個，確保 cons_tags 只有預設負評
+  const consOnlyPreset =
+    customConsStr == null
+      ? rawConsArray
+      : rawConsArray.filter((tag) => String(tag) !== customConsStr);
+
   const values = [
     store_id,
     review_text,
@@ -173,8 +184,8 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
     safeJoin(posAmbiance),
     safeJoin(posNewItems),
     customFood == null || customFood === "" ? null : String(customFood),
-    safeJoin(cons),
-    customCons == null || customCons === "" ? null : String(customCons),
+    safeJoin(consOnlyPreset),   // ← 只存預設負評標籤
+    customConsStr,              // ← 只存空白輸入那一個
   ];
 
   try {
@@ -185,6 +196,7 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
     return null;
   }
 }
+
 
 // 節流：取得 IP
 function getIP(event) {
