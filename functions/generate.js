@@ -1,5 +1,5 @@
 // functions/generate.js
-// POST /api/generate
+// POST /.netlify/functions/generate
 // Body: { storeid, positiveTags: string[], consTags: string[], lang?, minChars?, maxChars?, tagBuckets? }
 
 const OPENAI_API_KEY   = process.env.OPENAI_API_KEY;
@@ -13,6 +13,9 @@ const DAILY_MAX_CALLS  = parseInt(process.env.DAILY_MAX_CALLS || "1000", 10);
 const PER_IP_MAX       = parseInt(process.env.PER_IP_MAX || "30", 10);
 const PER_IP_WINDOW_S  = parseInt(process.env.PER_IP_WINDOW_S || "900", 10); // 15 分鐘
 const REVIEW_WEBHOOK   = process.env.REVIEW_WEBHOOK_URL || "";
+
+// 相似度門檻（pg_trgm similarity），超過就觸發 rewrite
+const SIMILARITY_THRESHOLD = 0.5;
 
 // ✅ 引入 pg 並建立 Supabase 連線池
 const { Pool } = require("pg");
@@ -99,11 +102,11 @@ async function fetchStoreRow(storeidLower) {
 
 // 穩定隨機變體 + AB bucket
 const FLAVORS = [
-  "語氣自然親切、像對朋友分享；語序口語但不浮誇。",
-  "精簡俐落、重點清楚；少形容詞、多實際細節。",
-  "帶感官：口感/香氣/溫度/份量任一具體細節。",
-  "中性理性、陳述體驗重點；避免誇飾與口頭禪。",
-  "加入一個小情境（點餐/上桌/座位/排隊/結帳其中一項）。",
+  "開頭直接點名今天最喜歡的品項 + 感受，語氣自然親切、像對朋友分享，但不要太浮誇。",
+  "先一短句總結整體體驗，再補 1–2 個具體亮點，精簡俐落、重點清楚，少形容詞、多實際細節。",
+  "加一點感官描寫：口感 / 香氣 / 溫度 / 份量擇一寫具體細節，讓畫面感更強。",
+  "語氣偏中性理性，像在記錄心得：陳述體驗重點，避免誇飾與口頭禪。",
+  "加入一個小情境（點餐 / 上桌 / 座位 / 排隊 / 結帳其中一項），但整體仍保持 1–2 句內完成。",
 ];
 function pickVariant(seedA, seedB) {
   const h = hashStr(stableKey({ seedA, seedB }));
@@ -113,24 +116,28 @@ function pickAB(storeid) {
   return (hashStr(storeid) % 2) === 0 ? "A" : "B";
 }
 
-// Supabase 去重檢查（提高門檻，只有非常像才重寫）
-async function isTooSimilarSupabase(store_id, review_text, threshold = 0.82) {
+// Supabase 去重檢查：回傳 tooSimilar + maxSim
+async function isTooSimilarSupabase(store_id, review_text, threshold = SIMILARITY_THRESHOLD) {
+  // 回傳 { tooSimilar, maxSim } 方便後面做監控與 webhook 紀錄
   const query = `
-    SELECT 1 
+    SELECT similarity(review_text, $2) AS sim
     FROM generated_reviews 
-    WHERE store_id = $1 AND similarity(review_text, $2) >= $3
+    WHERE store_id = $1
+    ORDER BY sim DESC
     LIMIT 1;
   `;
   try {
     const { rows } = await pgPool.query(query, [
       store_id,
       review_text,
-      threshold,
     ]);
-    return rows.length > 0;
+    const maxSim = rows?.[0]?.sim ?? null;
+    const tooSimilar =
+      typeof maxSim === "number" && maxSim >= (threshold ?? SIMILARITY_THRESHOLD);
+    return { tooSimilar, maxSim };
   } catch (e) {
     console.error("Supabase similarity check error:", e.message);
-    return false;
+    return { tooSimilar: false, maxSim: null };
   }
 }
 
@@ -165,17 +172,6 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
   const safeJoin = (val) =>
     Array.isArray(val) ? val.join(",") : (val == null ? null : String(val));
 
-  // ⭐ 先把 cons / customCons 拆乾淨
-  const rawConsArray = Array.isArray(cons) ? cons : [];
-  const customConsStr =
-    customCons == null || customCons === "" ? null : String(customCons);
-
-  // ⭐ 從 cons 裡面移除「自訂建議」那一個，確保 cons_tags 只有預設負評
-  const consOnlyPreset =
-    customConsStr == null
-      ? rawConsArray
-      : rawConsArray.filter((tag) => String(tag) !== customConsStr);
-
   const values = [
     store_id,
     review_text,
@@ -184,8 +180,8 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
     safeJoin(posAmbiance),
     safeJoin(posNewItems),
     customFood == null || customFood === "" ? null : String(customFood),
-    safeJoin(consOnlyPreset),   // ← 只存預設負評標籤
-    customConsStr,              // ← 只存空白輸入那一個
+    safeJoin(cons),
+    customCons == null || customCons === "" ? null : String(customCons),
   ];
 
   try {
@@ -196,7 +192,6 @@ async function storeReviewSupabase(store_id, review_text, tagBuckets = {}) {
     return null;
   }
 }
-
 
 // 節流：取得 IP
 function getIP(event) {
@@ -643,13 +638,34 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // ✅ 呼叫 Supabase 進行去重檢查
-    if (await isTooSimilarSupabase(storeid, text, 0.6)) {
+    // ✅ 呼叫 Supabase 進行去重檢查 + 監控
+    const similarityCheck = await isTooSimilarSupabase(
+      storeid,
+      text,
+      SIMILARITY_THRESHOLD
+    );
+    const similarityInfo = {
+      thresholdUsed: SIMILARITY_THRESHOLD,
+      maxSimBefore: similarityCheck?.maxSim ?? null,
+      maxSimAfter: null,
+      rewroteForSimilarity: false,
+    };
+
+    if (similarityCheck?.tooSimilar) {
+      similarityInfo.rewroteForSimilarity = true;
       const hint = MICRO[hashStr(text) % MICRO.length];
       const retry = await callOpenAI(sys, user + `\n[Rewrite hint] ${hint}`);
       text = retry.text || text;
       usage = retry.usage || usage;
       latencyMs += retry.latencyMs || 0;
+
+      // 重寫後再看一次實際相似度，純做監控用途
+      const afterCheck = await isTooSimilarSupabase(
+        storeid,
+        text,
+        SIMILARITY_THRESHOLD
+      );
+      similarityInfo.maxSimAfter = afterCheck?.maxSim ?? null;
     }
 
     // 再確保：沒有 consTags 時，不要出現「如果…更好」這類句子
@@ -678,6 +694,7 @@ exports.handler = async (event, context) => {
         consTags,
         lang: currentLang,
         tagBuckets,
+        similarityInfo,
       },
     };
 
@@ -696,6 +713,7 @@ exports.handler = async (event, context) => {
             positiveTags,
             consTags,
             tagBuckets,
+            similarityInfo,
             reviewText: text,
             variant,
             abBucket,
@@ -716,5 +734,4 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
-
 
