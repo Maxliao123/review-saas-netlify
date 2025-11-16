@@ -195,7 +195,7 @@
   <script>
   /* ---------- color utils ---------- */
   const hexToRgb=h=>{h=h.replace('#',''); if(h.length===3)h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}};
-  const rgbToHex=(r,g,b)=>'#'+[r,g,b].map(v=>('0'+v.toString(16)).slice(-2)).join('');
+  const rgbToHex=(r,g,b)=>'#'+[r,g,b].map(v=>('0'+v.toString(16)).slice(-2).join(''));
   function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const M=Math.max(r,g,b),m=Math.min(r,g,b);let h,s,l=(M+m)/2;if(M===m){h=s=0}else{const d=M-m;s=l>0.5?d/(2-M-m):d/(M+m);switch(M){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break}h/=6}return{h,s,l}}
   function hslToRgb(h,s,l){let r,g,b;if(s===0){r=g=b=l}else{const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q,f=t=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};r=f(h+1/3);g=f(h);b=f(h-1/3)}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)}}
   const normHex=h=>{if(!h)return'';let s=String(h).trim();if(!s.startsWith('#'))s='#'+s;if(/^#([0-9a-fA-F]{3})$/.test(s)){const[,r,g,b]=s.match(/^#(.)(.)(.)$/);s='#'+r+r+g+g+b+b}return /^#([0-9a-fA-F]{6})$/.test(s)?s.toUpperCase():''};
@@ -355,7 +355,7 @@
   let storeMeta=null, availableLangs=[], storeNames=null;
   let googleReviewUrl_global='';
   let isGenerated=false;
-  let currentReviewId = null; // ⭐ 新增：目前這一則評論在 DB 的 id
+  let currentReviewId = null; // ⭐ 目前這一則評論在 DB 的 id
 
   const genButtonTemplate=()=>`<span class="spinner"></span><span id="btnGen">${LANGS[currentLang].ui.gen}</span>`;
 
@@ -440,38 +440,35 @@
 
     CHIP_GROUPS_CONFIG.forEach(group => {
       const isConsGroup = !!group.isConsGroup;
-      
-      const keysForLang = [];
-      group.keys.forEach(baseKey => {
-        keysForLang.push(baseKey + langSuffix); 
-        keysForLang.push(baseKey);
-      });
-      
+
+      // 每個 group 內，用 Map 去重，並加上 sourceKey（top3/features/ambiance/newItems/cons）
       const seenInThisGroup = new Map();
-      
-      keysForLang.forEach(key => {
-        const raw = data[key] || ''; 
-        if (raw) {
+
+      group.keys.forEach(baseKey => {
+        const keysForLang = [baseKey + langSuffix, baseKey];
+        keysForLang.forEach(key => {
+          const raw = data[key] || '';
+          if (!raw) return;
           String(raw).split(',').forEach(tag => {
             const t = (tag || '').trim();
-            if (t && !allTagsRendered.has(t)) {
-              if (!seenInThisGroup.has(t)) {
-                seenInThisGroup.set(t, { tag: t, isCons: isConsGroup });
-              }
+            if (!t) return;
+            if (!seenInThisGroup.has(t) && !allTagsRendered.has(t)) {
+              seenInThisGroup.set(t, {
+                tag: t,
+                isCons: isConsGroup,
+                sourceKey: baseKey
+              });
             }
           });
-        }
+        });
       });
-      
+
       const uniqueTagsData = Array.from(seenInThisGroup.values());
       
       if (uniqueTagsData.length === 0 && group.id !== 'food') {
         return; 
-      }
-      if (uniqueTagsData.length === 0 && group.id === 'food') {
-        // 仍然要渲染，因為要放輸入框
-      } else if (uniqueTagsData.length === 0) {
-         return;
+      } else if (uniqueTagsData.length === 0 && group.id === 'food') {
+        // food 群組就算沒有預設標籤，也要 render，因為要放自訂輸入框
       }
 
       const $groupWrapper = document.createElement('div');
@@ -485,7 +482,7 @@
       const $chipsGrid = document.createElement('div');
       $chipsGrid.className = 'chips';
 
-      uniqueTagsData.forEach(({ tag, isCons }) => {
+      uniqueTagsData.forEach(({ tag, isCons, sourceKey }) => {
         allTagsRendered.add(tag); 
         
         const el = document.createElement('div');
@@ -496,14 +493,14 @@
           if (selected.has(tag)) {
             selected.delete(tag);
           } else {
-            selected.set(tag, { isCons: isCons });
+            selected.set(tag, { isCons, sourceKey });
           }
           el.classList.toggle('on');
         };
         $chipsGrid.appendChild(el);
       });
 
-      // ✅ [新增] 若為 "food" 群組，在標籤列表最後追加一個輸入框
+      // food 群組加「自訂餐點」輸入框
       if (group.id === 'food') {
         const inputWrapper = document.createElement('div');
         inputWrapper.className = 'chip custom-input';
@@ -512,14 +509,13 @@
         inputEl.type = 'text';
         inputEl.id = 'custom-food-input';
         inputEl.placeholder = LANGS[currentLang]?.customPlaceholder || 'Or type here...';
-        // 防止點擊輸入框時觸發父層 click (雖然目前 wrapper 沒 onclick，但保險起見)
         inputEl.onclick = (e) => e.stopPropagation();
 
         inputWrapper.appendChild(inputEl);
         $chipsGrid.appendChild(inputWrapper);
       }
 
-      // ✅ [新增] 若為「建議」群組 (isConsGroup)，也加一個可輸入的自訂標籤
+      // 建議群組加「自訂建議」輸入框
       if (isConsGroup) {
         const consInputWrapper = document.createElement('div');
         consInputWrapper.className = 'chip custom-input chip-cons';
@@ -578,7 +574,7 @@
   (function init(){const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF'; applyBlueScale(cssBase,'');})();
   applyBasicLinks('Store'); renderUI(); loadStoreMeta(); addEventListener('resize',()=>requestAnimationFrame(fitTitle));
 
-  // ⭐ 改成用 reviewId 標記
+  // ⭐ mark likely_posted = true
   async function markAsPosted(reviewId) {
     if (!reviewId) return;
     try {
@@ -600,14 +596,12 @@
       return;
     }
 
-    // 1. 先標記這一筆評論
     try {
       await markAsPosted(currentReviewId);
     } catch (err) {
       console.error(err);
     }
 
-    // 2. 複製內容
     try {
       await navigator.clipboard.writeText(txt);
       $status.textContent = '';
@@ -615,7 +609,6 @@
       $status.textContent = '請手動複製';
     }
 
-    // 3. 打開 Google 評論頁
     try {
       window.open(googleReviewUrl_global, '_blank');
     } catch {}
@@ -627,26 +620,76 @@
     if(!storeid){ $status.textContent=(currentLang==='zh')?'請先指定 StoreID。':'Please set StoreID first.'; return; }
 
     const allSelections = Array.from(selected.entries());
-    const positiveTags = allSelections.filter(([, data]) => !data.isCons).map(([tag]) => tag);
-    const consTags = allSelections.filter(([, data]) => data.isCons).map(([tag]) => tag);
-    
+
+    // 先拆出正評 / 負評 tags（給 AI 用）
+    const positiveTags = allSelections
+      .filter(([, data]) => !data.isCons)
+      .map(([tag]) => tag);
+
+    const consTags = allSelections
+      .filter(([, data]) => data.isCons)
+      .map(([tag]) => tag);
+
+    // 再依 sourceKey 分到各 bucket
+    const posTop3Tags = allSelections
+      .filter(([, data]) => !data.isCons && data.sourceKey === 'top3')
+      .map(([tag]) => tag);
+
+    const posFeaturesTags = allSelections
+      .filter(([, data]) => !data.isCons && data.sourceKey === 'features')
+      .map(([tag]) => tag);
+
+    const posAmbianceTags = allSelections
+      .filter(([, data]) => !data.isCons && data.sourceKey === 'ambiance')
+      .map(([tag]) => tag);
+
+    const posNewItemsTags = allSelections
+      .filter(([, data]) => !data.isCons && data.sourceKey === 'newItems')
+      .map(([tag]) => tag);
+
+    // 自訂輸入
     const customInput = document.getElementById('custom-food-input');
-    if (customInput && customInput.value.trim()) {
-      positiveTags.push(customInput.value.trim());
+    const customFoodTag = customInput && customInput.value.trim()
+      ? customInput.value.trim()
+      : '';
+
+    if (customFoodTag) {
+      positiveTags.push(customFoodTag);
     }
 
     const customConsInput = document.getElementById('custom-cons-input');
-    if (customConsInput && customConsInput.value.trim()) {
-      consTags.push(customConsInput.value.trim());
+    const customConsTag = customConsInput && customConsInput.value.trim()
+      ? customConsInput.value.trim()
+      : '';
+
+    if (customConsTag) {
+      consTags.push(customConsTag);
     }
 
-    if(positiveTags.length === 0 && consTags.length === 0){ $status.textContent={en:'Please select at least one tag.', zh:'請至少選擇一個標籤。'}[currentLang]||'Please select at least one tag.'; return; }
+    if(positiveTags.length === 0 && consTags.length === 0){
+      $status.textContent={
+        en:'Please select at least one tag.',
+        zh:'請至少選擇一個標籤。'
+      }[currentLang]||'Please select at least one tag.';
+      return;
+    }
+
+    const tagBuckets = {
+      posTop3: posTop3Tags,
+      posFeatures: posFeaturesTags,
+      posAmbiance: posAmbianceTags,
+      posNewItems: posNewItemsTags,
+      customFood: customFoodTag || null,
+      cons: consTags,
+      customCons: customConsTag || null,
+    };
     
     const body={
       storeid,
       positiveTags,
       consTags,
-      variant:1, minChars:90, maxChars:160, lang:currentLang
+      variant:1, minChars:90, maxChars:160, lang:currentLang,
+      tagBuckets
     };
 
     $gen.classList.add('loading'); $gen.disabled=true;
@@ -657,7 +700,6 @@
       const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const data=await res.json(); if(!res.ok) throw new Error(data?.error||('HTTP '+res.status));
 
-      // ⭐ 接住後端回傳的 reviewId
       currentReviewId = data.reviewId || null;
 
       const reviewText=data.reviewText||''; $output.value=reviewText;
@@ -724,4 +766,5 @@
   </script>
 </body>
 </html>
+
 
