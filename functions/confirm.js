@@ -39,7 +39,7 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body || "{}");
-    const reviewId = body.reviewId;
+    const { reviewId } = body;
 
     if (!reviewId) {
       return json(400, { error: "reviewId is required" });
@@ -48,40 +48,32 @@ exports.handler = async (event) => {
     const client = await pool.connect();
 
     try {
-      // 1) 把這一則評論標記為 likely_posted = true
-      await client.query(
-        `
-        UPDATE generated_reviews
-        SET likely_posted = true,
-            posted_at     = COALESCE(posted_at, NOW())
-        WHERE id = $1
-      `,
-        [reviewId]
-      );
-
-      // 2) 讀出這一筆評論的 store_id + 各種 tags
+      // 1) 更新這筆 generated_reviews，並同時把需要的欄位取回
       const { rows } = await client.query(
         `
-        SELECT
-          store_id,
-          COALESCE(pos_top3_tags,      '{}'::text[]) AS pos_top3_tags,
-          COALESCE(pos_features_tags,  '{}'::text[]) AS pos_features_tags,
-          COALESCE(pos_ambiance_tags,  '{}'::text[]) AS pos_ambiance_tags,
-          COALESCE(pos_newitems_tags,  '{}'::text[]) AS pos_newitems_tags,
-          COALESCE(cons_tags,          '{}'::text[]) AS cons_tags,
-          custom_food_tag,
-          custom_cons_tag
-        FROM generated_reviews
+        UPDATE generated_reviews
+        SET 
+          likely_posted = TRUE,
+          posted_at     = COALESCE(posted_at, NOW())
         WHERE id = $1
-      `,
+        RETURNING
+          store_id,
+          COALESCE(pos_top3_tags,     '{}'::text[]) AS pos_top3_tags,
+          COALESCE(pos_features_tags, '{}'::text[]) AS pos_features_tags,
+          COALESCE(pos_ambiance_tags, '{}'::text[]) AS pos_ambiance_tags,
+          COALESCE(pos_newitems_tags, '{}'::text[]) AS pos_newitems_tags,
+          COALESCE(cons_tags,         '{}'::text[]) AS cons_tags,
+          custom_food_tag,
+          custom_cons_tag;
+        `,
         [reviewId]
       );
 
-      if (rows.length) {
+      if (rows.length > 0) {
         const r = rows[0];
 
-        // 3) 把所有 tag 收成一個去重後的陣列
-        const all = [
+        // 2) 收集所有 tag，去空白、去重
+        const allTags = [
           ...r.pos_top3_tags,
           ...r.pos_features_tags,
           ...r.pos_ambiance_tags,
@@ -89,24 +81,27 @@ exports.handler = async (event) => {
           ...r.cons_tags,
         ];
 
-        if (r.custom_food_tag) all.push(r.custom_food_tag);
-        if (r.custom_cons_tag) all.push(r.custom_cons_tag);
+        if (r.custom_food_tag) allTags.push(r.custom_food_tag);
+        if (r.custom_cons_tag) allTags.push(r.custom_cons_tag);
 
         const tagsUsed = Array.from(
           new Set(
-            all
+            allTags
               .map((t) => String(t || "").trim())
               .filter(Boolean)
           )
         );
 
-        // 4) 寫入 generator_events：click_google
+        // 3) 因為 generator_events.tags_used 是 text，
+        //    我們存成 JSON 字串（跟 generate 時一樣風格）
+        const tagsText = JSON.stringify(tagsUsed);
+
         await client.query(
           `
           INSERT INTO generator_events (store_id, event_type, tags_used)
-          VALUES ($1, 'click_google', $2::text[])
+          VALUES ($1, 'click_google', $2)
         `,
-          [r.store_id, tagsUsed]
+          [r.store_id, tagsText]
         );
       }
 
