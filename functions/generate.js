@@ -355,6 +355,38 @@ function checkGlobalDailyLimit() {
   return true;
 }
 
+
+async function insertGeneratorEvent({
+  store_id,
+  event_type,
+  tags_used = [],
+}) {
+  const query = `
+    INSERT INTO generator_events (
+      store_id,
+      event_type,
+      tags_used
+    )
+    VALUES ($1, $2, $3)
+    RETURNING id;
+  `;
+
+  const values = [
+    store_id,
+    event_type,
+    (tags_used && tags_used.length > 0) ? tags_used : null,
+  ];
+
+  try {
+    const { rows } = await pgPool.query(query, values);
+    return rows?.[0]?.id || null;
+  } catch (e) {
+    console.error("Supabase insert generator_event error:", e.message);
+    return null;
+  }
+}
+
+
 // Netlify Blobs 版本的 IP 節流
 async function checkIpWindowBlob(ip, event) {
   connectLambda(event);
@@ -884,6 +916,19 @@ exports.handler = async (event, context) => {
       similarityInfo,
       tagBuckets,
     });
+
+        // ⭐ 記錄一筆問卷事件：使用者點擊「產生評論」一次
+    try {
+      const eventTags = Array.isArray(selectedTags) ? selectedTags : [];
+      await insertGeneratorEvent({
+        store_id: storeDbId,
+        event_type: "generate",
+        tags_used: eventTags,
+      });
+    } catch (e) {
+      console.error("insertGeneratorEvent(generate) error:", e.message);
+    }
+
 
     const result = {
       reviewText: text,
