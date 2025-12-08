@@ -403,17 +403,17 @@ async function callOpenAI(system, user) {
     headers: {
       Authorization: `Bearer ${OPENAI_API_KEY}`,
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.8,
-      top_p: 0.9,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.8,
+        top_p: 0.9,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
   if (!resp.ok)
     throw new Error(
       `OpenAI ${resp.status}: ${await resp.text().catch(() => "")}`
@@ -759,8 +759,16 @@ exports.handler = async (event, context) => {
     // const cached = cacheGet(cacheKey);
     // if (cached) return json(cached, 200);
 
-    // ⭐ 這裡改成從 Supabase + Google Sheet 取店家資訊 + tenant_id
-    const { tenantId, meta } = await getStoreContext(storeid);
+    // ⭐ 從 Supabase + Google Sheet 取店家資訊 + tenant_id
+    const { storeRow, tenantId, meta } = await getStoreContext(storeid);
+    const storeDbId = storeRow?.id || null;
+    if (!storeDbId) {
+      console.error("store not found in stores table for slug:", storeid);
+      return json(
+        { error: "Store not configured in backend (stores table)." },
+        400
+      );
+    }
     const storeName = meta.name || storeid;
 
     const { sys, user } = buildPrompt({
@@ -808,7 +816,7 @@ exports.handler = async (event, context) => {
       riskLevel: "unknown",
     };
 
-    const initialCheck = await isTooSimilarSupabase(storeid, text, 0);
+    const initialCheck = await isTooSimilarSupabase(storeDbId, text, 0);
     similarityInfo.maxSimBefore = initialCheck?.maxSim ?? null;
 
     const simBefore = similarityInfo.maxSimBefore;
@@ -830,7 +838,7 @@ exports.handler = async (event, context) => {
         latencyMs += retry.latencyMs || 0;
         rewriteAttempts++;
 
-        const afterCheck = await isTooSimilarSupabase(storeid, text, 0);
+        const afterCheck = await isTooSimilarSupabase(storeDbId, text, 0);
         similarityInfo.maxSimAfter = afterCheck?.maxSim ?? null;
 
         if (
@@ -864,7 +872,7 @@ exports.handler = async (event, context) => {
 
     // ⭐ 寫入 DB（含 tenant_id / lang / persona / latency / tokens / similarity）
     const reviewId = await storeReviewSupabase({
-      store_id: storeid,
+      store_id: storeDbId,
       tenant_id: tenantId,
       review_text: text,
       lang: currentLang,
@@ -945,5 +953,6 @@ exports.handler = async (event, context) => {
     return json({ error: e.message || "server error" }, 500);
   }
 };
+
 
 
