@@ -1,8 +1,15 @@
 // functions/confirm.js
 const { Pool } = require("pg");
 
+const connectionString =
+  process.env.SUPABASE_DB_URL || process.env.SUPABASE_PG_URL;
+
+if (!connectionString) {
+  console.error("Missing SUPABASE_DB_URL / SUPABASE_PG_URL");
+}
+
 const pool = new Pool({
-  connectionString: process.env.SUPABASE_DB_URL,
+  connectionString,
   ssl: { rejectUnauthorized: false },
 });
 
@@ -92,8 +99,8 @@ exports.handler = async (event) => {
           )
         );
 
-        // 3) 因為 generator_events.tags_used 是 text，
-        //    我們存成 JSON 字串（跟 generate 時一樣風格）
+        // 3) generator_events.tags_used 是 text
+        //    目前 generate 也是存 JSON 字串，所以這邊跟它一樣
         const tagsText = JSON.stringify(tagsUsed);
 
         await client.query(
@@ -114,6 +121,7 @@ exports.handler = async (event) => {
     return json(500, { error: "Internal Server Error" });
   }
 };
+
 
 
 
