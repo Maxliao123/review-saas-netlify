@@ -12,13 +12,43 @@
 const DEFAULT_SHEET_NAME = '工作表1';
 const PLACE_PHOTO_MAX = 1000;
 
+const { Pool } = require('pg');
+
+// 對應 generator_tags.question_key → 前端使用的 base key
+const QUESTION_KEY_TO_BASE = {
+  main_impression: 'top3',
+  features: 'features',
+  occasion: 'ambiance',
+  cons: 'cons',
+};
+
+const pgPool = process.env.SUPABASE_PG_URL
+  ? new Pool({
+      connectionString: process.env.SUPABASE_PG_URL,
+      ssl: { rejectUnauthorized: false },
+    })
+  : null;
+
+function localeToSuffix(locale) {
+  const l = String(locale || '').toLowerCase();
+  if (!l) return 'Cn';               // 預設當成中文
+  if (l.startsWith('zh')) return 'Cn';
+  if (l.startsWith('en')) return 'En';
+  if (l.startsWith('ko')) return 'Ko';
+  if (l.startsWith('ja')) return 'Ja';
+  if (l.startsWith('fr')) return 'Fr';
+  if (l.startsWith('es')) return 'Es';
+  return null;
+}
+
 const LANG_SUFFIXES = { En: 'En', Cn: 'Cn', Ko: 'Ko', Fr: 'Fr', Ja: 'Ja', Es: 'Es' };
 // ✅ [修改] 新增 'cons'
 const LIST_FIELD_BASES = ['top3', 'features', 'ambiance', 'newItems', 'cons'];
 
 const GMAPS_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_API_KEY || '';
 
-// ---------- Utils ----------
+// --------- 共用工具 ---------
+
 function jsonResponse(body, status = 200) {
   return {
     statusCode: status,
@@ -35,163 +65,192 @@ function jsonResponse(body, status = 200) {
 
 function parseCSV(text) {
   const rows = [];
-  let cur = [], val = '', inQ = false;
+  let current = [];
+  let field = '';
+  let inQuotes = false;
+
   for (let i = 0; i < text.length; i++) {
-    const c = text[i], n = text[i + 1];
-    if (c === '"') {
-      if (inQ && n === '"') { val += '"'; i++; } else { inQ = !inQ; }
-    } else if (c === ',' && !inQ) {
-      cur.push(val); val = '';
-    } else if ((c === '\n' || (c === '\r' && n !== '\n')) && !inQ) {
-      cur.push(val); rows.push(cur); cur = []; val = '';
-    } else if (c === '\r' && n === '\n' && !inQ) {
-      cur.push(val); rows.push(cur); cur = []; val = ''; i++;
+    const c = text[i];
+    const next = text[i + 1];
+
+    if (inQuotes) {
+      if (c === '"' && next === '"') {
+        field += '"';
+        i++;
+      } else if (c === '"') {
+        inQuotes = false;
+      } else {
+        field += c;
+      }
     } else {
-      val += c;
+      if (c === '"') {
+        inQuotes = true;
+      } else if (c === ',') {
+        current.push(field);
+        field = '';
+      } else if (c === '\n' || c === '\r') {
+        if (field !== '' || current.length > 0) {
+          current.push(field);
+          rows.push(current);
+          current = [];
+          field = '';
+        }
+      } else {
+        field += c;
+      }
     }
   }
-  cur.push(val); rows.push(cur);
+
+  if (field !== '' || current.length > 0) {
+    current.push(field);
+    rows.push(current);
+  }
+
   return rows;
 }
 
 function rowsToObjects(rows) {
-  if (!rows.length) return { headers: [], lower: [], objs: [] };
-  const headers = rows[0].map(h => (h || '').toString().trim());
-  const lower = headers.map(h => h.toLowerCase());
-  const objs = [];
-  for (let r = 1; r < rows.length; r++) {
-    const row = rows[r];
+  if (!rows || rows.length === 0) return { headers: [], objs: [] };
+  const headers = rows[0].map(h => h.trim());
+  const objs = rows.slice(1).map(r => {
     const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i] ?? ''; obj[lower[i]] = row[i] ?? ''; });
-    objs.push(obj);
-  }
-  return { headers, lower, objs };
+    headers.forEach((h, i) => {
+      obj[h] = r[i] !== undefined ? r[i] : '';
+    });
+    return obj;
+  });
+  return { headers, objs };
 }
 
-function normalizeListCell(s) {
-  if (!s) return '';
-  const unified = String(s)
-    .replace(/[、，；;]/g, ',')
+function normalizeList(str) {
+  if (!str) return [];
+  const raw = String(str)
+    .replace(/[、；;]/g, ',')
     .split(',')
-    .map(x => (x || '').trim())
+    .map(s => s.trim())
     .filter(Boolean);
-  const uniq = [];
-  const seen = new Set();
-  for (const x of unified) if (!seen.has(x)) { seen.add(x); uniq.push(x); }
-  return uniq.join(',');
+  return Array.from(new Set(raw));
 }
 
-function normalizeDriveUrl(u) {
+function normalizeDriveUrl(url) {
+  if (!url) return '';
+  const u = String(url).trim();
   if (!u) return '';
-  try {
-    const s = String(u).trim();
-    if (/drive\.google\.com\/uc\?/.test(s)) return s;
-    let m = s.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-    if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
-    m = s.match(/[?&]id=([^&]+)/);
-    if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
-    return s;
-  } catch { return u; }
-}
-
-function absolutizeAsset(u, event) {
-  if (!u) return '';
-  const s = String(u).trim();
-  if (s.startsWith('/')) {
-    const host = event.headers['x-forwarded-host'] || event.headers.host || '';
-    const proto = event.headers['x-forwarded-proto'] || 'https';
-    return `${proto}://${host}${s}`;
+  if (/^https?:\/\/drive\.google\.com\/file\/d\//.test(u)) {
+    const m = u.match(/\/file\/d\/([^/]+)/);
+    if (m && m[1]) {
+      return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    }
   }
-  return s;
-}
-
-function pickField(row, aliases) {
-  for (const a of aliases) {
-    if (a in row && row[a]) return row[a];
-    const al = a.toLowerCase();
-    if (al in row && row[al]) return row[al];
+  if (/^\/assets\//.test(u)) {
+    const base = process.env.ASSETS_BASE_URL || '';
+    if (base) return base.replace(/\/+$/, '') + u;
   }
-  return '';
+  return u;
 }
 
+// 讀 Sheet CSV
 async function fetchSheetCSV() {
   const csvUrl = process.env.SHEET_CSV_URL;
   if (csvUrl) {
     const res = await fetch(csvUrl);
-    if (!res.ok) throw new Error(`Fetch SHEET_CSV_URL failed: ${res.status}`);
+    if (!res.ok) throw new Error(`fetch SHEET_CSV_URL failed: ${res.status}`);
     return await res.text();
   }
-  const id = process.env.SHEET_ID;
-  const name = process.env.SHEET_NAME || DEFAULT_SHEET_NAME;
-  if (!id) throw new Error('Missing SHEET_CSV_URL or SHEET_ID');
-  const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+
+  const sheetId = process.env.SHEET_ID;
+  const sheetName = process.env.SHEET_NAME || DEFAULT_SHEET_NAME;
+  if (!sheetId) throw new Error('Missing SHEET_CSV_URL or SHEET_ID');
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Fetch sheet CSV failed: ${res.status}`);
+  if (!res.ok) throw new Error(`fetch Sheet CSV via gviz failed: ${res.status}`);
   return await res.text();
+}
+
+// Google Maps Place Photo
+async function fetchFirstPhotoRefByPlaceId(placeId) {
+  if (!placeId || !GMAPS_KEY) return '';
+  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(
+    placeId
+  )}&fields=photos&key=${encodeURIComponent(GMAPS_KEY)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.error('fetchPlaceDetails failed:', res.status, await res.text());
+    return '';
+  }
+  const json = await res.json();
+  const ref = json?.result?.photos?.[0]?.photo_reference || '';
+  return ref || '';
 }
 
 function buildPlacePhotoUrlFromRef(ref) {
   if (!ref || !GMAPS_KEY) return '';
-  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${PLACE_PHOTO_MAX}&photo_reference=${encodeURIComponent(ref)}&key=${encodeURIComponent(GMAPS_KEY)}`;
+  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${PLACE_PHOTO_MAX}&photo_reference=${encodeURIComponent(
+    ref
+  )}&key=${encodeURIComponent(GMAPS_KEY)}`;
 }
 
-async function fetchFirstPhotoRefByPlaceId(placeId) {
-  if (!placeId || !GMAPS_KEY) return '';
-  try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=photos&key=${encodeURIComponent(GMAPS_KEY)}`;
-    const r = await fetch(url);
-    const j = await r.json();
-    const ref = j?.result?.photos?.[0]?.photo_reference || '';
-    return ref || '';
-  } catch {
-    return '';
-  }
-}
-
-// ---------- Normalize one row ----------
-function normalizeRowToStore(row, event) {
-  const storeId   = String(pickField(row, ['StoreID'])).trim();
-  const storeName = String(pickField(row, ['StoreName','Name'])).trim();
-  const placeId   = String(pickField(row, ['PlaceID','GooglePlaceID'])).trim();
-
-  let logoUrl = pickField(row, ['LOGO','Logo','LogoUrl']);
-  let heroUrl = pickField(row, ['Hero圖片','Hero','HeroUrl','HeroImage']);
-  logoUrl = absolutizeAsset(normalizeDriveUrl(logoUrl), event);
-  heroUrl = absolutizeAsset(normalizeDriveUrl(heroUrl), event);
-
-  // ✅ 新增：品牌主色（AD 欄）與主按鈕文字色（AE 欄）
-  const themeBlue   = String(pickField(row, ['AD','ThemeBlue','BrandColor'])).trim();
-  const themeOnBlue = String(pickField(row, ['AE','ThemeOnBlue','PrimaryTextColor'])).trim();
-
-  const base = {
-    top3:       normalizeListCell(pickField(row, ['top3','Top3Items'])),
-    features:   normalizeListCell(pickField(row, ['features','StoreFeatures'])),
-    ambiance:   normalizeListCell(pickField(row, ['ambiance'])),
-    newItems:   normalizeListCell(pickField(row, ['newItems','新品','NewItems'])),
-  };
-
-  const multi = {};
-  // ✅ [修改] AF/AG... 等 'cons' 相關欄位會在此處被自動讀取
-  for (const sufKey of Object.keys(LANG_SUFFIXES)) {
-    const suf = LANG_SUFFIXES[sufKey];
-    for (const baseName of LIST_FIELD_BASES) {
-      const colName = `${baseName}${suf}`;
-      // ✅ [修改] 增加對 AF-AK 欄位別名的支援
-      const aliases = [colName];
-      if (baseName === 'cons') {
-        if (suf === 'En') aliases.push('AF');
-        if (suf === 'Cn') aliases.push('AG');
-        if (suf === 'Ko') aliases.push('AH');
-        if (suf === 'Fr') aliases.push('AI');
-        if (suf === 'Ja') aliases.push('AJ');
-        if (suf === 'Es') aliases.push('AK');
-      }
-      multi[colName] = normalizeListCell(pickField(row, aliases));
+function pickField(row, keys, fallback = '') {
+  for (const k of keys) {
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+      return String(row[k]).trim();
     }
   }
+  return fallback;
+}
 
-  const photoRef = pickField(row, ['placePhotoRef','photoReference','PlacePhotoRef']);
-  const placePhotoUrl = photoRef ? buildPlacePhotoUrlFromRef(photoRef) : '';
+function buildMultiLangLists(row, baseName) {
+  const result = {};
+  const baseKey = baseName;
+
+  const baseList = normalizeList(row[baseKey]);
+  if (baseList.length > 0) {
+    result[baseKey] = baseList.join(',');
+  }
+
+  Object.keys(LANG_SUFFIXES).forEach(suffixKey => {
+    const suffix = LANG_SUFFIXES[suffixKey];
+    const col = `${baseKey}${suffix}`;
+    const list = normalizeList(row[col]);
+    if (list.length > 0) {
+      result[col] = list.join(',');
+    }
+  });
+
+  return result;
+}
+
+function normalizeRowToStore(row, event) {
+  const storeId = pickField(row, ['StoreID', 'storeid', 'id']);
+  const storeName = pickField(row, ['Name', 'name', 'StoreName']);
+  const placeId = pickField(row, ['PlaceID', 'placeId']);
+  const logo = pickField(row, ['logo', 'Logo']);
+  const hero = pickField(row, ['hero', 'Hero', 'Cover', 'Banner']);
+
+  const placePhotoRef = pickField(row, ['placePhotoRef','photoReference','PlacePhotoRef']);
+  const placePhotoUrl = placePhotoRef ? buildPlacePhotoUrlFromRef(placePhotoRef) : '';
+
+  const logoUrl = normalizeDriveUrl(logo);
+  const heroUrl = normalizeDriveUrl(hero);
+
+  const themeBlue = pickField(row, ['themeBlue', 'ThemeBlue', 'primaryColor'], '#0A84FF');
+  const themeOnBlue = pickField(row, ['themeOnBlue', 'ThemeOnBlue', 'onPrimaryColor'], '#FFFFFF');
+
+  let base = {};
+  LIST_FIELD_BASES.forEach(fieldBase => {
+    const val = normalizeList(row[fieldBase]);
+    if (val.length > 0) {
+      base[fieldBase] = val.join(',');
+    }
+  });
+
+  let multi = {};
+  LIST_FIELD_BASES.forEach(fieldBase => {
+    multi = {
+      ...multi,
+      ...buildMultiLangLists(row, fieldBase),
+    };
+  });
 
   return {
     storeid: storeId,
@@ -208,7 +267,66 @@ function normalizeRowToStore(row, event) {
   };
 }
 
+// ---------- Supabase TAG overlay ----------
+
+async function buildTagOverlayFromSupabase(storeSlug) {
+  if (!pgPool || !storeSlug) return null;
+  const slugLower = String(storeSlug).trim().toLowerCase();
+  if (!slugLower) return null;
+
+  try {
+    // 先找對應的 store.id
+    const { rows: storeRows } = await pgPool.query(
+      'select id from public.stores where lower(slug) = $1 limit 1',
+      [slugLower]
+    );
+    if (!storeRows || storeRows.length === 0) return null;
+    const storeId = storeRows[0].id;
+
+    // 讀取該 store 的啟用 TAG
+    const { rows: tagRows } = await pgPool.query(
+      `select question_key, label, locale
+         from public.generator_tags
+        where store_id = $1
+          and is_active = true
+        order by question_key, order_index, label`,
+      [storeId]
+    );
+    if (!tagRows || tagRows.length === 0) return null;
+
+    const buckets = {};
+
+    for (const row of tagRows) {
+      const baseKey = QUESTION_KEY_TO_BASE[row.question_key];
+      const suffix = localeToSuffix(row.locale);
+      const label = (row.label || '').trim();
+      if (!baseKey || !suffix || !label) continue;
+
+      const keyWithSuffix = `${baseKey}${suffix}`;
+      if (!buckets[keyWithSuffix]) buckets[keyWithSuffix] = [];
+      buckets[keyWithSuffix].push(label);
+
+      // baseKey（不帶語系）暫時用中文版本當預設
+      if (suffix === 'Cn') {
+        if (!buckets[baseKey]) buckets[baseKey] = [];
+        buckets[baseKey].push(label);
+      }
+    }
+
+    const overlay = {};
+    for (const [key, list] of Object.entries(buckets)) {
+      const uniq = Array.from(new Set(list.map(s => s.trim()).filter(Boolean)));
+      overlay[key] = uniq.join(',');
+    }
+    return overlay;
+  } catch (err) {
+    console.error('buildTagOverlayFromSupabase error:', err);
+    return null;
+  }
+}
+
 // ---------- Handler ----------
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -224,12 +342,16 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') return jsonResponse({ error: 'Method not allowed' }, 405);
 
   try {
-    const url = new URL(event.rawUrl || `https://${event.headers.host}${event.path}${event.rawQuery ? '?' + event.rawQuery : ''}`);
+    const url = new URL(
+      event.rawUrl ||
+        `https://${event.headers.host}${event.path}${event.rawQuery ? '?' + event.rawQuery : ''}`
+    );
     const storeid = (url.searchParams.get('store') || url.searchParams.get('storeid') || '').trim();
     if (!storeid) return jsonResponse({ error: 'Missing storeid' }, 400);
 
     // 讀表（CSV）
     const csv = await fetchSheetCSV();
+
     const rows = parseCSV(csv);
     const { objs } = rowsToObjects(rows);
 
@@ -243,6 +365,16 @@ exports.handler = async (event) => {
     // 正規化
     let payload = normalizeRowToStore(row, event);
 
+    // 從 Supabase generator_tags 覆蓋問卷標籤（若有）
+    try {
+      const overlay = await buildTagOverlayFromSupabase(storeid);
+      if (overlay) {
+        payload = { ...payload, ...overlay };
+      }
+    } catch (e) {
+      console.error('Supabase tag overlay failed:', e);
+    }
+
     // 若 placePhotoUrl 還是空，而有 placeId + 金鑰，就嘗試用 Place Details
     if (!payload.placePhotoUrl && payload.placeId && GMAPS_KEY) {
       const ref = await fetchFirstPhotoRefByPlaceId(payload.placeId);
@@ -255,5 +387,6 @@ exports.handler = async (event) => {
     return jsonResponse({ error: String(err.message || err) }, 500);
   }
 };
+
 
 
