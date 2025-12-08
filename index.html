@@ -571,7 +571,11 @@ const rgbToHex = (r, g, b) =>
       const logoUrl=pick(data,'logoUrl','logo','image','icon');
       setImgEl($hero,heroUrl,pick(data,'placePhotoUrl','photoUrl'));
       setImgEl($logo,logoUrl,pick(data,'placePhotoUrl','photoUrl'),$logoBadge);
-      if(data.placeId){ const url='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.placeId); $openGoogle.href=url; googleReviewUrl_global=url; }
+if(data.placeId){ 
+  const url = 'https://www.google.com/maps/place/?q=place_id:' + encodeURIComponent(data.placeId);
+  $openGoogle.href = url; 
+  googleReviewUrl_global = url; 
+}
       renderUI(); buildLangBar(); buildChipsFromMeta();
     }catch(e){
       const cssBase=getComputedStyle(document.documentElement).getPropertyValue('--blue').trim()||'#0A84FF';
@@ -712,10 +716,10 @@ const rgbToHex = (r, g, b) =>
       currentReviewId = data.reviewId || null;
 
       const reviewText=data.reviewText||''; $output.value=reviewText;
-      if(data?.store?.placeId){
-        googleReviewUrl_global='https://search.google.com/local/writereview?placeid='+encodeURIComponent(data.store.placeId);
-        $openGoogle.href=googleReviewUrl_global;
-      }
+     if(data?.store?.placeId){
+  googleReviewUrl_global = 'https://www.google.com/maps/place/?q=place_id:' + encodeURIComponent(data.store.placeId);
+  $openGoogle.href = googleReviewUrl_global;
+}
 
       isGenerated=true;
       renderUI();
