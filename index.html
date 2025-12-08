@@ -448,23 +448,29 @@ const rgbToHex = (r, g, b) =>
       const seenInThisGroup = new Map();
 
       group.keys.forEach(baseKey => {
-        const keysForLang = [baseKey + langSuffix, baseKey];
-        keysForLang.forEach(key => {
-          const raw = data[key] || '';
-          if (!raw) return;
-          String(raw).split(',').forEach(tag => {
-            const t = (tag || '').trim();
-            if (!t) return;
-            if (!seenInThisGroup.has(t) && !allTagsRendered.has(t)) {
-              seenInThisGroup.set(t, {
-                tag: t,
-                isCons: isConsGroup,
-                sourceKey: baseKey
-              });
-            }
-          });
+  // 如果有對應語系的欄位，就只用那個；
+  // 沒有時才 fallback 用 baseKey（通常是中文）
+  const langKey = baseKey + langSuffix;
+  const hasLang = (data[langKey] || '').trim() !== '';
+  const keysForLang = hasLang ? [langKey] : [baseKey];
+
+  keysForLang.forEach(key => {
+    const raw = data[key] || '';
+    if (!raw) return;
+    String(raw).split(',').forEach(tag => {
+      const t = (tag || '').trim();
+      if (!t) return;
+      if (!seenInThisGroup.has(t) && !allTagsRendered.has(t)) {
+        seenInThisGroup.set(t, {
+          tag: t,
+          isCons: isConsGroup,
+          sourceKey: baseKey
         });
-      });
+      }
+    });
+  });
+});
+
 
       const uniqueTagsData = Array.from(seenInThisGroup.values());
       
