@@ -608,47 +608,54 @@
     }
   }
 
-  $openGoogle.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    const txt = ($output.value || '').trim();
-    if (!txt) {
-      $status.textContent = '尚無內容可複製';
-      return;
-    }
 
-    try {
-      await markAsPosted(currentReviewId);
-    } catch (err) {
-      console.error(err);
-    }
+$openGoogle.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  const txt = ($output.value || '').trim();
+  if (!txt) {
+    $status.textContent = '尚無內容可複製';
+    return;
+  }
 
-    try {
-      await navigator.clipboard.writeText(txt);
-      $status.textContent = '';
-    } catch {
-      $status.textContent = '請手動複製';
-    }
+  // 1) 標記這則 review 為 likely_posted（原本就有）
+  try {
+    await markAsPosted(currentReviewId);
+  } catch (err) {
+    console.error("markAsPosted error:", err);
+  }
 
-    // 上報 click_google 事件（最佳 effort，不影響主流程）
-    try {
-      await fetch('/.netlify/functions/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          store_id: currentStoreId,
-          event_type: 'click_google',
-          tags_used: Array.from(new Set(lastTagsUsed || [])).slice(0, 50),
-        }),
-      });
-    } catch (err) {
-      console.error('click_google track error:', err);
-    }
+  // 2) 上報 click_google 事件 → 寫入 generator_events
+  try {
+    await fetch("/.netlify/functions/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // 先用 null 當佔位，之後我們再接上真正的 store_id
+        store_id: null,
+        event_type: "click_google",
+        tags_used: null,
+      }),
+    });
+  } catch (err) {
+    console.error("track click_google error:", err);
+  }
 
-    try {
-      window.open(googleReviewUrl_global, '_blank');
-    } catch {}
-  });
+  // 3) 複製文字到剪貼簿（原本就有）
+  try {
+    await navigator.clipboard.writeText(txt);
+    $status.textContent = '';
+  } catch {
+    $status.textContent = '請手動複製';
+  }
 
+  // 4) 開啟 Google 評論頁（原本就有）
+  try {
+    window.open(googleReviewUrl_global, '_blank');
+  } catch {}
+});
+
+
+    
 
   async function generate(){
     const storeid=(currentStore||'').trim();
