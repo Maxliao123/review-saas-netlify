@@ -8,7 +8,7 @@ const CORS_HEADERS = {
 };
 
 const pgPool = new Pool({
-  connectionString: process.env.SUPABASE_PG_URL, // 一樣用這個
+  connectionString: process.env.SUPABASE_PG_URL,
   ssl: { rejectUnauthorized: false },
 });
 
@@ -40,7 +40,7 @@ exports.handler = async (event) => {
     }
 
     const payload = JSON.parse(event.body || "{}");
-    let { store_id, event_type, tags_used } = payload;
+    let { store_id, event_type, tags_used, source_id } = payload;
 
     if (!event_type) {
       return {
@@ -50,13 +50,12 @@ exports.handler = async (event) => {
       };
     }
 
-    // 目前你的表裡 store_id 都是 1（Memory Corner）
-    // 如果前端沒傳，就先 default 1
+    // 目前只有 Memory Corner，沒傳就先 default = 1
     if (!store_id) {
       store_id = 1;
     }
 
-    // tags_used 可能是 null / undefined，轉成陣列或 null
+    // tags_used 可以是 null / 陣列；空陣列就存成 null 比較乾淨
     if (Array.isArray(tags_used) && tags_used.length === 0) {
       tags_used = null;
     }
@@ -65,10 +64,10 @@ exports.handler = async (event) => {
     try {
       await client.query(
         `
-        INSERT INTO generator_events (store_id, event_type, tags_used)
-        VALUES ($1, $2, $3::text[])
+        INSERT INTO generator_events (store_id, source_id, event_type, tags_used)
+        VALUES ($1, $2, $3, $4::text[])
         `,
-        [store_id, event_type, tags_used]
+        [store_id, source_id || null, event_type, tags_used]
       );
     } finally {
       client.release();
@@ -88,3 +87,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
