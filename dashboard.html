@@ -226,7 +226,8 @@
     <section class="card">
       <div class="card-label" style="margin-bottom:8px;">Daily funnel</div>
       <div style="overflow-x:auto;">
-        <table>
+        <!-- 加上 id + data-sortable -->
+        <table id="daily-funnel-table" data-sortable="true">
           <thead>
             <tr>
               <th>Day</th>
@@ -250,15 +251,16 @@
     <section class="card">
       <div class="card-label" style="margin-bottom:8px;">Tag performance</div>
       <div style="overflow-x:auto;">
-        <table>
-         <thead>
-  <tr>
-    <th>Tag</th>
-    <th>Times selected</th>
-    <th>Google clicks</th>
-    <th>Click-through rate</th>
-  </tr>
-</thead>
+        <!-- 加上 id + data-sortable -->
+        <table id="tag-performance-table" data-sortable="true">
+          <thead>
+            <tr>
+              <th>Tag</th>
+              <th>Times selected</th>
+              <th>Google clicks</th>
+              <th>Click-through rate</th>
+            </tr>
+          </thead>
           <tbody id="tagTableBody"></tbody>
         </table>
       </div>
@@ -266,9 +268,9 @@
         目前這個期間沒有任何帶標籤的事件。
       </div>
       <div class="tag-note">
- 註：Times selected = 產生評論時，有勾選到此標籤的次數。
-  Google clicks = 使用此標籤且點擊「複製並開啟 Google 評論」的次數。
-  Click-through rate = 點擊率（Google clicks ÷ Times selected）。
+        註：Times selected = 產生評論時，有勾選到此標籤的次數。<br/>
+        Google clicks = 使用此標籤且點擊「複製並開啟 Google 評論」的次數。<br/>
+        Click-through rate = 點擊率（Google clicks ÷ Times selected）。
       </div>
     </section>
   </div>
@@ -462,6 +464,60 @@
       });
     }
 
+    // ---- 簡單表格排序 ----
+    function initSortableTables() {
+      const tables = document.querySelectorAll('table[data-sortable="true"]');
+
+      tables.forEach((table) => {
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+        if (!thead || !tbody) return;
+
+        const headers = Array.from(thead.querySelectorAll('th'));
+
+        headers.forEach((th, colIndex) => {
+          let sortDir = 1; // 1 = asc, -1 = desc
+          th.style.cursor = 'pointer';
+
+          th.addEventListener('click', () => {
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const isNumeric = detectNumericColumn(rows, colIndex);
+
+            rows.sort((a, b) => {
+              const aText = (a.children[colIndex]?.textContent || '').trim();
+              const bText = (b.children[colIndex]?.textContent || '').trim();
+
+              if (isNumeric) {
+                const aNum = parseFloat(aText.replace(/[^0-9.\-]/g, '')) || 0;
+                const bNum = parseFloat(bText.replace(/[^0-9.\-]/g, '')) || 0;
+                return (aNum - bNum) * sortDir;
+              } else {
+                return aText.localeCompare(bText, 'zh-Hant') * sortDir;
+              }
+            });
+
+            sortDir *= -1;
+            rows.forEach((row) => tbody.appendChild(row));
+          });
+        });
+      });
+
+      function detectNumericColumn(rows, colIndex) {
+        let numericCount = 0;
+        let total = 0;
+        rows.forEach((row) => {
+          const txt = (row.children[colIndex]?.textContent || '').trim();
+          if (!txt) return;
+          total += 1;
+          const cleaned = txt.replace(/[^0-9.\-]/g, '');
+          if (cleaned && !isNaN(parseFloat(cleaned))) {
+            numericCount += 1;
+          }
+        });
+        return total > 0 && numericCount / total > 0.6;
+      }
+    }
+
     async function loadAndRender() {
       const days = parseInt(daysSelect.value, 10);
       rangeLabel.textContent = `最近 ${days} 天`;
@@ -488,8 +544,11 @@
     reloadBtn.addEventListener('click', loadAndRender);
     daysSelect.addEventListener('change', loadAndRender);
 
-    // 初次載入
-    loadAndRender();
+    // 初次載入＋啟用排序
+    document.addEventListener('DOMContentLoaded', () => {
+      initSortableTables();
+      loadAndRender();
+    });
   </script>
 </body>
 </html>
