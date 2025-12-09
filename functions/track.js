@@ -50,18 +50,21 @@ exports.handler = async (event) => {
       };
     }
 
-    // Memory Corner 目前就是 1，前端沒傳就 default 1
+    // Memory Corner 預設 1
     if (!store_id) {
       store_id = 1;
     }
 
-    // tags_used：空陣列視為 null，其他保持陣列
+    // tags_used：空或不是陣列 => null
     if (!Array.isArray(tags_used) || tags_used.length === 0) {
       tags_used = null;
     }
 
-    // source_id：沒有就改成 null（允許 generate 沒有 source_id）
-    if (!source_id || typeof source_id !== "string" || !source_id.trim()) {
+    // source_id：轉成數字，轉不動就設為 null
+    if (source_id != null) {
+      const n = Number(source_id);
+      source_id = Number.isFinite(n) ? n : null;
+    } else {
       source_id = null;
     }
 
@@ -70,7 +73,7 @@ exports.handler = async (event) => {
       await client.query(
         `
         INSERT INTO generator_events (store_id, source_id, event_type, tags_used)
-        VALUES ($1, $2::uuid, $3, $4::text[])
+        VALUES ($1, $2, $3, $4::text[])
         `,
         [store_id, source_id, event_type, tags_used]
       );
@@ -92,4 +95,5 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
