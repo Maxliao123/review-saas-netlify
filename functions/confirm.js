@@ -1,16 +1,16 @@
 // functions/confirm.js
 const { Pool } = require("pg");
 
+const pool = new Pool({
+  connectionString: process.env.SUPABASE_PG_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-
-const pgPool = new Pool({
-  connectionString: process.env.SUPABASE_PG_URL, // 🔴 改這行
-  ssl: { rejectUnauthorized: false },
-});
 
 exports.handler = async (event) => {
   // CORS preflight
@@ -26,39 +26,39 @@ exports.handler = async (event) => {
     return {
       statusCode: 405,
       headers: CORS_HEADERS,
-      body: "Method not allowed",
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
+  }
+
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: "Missing body" }),
     };
   }
 
   try {
-    if (!event.body) {
-      return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: "No body",
-      };
-    }
-
     const { reviewId } = JSON.parse(event.body || "{}");
 
     if (!reviewId) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
-        body: "Missing reviewId",
+        body: JSON.stringify({ error: "Missing reviewId" }),
       };
     }
 
-    const client = await pgPool.connect();
-
+    const client = await pool.connect();
     try {
+      // 只負責把這則 review 標記為已「很可能已貼上」
       await client.query(
         `
         UPDATE generated_reviews
         SET likely_posted = TRUE,
             posted_at     = COALESCE(posted_at, NOW())
-        WHERE id = $1;
-        `,
+        WHERE id = $1
+      `,
         [reviewId]
       );
     } finally {
@@ -71,14 +71,15 @@ exports.handler = async (event) => {
       body: JSON.stringify({ ok: true }),
     };
   } catch (err) {
-    console.error("Confirm error:", err);
+    console.error("confirm handler error:", err);
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
-      body: "Error",
+      body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
 };
+
 
 
 
