@@ -31,56 +31,66 @@ exports.handler = async (event) => {
   }
 
   try {
-    const params = event.queryStringParameters || {};
-    const daysRaw = params.days || "30";
-    const storeId = (params.store_id || "1").trim(); // 預設先用 1（Memory Corner）
+    const qs = event.queryStringParameters || {};
 
-    const days = parseInt(daysRaw, 10);
-    if (isNaN(days) || days <= 0 || days > 365) {
-      return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: "Invalid days" }),
-      };
+    const daysRaw = qs.days;
+    const storeIdRaw = qs.store_id;
+
+    // days: 預設 30 天
+    let days = parseInt(daysRaw, 10);
+    if (Number.isNaN(days) || days <= 0) {
+      days = 30;
+    }
+
+    // store_id: 預設 1（Memory Corner）
+    let storeId = parseInt(storeIdRaw, 10);
+    if (Number.isNaN(storeId) || storeId <= 0) {
+      storeId = 1;
     }
 
     const client = await pool.connect();
-    let rows;
     try {
-      // 從 store_daily_funnel 取指定門店 + 區間
-      const { rows: result } = await client.query(
+      // 直接從 memorycorner_review_funnel 做 group by
+      const { rows } = await client.query(
         `
         SELECT
-          day,
-          store_id,
-          generated_count,
-          clicked_count,
-          posted_count,
-          click_rate_pct,
-          posted_rate_pct,
-          avg_hours_to_click
-        FROM store_daily_funnel
+          date_trunc('day', generated_at)::timestamptz AS day,
+          COUNT(*) AS generated_count,
+          COUNT(*) FILTER (WHERE is_clicked) AS clicked_count,
+          COUNT(*) FILTER (WHERE likely_posted) AS posted_count,
+          CASE 
+            WHEN COUNT(*) > 0 
+              THEN COUNT(*) FILTER (WHERE is_clicked) * 100.0 / COUNT(*)
+            ELSE NULL
+          END AS click_rate_pct,
+          CASE 
+            WHEN COUNT(*) > 0 
+              THEN COUNT(*) FILTER (WHERE likely_posted) * 100.0 / COUNT(*)
+            ELSE NULL
+          END AS posted_rate_pct,
+          AVG(hours_to_click) AS avg_hours_to_click
+        FROM memorycorner_review_funnel
         WHERE store_id = $1
-          AND day >= (CURRENT_DATE - ($2::int - 1))
-        ORDER BY day ASC
+          AND generated_at >= (now() - $2 * INTERVAL '1 day')
+        GROUP BY day
+        ORDER BY day DESC;
         `,
         [storeId, days]
       );
-      rows = result;
+
+      return {
+        statusCode: 200,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(rows),
+      };
     } finally {
       client.release();
     }
-
-    return {
-      statusCode: 200,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(rows),
-    };
   } catch (err) {
-    console.error("funnel error:", err);
+    console.error("funnel.js error:", err);
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
