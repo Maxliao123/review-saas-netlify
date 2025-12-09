@@ -356,19 +356,20 @@
 
     const insightsList = document.getElementById('insightsList');
 
-    async function fetchFunnel(days) {
-      const url = `/.netlify/functions/funnel?days=${encodeURIComponent(days)}`;
+        async function fetchFunnel(days) {
+      const url = `/.netlify/functions/funnel?days=${encodeURIComponent(days)}&store_id=${encodeURIComponent(storeId)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Fetch funnel failed: ' + res.status);
       return res.json();
     }
 
     async function fetchTagFunnel(days) {
-      const url = `/.netlify/functions/tag_funnel?days=${encodeURIComponent(days)}`;
+      const url = `/.netlify/functions/tag_funnel?days=${encodeURIComponent(days)}&store_id=${encodeURIComponent(storeId)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error('Fetch tag funnel failed: ' + res.status);
       return res.json();
     }
+
 
     function formatNumber(n, digits = 0) {
       if (n === null || n === undefined || isNaN(n)) return '–';
