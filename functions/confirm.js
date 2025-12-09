@@ -41,11 +41,18 @@ exports.handler = async (event) => {
   try {
     const { reviewId } = JSON.parse(event.body || "{}");
 
-    if (!reviewId) {
+    // Ensure reviewId exists and looks like a UUID to avoid DB errors
+    const isValidUuid =
+      typeof reviewId === "string" &&
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+        reviewId
+      );
+
+    if (!isValidUuid) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: "Missing reviewId" }),
+        body: JSON.stringify({ error: "Missing or invalid reviewId" }),
       };
     }
 
