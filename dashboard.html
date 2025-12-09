@@ -333,6 +333,10 @@
   </div>
 
   <script>
+    // 讀取 URL ?store_id=2 之類的參數，預設 1
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = (urlParams.get('store_id') || '1').trim();
+    
     const daysSelect = document.getElementById('daysSelect');
     const reloadBtn = document.getElementById('reloadBtn');
     const rangeLabel = document.getElementById('rangeLabel');
