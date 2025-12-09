@@ -7,8 +7,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-// 跟 track.js / confirm.js 一樣，用 SUPABASE_PG_URL
-const pgPool = new Pool({
+const pool = new Pool({
   connectionString: process.env.SUPABASE_PG_URL,
   ssl: { rejectUnauthorized: false },
 });
@@ -27,39 +26,47 @@ exports.handler = async (event) => {
     return {
       statusCode: 405,
       headers: CORS_HEADERS,
-      body: "Method not allowed",
+      body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
   try {
-    const qs = event.queryStringParameters || {};
-    let days = parseInt(qs.days, 10);
+    const params = event.queryStringParameters || {};
+    const daysRaw = params.days || "30";
+    const storeId = (params.store_id || "1").trim(); // 預設先用 1（Memory Corner）
 
-    // 安全護欄：days 不能亂給
+    const days = parseInt(daysRaw, 10);
     if (isNaN(days) || days <= 0 || days > 365) {
-      days = 30; // 預設看最近 30 天
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Invalid days" }),
+      };
     }
 
-    const client = await pgPool.connect();
+    const client = await pool.connect();
     let rows;
     try {
-      const result = await client.query(
+      // 從 store_daily_funnel 取指定門店 + 區間
+      const { rows: result } = await client.query(
         `
-        select
+        SELECT
           day,
+          store_id,
           generated_count,
           clicked_count,
           posted_count,
           click_rate_pct,
           posted_rate_pct,
           avg_hours_to_click
-        from public.memorycorner_daily_funnel
-        where day >= current_date - $1::int
-        order by day asc
+        FROM store_daily_funnel
+        WHERE store_id = $1
+          AND day >= (CURRENT_DATE - ($2::int - 1))
+        ORDER BY day ASC
         `,
-        [days]
+        [storeId, days]
       );
-      rows = result.rows;
+      rows = result;
     } finally {
       client.release();
     }
@@ -81,3 +88,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
