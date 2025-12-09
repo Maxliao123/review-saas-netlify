@@ -41,9 +41,10 @@ exports.handler = async (event) => {
   try {
     const { reviewId } = JSON.parse(event.body || "{}");
 
-    // Accept UUIDs or safe alphanumeric tokens (e.g. Snowflake-style IDs)
     const normalizedId =
-      typeof reviewId === "string" ? reviewId.trim() : String(reviewId || "").trim();
+      typeof reviewId === "string"
+        ? reviewId.trim()
+        : String(reviewId || "").trim();
 
     const isUuid =
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
@@ -51,15 +52,8 @@ exports.handler = async (event) => {
       );
     const isSafeToken = /^[A-Za-z0-9_-]{6,128}$/.test(normalizedId);
 
+    // reviewId 要存在，而且要是 UUID 或安全字串，才接受
     if (!normalizedId || (!isUuid && !isSafeToken)) {
-    // Ensure reviewId exists and looks like a UUID to avoid DB errors
-    const isValidUuid =
-      typeof reviewId === "string" &&
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
-        reviewId
-      );
-
-    if (!isValidUuid) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
@@ -69,7 +63,6 @@ exports.handler = async (event) => {
 
     const client = await pool.connect();
     try {
-      // 只負責把這則 review 標記為已「很可能已貼上」
       await client.query(
         `
         UPDATE generated_reviews
