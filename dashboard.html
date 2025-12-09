@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Memory Corner · Review Funnel Dashboard</title>
+  <style>
+    :root {
+      --bg:#0f172a;
+      --card:#111827;
+      --card-soft:#020617;
+      --accent:#f97316;
+      --accent-soft:#fed7aa;
+      --accent-text:#7c2d12;
+      --fg:#e5e7eb;
+      --muted:#9ca3af;
+      --border:#1f2933;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+      background:radial-gradient(circle at top,#1f2937 0,#020617 55%,#000 100%);
+      color:var(--fg);
+      min-height:100vh;
+      padding:24px 16px 32px;
+    }
+    .shell{
+      max-width:960px;
+      margin:0 auto;
+    }
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:24px;
+    }
+    .title-block h1{
+      margin:0 0 4px;
+      font-size:22px;
+      letter-spacing:0.02em;
+    }
+    .title-block p{
+      margin:0;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    select,button{
+      font:inherit;
+    }
+    .select{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(15,23,42,0.9);
+      color:var(--fg);
+    }
+    .btn{
+      padding:6px 14px;
+      border-radius:999px;
+      border:none;
+      background:var(--accent);
+      color:#111827;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .btn:disabled{
+      opacity:0.6;
+      cursor:default;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:20px;
+    }
+    @media (max-width:768px){
+      .grid{grid-template-columns:1fr;}
+      .header{flex-direction:column;align-items:flex-start;}
+    }
+    .card{
+      background:radial-gradient(circle at top left,#1f2937 0,#020617 55%);
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,0.15);
+      padding:14px 14px 12px;
+      box-shadow:0 18px 45px rgba(15,23,42,0.8);
+    }
+    .card-label{
+      font-size:11px;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .card-main{
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+    }
+    .card-value{
+      font-size:22px;
+      font-weight:600;
+    }
+    .card-unit{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .card-sub{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .badge-soft{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      border-radius:999px;
+      padding:3px 8px;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(148,163,184,0.2);
+      font-size:11px;
+      color:var(--muted);
+    }
+    .badge-dot{
+      width:6px;height:6px;border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(248,153,60,0.25);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    thead{
+      background:linear-gradient(to right,rgba(15,23,42,0.9),rgba(15,23,42,0.5));
+    }
+    th,td{
+      padding:8px 10px;
+      border-bottom:1px solid rgba(31,41,55,0.9);
+      text-align:right;
+      white-space:nowrap;
+    }
+    th:first-child,td:first-child{
+      text-align:left;
+    }
+    th{
+      font-weight:500;
+      color:var(--muted);
+      font-size:11px;
+    }
+    tbody tr:nth-child(even){
+      background:rgba(15,23,42,0.6);
+    }
+    .pill-good{color:#4ade80;}
+    .pill-warn{color:#facc15;}
+    .pill-bad{color:#f97373;}
+    .empty{
+      margin-top:24px;
+      font-size:13px;
+      color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="header">
+      <div class="title-block">
+        <h1>Memory Corner · Review Funnel</h1>
+        <p>快速看出：每天產生幾則、點擊 Google 幾次、平均多久點擊。</p>
+      </div>
+      <div class="controls">
+        <span class="badge-soft">
+          <span class="badge-dot"></span>
+          <span id="rangeLabel">最近 30 天</span>
+        </span>
+        <select id="daysSelect" class="select">
+          <option value="7">最近 7 天</option>
+          <option value="14">最近 14 天</option>
+          <option value="30" selected>最近 30 天</option>
+          <option value="60">最近 60 天</option>
+        </select>
+        <button id="reloadBtn" class="btn">Reload</button>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="card-label">總產生筆數</div>
+        <div class="card-main">
+          <div class="card-value" id="totalGenerated">–</div>
+          <div class="card-unit">reviews</div>
+        </div>
+        <div class="card-sub" id="generatedPerDay">–</div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">Google 點擊率</div>
+        <div class="card-main">
+          <div class="card-value" id="avgClickRate">–</div>
+          <div class="card-unit">%</div>
+        </div>
+        <div class="card-sub" id="clickSummary">–</div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">平均點擊時間</div>
+        <div class="card-main">
+          <div class="card-value" id="avgHours">–</div>
+          <div class="card-unit">hr</div>
+        </div>
+        <div class="card-sub" id="hoursSummary">–</div>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="card-label" style="margin-bottom:8px;">Daily funnel</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Generated</th>
+              <th>Clicked</th>
+              <th>Posted</th>
+              <th>Click %</th>
+              <th>Posted %</th>
+              <th>Avg hrs to click</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyHint" class="empty" style="display:none;">
+        目前沒有資料，先去跑幾次 Memory Corner 的表單吧 🐣
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const daysSelect = document.getElementById('daysSelect');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const rangeLabel = document.getElementById('rangeLabel');
+
+    const totalGeneratedEl = document.getElementById('totalGenerated');
+    const generatedPerDayEl = document.getElementById('generatedPerDay');
+    const avgClickRateEl = document.getElementById('avgClickRate');
+    const clickSummaryEl = document.getElementById('clickSummary');
+    const avgHoursEl = document.getElementById('avgHours');
+    const hoursSummaryEl = document.getElementById('hoursSummary');
+
+    const tableBody = document.getElementById('tableBody');
+    const emptyHint = document.getElementById('emptyHint');
+
+    async function fetchFunnel(days) {
+      const url = `/.netlify/functions/funnel?days=${encodeURIComponent(days)}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error('Fetch failed: ' + res.status);
+      }
+      return res.json(); // array of rows
+    }
+
+    function formatNumber(n, digits = 0) {
+      if (n === null || n === undefined || isNaN(n)) return '–';
+      return Number(n).toLocaleString('en-US', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+      });
+    }
+
+    function computeSummary(rows, days) {
+      if (!rows.length) {
+        totalGeneratedEl.textContent = '0';
+        generatedPerDayEl.textContent = '最近 ' + days + ' 天尚無資料';
+        avgClickRateEl.textContent = '–';
+        clickSummaryEl.textContent = '尚未產生任何評論';
+        avgHoursEl.textContent = '–';
+        hoursSummaryEl.textContent = '尚無點擊行為';
+        return;
+      }
+
+      let totalGenerated = 0;
+      let totalClicked = 0;
+      let totalPosted = 0;
+      let sumClickRate = 0;
+      let countClickRate = 0;
+      let sumHours = 0;
+      let countHours = 0;
+
+      rows.forEach((r) => {
+        const g = Number(r.generated_count || 0);
+        const c = Number(r.clicked_count || 0);
+        const p = Number(r.posted_count || 0);
+        const cr = r.click_rate_pct !== null ? Number(r.click_rate_pct) : null;
+        const h = r.avg_hours_to_click !== null ? Number(r.avg_hours_to_click) : null;
+
+        totalGenerated += g;
+        totalClicked += c;
+        totalPosted += p;
+        if (cr !== null && !isNaN(cr)) {
+          sumClickRate += cr;
+          countClickRate += 1;
+        }
+        if (h !== null && !isNaN(h)) {
+          sumHours += h;
+          countHours += 1;
+        }
+      });
+
+      const daysWithData = rows.length;
+      const genPerDay = totalGenerated / daysWithData;
+      const avgClickRate = countClickRate ? sumClickRate / countClickRate : null;
+      const avgHours = countHours ? sumHours / countHours : null;
+
+      totalGeneratedEl.textContent = formatNumber(totalGenerated);
+      generatedPerDayEl.textContent = `平均每天約 ${formatNumber(genPerDay, 1)} 則評論產生`;
+
+      avgClickRateEl.textContent = avgClickRate === null ? '–' : formatNumber(avgClickRate, 1);
+      if (totalGenerated > 0) {
+        const overallRate = (totalClicked / totalGenerated) * 100;
+        clickSummaryEl.textContent =
+          `共 ${formatNumber(totalClicked)} 次點擊，整體點擊率約 ${formatNumber(overallRate, 1)}%`;
+      } else {
+        clickSummaryEl.textContent = '尚未產生任何評論';
+      }
+
+      if (avgHours === null) {
+        avgHoursEl.textContent = '–';
+        hoursSummaryEl.textContent = '尚無點擊資料';
+      } else {
+        avgHoursEl.textContent = formatNumber(avgHours, 2);
+        hoursSummaryEl.textContent = '從產生到點擊 Google 的平均時間';
+      }
+    }
+
+    function renderTable(rows) {
+      tableBody.innerHTML = '';
+
+      if (!rows.length) {
+        emptyHint.style.display = 'block';
+        return;
+      }
+
+      emptyHint.style.display = 'none';
+
+      rows.forEach((r) => {
+        const tr = document.createElement('tr');
+
+        const dayTd = document.createElement('td');
+        dayTd.textContent = r.day;
+        tr.appendChild(dayTd);
+
+        const genTd = document.createElement('td');
+        genTd.textContent = formatNumber(r.generated_count);
+        tr.appendChild(genTd);
+
+        const clickTd = document.createElement('td');
+        clickTd.textContent = formatNumber(r.clicked_count);
+        tr.appendChild(clickTd);
+
+        const postedTd = document.createElement('td');
+        postedTd.textContent = formatNumber(r.posted_count);
+        tr.appendChild(postedTd);
+
+        const clickRateTd = document.createElement('td');
+        clickRateTd.textContent = r.click_rate_pct === null
+          ? '–'
+          : formatNumber(r.click_rate_pct, 1) + '%';
+        tr.appendChild(clickRateTd);
+
+        const postedRateTd = document.createElement('td');
+        postedRateTd.textContent = r.posted_rate_pct === null
+          ? '–'
+          : formatNumber(r.posted_rate_pct, 1) + '%';
+        tr.appendChild(postedRateTd);
+
+        const hoursTd = document.createElement('td');
+        hoursTd.textContent = r.avg_hours_to_click === null
+          ? '–'
+          : formatNumber(r.avg_hours_to_click, 2);
+        tr.appendChild(hoursTd);
+
+        tableBody.appendChild(tr);
+      });
+    }
+
+    async function loadAndRender() {
+      const days = parseInt(daysSelect.value, 10);
+      rangeLabel.textContent = `最近 ${days} 天`;
+      reloadBtn.disabled = true;
+      reloadBtn.textContent = 'Loading…';
+
+      try {
+        const rows = await fetchFunnel(days);
+        renderTable(rows);
+        computeSummary(rows, days);
+      } catch (err) {
+        console.error(err);
+        alert('載入漏斗資料失敗，請稍後再試');
+      } finally {
+        reloadBtn.disabled = false;
+        reloadBtn.textContent = 'Reload';
+      }
+    }
+
+    reloadBtn.addEventListener('click', loadAndRender);
+    daysSelect.addEventListener('change', loadAndRender);
+
+    // 初次載入
+    loadAndRender();
+  </script>
+</body>
+</html>
