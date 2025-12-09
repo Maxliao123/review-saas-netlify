@@ -610,7 +610,7 @@
   }
 
 
-$openGoogle.addEventListener('click', async (e)=>{
+$openGoogle.addEventListener('click', async (e) => {
   e.preventDefault();
   const txt = ($output.value || '').trim();
   if (!txt) {
@@ -618,30 +618,32 @@ $openGoogle.addEventListener('click', async (e)=>{
     return;
   }
 
-  // 1) 標記這則 review 為 likely_posted（原本就有）
+  // 1) 標記這則 review 為 likely_posted + posted_at
   try {
     await markAsPosted(currentReviewId);
   } catch (err) {
     console.error("markAsPosted error:", err);
   }
 
-  // 2) 上報 click_google 事件 → 寫入 generator_events
+  // 2) 上報 click_google 事件 -> 寫入 generator_events
   try {
     await fetch("/.netlify/functions/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // 先用 null 當佔位，之後我們再接上真正的 store_id
-        store_id: null,
+        store_id: 1,                          // Memory Corner
         event_type: "click_google",
-        tags_used: null,
+        source_id: currentReviewId,          // 🔗 對應 generated_reviews.id
+        tags_used: (lastTagsUsed && lastTagsUsed.length)
+          ? lastTagsUsed
+          : null,
       }),
     });
   } catch (err) {
     console.error("track click_google error:", err);
   }
 
-  // 3) 複製文字到剪貼簿（原本就有）
+  // 3) 寫入剪貼簿
   try {
     await navigator.clipboard.writeText(txt);
     $status.textContent = '';
@@ -649,12 +651,13 @@ $openGoogle.addEventListener('click', async (e)=>{
     $status.textContent = '請手動複製';
   }
 
-  // 4) 開啟 Google 評論頁（原本就有）
+  // 4) 開啟 Google 評論頁
   try {
     const open = window.__nativeOpen || window.open;
     open.call(window, googleReviewUrl_global, '_blank');
   } catch {}
 });
+
 
 
     
