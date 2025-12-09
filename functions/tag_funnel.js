@@ -7,13 +7,12 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-const pgPool = new Pool({
+const pool = new Pool({
   connectionString: process.env.SUPABASE_PG_URL,
   ssl: { rejectUnauthorized: false },
 });
 
 exports.handler = async (event) => {
-  // CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
@@ -26,51 +25,51 @@ exports.handler = async (event) => {
     return {
       statusCode: 405,
       headers: CORS_HEADERS,
-      body: "Method not allowed",
+      body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
   try {
-    const qs = event.queryStringParameters || {};
-    let days = parseInt(qs.days, 10);
+    const params = event.queryStringParameters || {};
+    const daysRaw = params.days || "30";
+    const storeId = (params.store_id || "1").trim();
 
-    // 安全範圍
+    const days = parseInt(daysRaw, 10);
     if (isNaN(days) || days <= 0 || days > 365) {
-      days = 30;
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Invalid days" }),
+      };
     }
 
-    const client = await pgPool.connect();
+    const client = await pool.connect();
     let rows;
     try {
-      const result = await client.query(
+      // 從 tag_daily_usage 聚合出這段時間各標籤的表現
+      const { rows: result } = await client.query(
         `
-        with tag_events as (
-          select
-            unnest(tags_used) as tag,
-            case when event_type = 'generate' then 1 else 0 end as generated_count,
-            case when event_type = 'click_google' then 1 else 0 end as clicked_count
-          from generator_events
-          where store_id = 1
-            and created_at >= current_date - $1::int
-            and event_type in ('generate', 'click_google')
-            and tags_used is not null
-        )
-        select
+        SELECT
           tag,
-          sum(generated_count) as generated_count,
-          sum(clicked_count)   as clicked_count,
-          case
-            when sum(generated_count) > 0
-              then round(100.0 * sum(clicked_count) / sum(generated_count), 1)
-            else null
-          end as click_rate_pct
-        from tag_events
-        group by tag
-        order by sum(generated_count) desc, tag asc
+          SUM(generated_count)::int AS generated_count,
+          SUM(clicked_count)::int   AS clicked_count,
+          CASE
+            WHEN SUM(generated_count) > 0
+            THEN ROUND(
+              SUM(clicked_count)::numeric * 100.0 / SUM(generated_count),
+              1
+            )
+            ELSE NULL
+          END AS click_rate_pct
+        FROM tag_daily_usage
+        WHERE store_id = $1
+          AND day >= (CURRENT_DATE - ($2::int - 1))
+        GROUP BY tag
+        ORDER BY generated_count DESC, tag ASC
         `,
-        [days]
+        [storeId, days]
       );
-      rows = result.rows;
+      rows = result;
     } finally {
       client.release();
     }
@@ -92,3 +91,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
