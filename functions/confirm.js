@@ -52,6 +52,14 @@ exports.handler = async (event) => {
     const isSafeToken = /^[A-Za-z0-9_-]{6,128}$/.test(normalizedId);
 
     if (!normalizedId || (!isUuid && !isSafeToken)) {
+    // Ensure reviewId exists and looks like a UUID to avoid DB errors
+    const isValidUuid =
+      typeof reviewId === "string" &&
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+        reviewId
+      );
+
+    if (!isValidUuid) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
