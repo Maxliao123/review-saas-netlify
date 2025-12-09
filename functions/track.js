@@ -50,14 +50,19 @@ exports.handler = async (event) => {
       };
     }
 
-    // 目前只有 Memory Corner，沒傳就先 default = 1
+    // Memory Corner 目前就是 1，前端沒傳就 default 1
     if (!store_id) {
       store_id = 1;
     }
 
-    // tags_used 可以是 null / 陣列；空陣列就存成 null 比較乾淨
-    if (Array.isArray(tags_used) && tags_used.length === 0) {
+    // tags_used：空陣列視為 null，其他保持陣列
+    if (!Array.isArray(tags_used) || tags_used.length === 0) {
       tags_used = null;
+    }
+
+    // source_id：沒有就改成 null（允許 generate 沒有 source_id）
+    if (!source_id || typeof source_id !== "string" || !source_id.trim()) {
+      source_id = null;
     }
 
     const client = await pgPool.connect();
@@ -65,9 +70,9 @@ exports.handler = async (event) => {
       await client.query(
         `
         INSERT INTO generator_events (store_id, source_id, event_type, tags_used)
-        VALUES ($1, $2, $3, $4::text[])
+        VALUES ($1, $2::uuid, $3, $4::text[])
         `,
-        [store_id, source_id || null, event_type, tags_used]
+        [store_id, source_id, event_type, tags_used]
       );
     } finally {
       client.release();
