@@ -188,6 +188,18 @@
     th.sort-desc .sort-indicator{
       opacity:0.8;
     }
+
+    /* insights */
+    .insights-list{
+      margin:6px 0 0;
+      padding-left:18px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .insights-list li{
+      margin-bottom:4px;
+      line-height:1.6;
+    }
   </style>
 </head>
 <body>
@@ -312,6 +324,12 @@
         Click-through rate = 點擊率（Google clicks ÷ Times selected）。
       </div>
     </section>
+
+    <!-- Key insights -->
+    <section class="card">
+      <div class="card-label" style="margin-bottom:8px;">Key insights</div>
+      <ul id="insightsList" class="insights-list"></ul>
+    </section>
   </div>
 
   <script>
@@ -331,6 +349,8 @@
 
     const tagTableBody = document.getElementById('tagTableBody');
     const tagEmptyHint = document.getElementById('tagEmptyHint');
+
+    const insightsList = document.getElementById('insightsList');
 
     async function fetchFunnel(days) {
       const url = `/.netlify/functions/funnel?days=${encodeURIComponent(days)}`;
@@ -529,6 +549,141 @@
       });
     }
 
+    // ------ Insights：總結 + 這週 vs 上週 + 熱門／待優化標籤 ------
+    function buildInsights(dailyRows, tagRows, days) {
+      if (!insightsList) return;
+      insightsList.innerHTML = '';
+
+      const add = (text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        insightsList.appendChild(li);
+      };
+
+      // 沒任何資料
+      if (!dailyRows.length) {
+        add(`最近 ${days} 天還沒有任何評論，先邀請幾位熟客來幫忙留下第一批 Google 評論吧。`);
+        return;
+      }
+
+      // 整體統計
+      let totalGenerated = 0;
+      let totalClicked = 0;
+      let totalPosted = 0;
+
+      dailyRows.forEach((r) => {
+        totalGenerated += Number(r.generated_count || 0);
+        totalClicked  += Number(r.clicked_count || 0);
+        totalPosted   += Number(r.posted_count || 0);
+      });
+
+      const clickRate  = totalGenerated ? (totalClicked / totalGenerated) * 100 : null;
+      const postedRate = totalGenerated ? (totalPosted  / totalGenerated) * 100 : null;
+
+      add(
+        `最近 ${days} 天共產生 ${formatNumber(totalGenerated)} 則評論，其中 ` +
+        `${formatNumber(totalClicked)} 次點擊前往 Google，整體點擊率約 ` +
+        `${clickRate === null ? '–' : formatNumber(clickRate, 1)}%。`
+      );
+
+      if (postedRate !== null) {
+        add(
+          `在所有已點擊的評論中，大約有 ${formatNumber(postedRate, 1)}% 被標記為「已發佈」。`
+        );
+      }
+
+      // 這週 vs 上週（用最近 7 天 vs 往前推的 7 天，只要資料夠就算）
+      const sorted = [...dailyRows].sort((a, b) => {
+        const da = Date.parse(a.day || '');
+        const db = Date.parse(b.day || '');
+        return da - db;
+      });
+
+      if (sorted.length >= 4) { // 至少有一些資料才有意義
+        const last7 = sorted.slice(-7);
+        const prev7 = sorted.slice(-14, -7);
+
+        const lastLen = last7.length;
+        const prevLen = prev7.length;
+
+        if (lastLen > 0 && prevLen > 0) {
+          const lastTotal = last7.reduce((sum, r) => sum + Number(r.generated_count || 0), 0);
+          const prevTotal = prev7.reduce((sum, r) => sum + Number(r.generated_count || 0), 0);
+          const lastPerDay = lastTotal / lastLen;
+          const prevPerDay = prevTotal / prevLen;
+
+          if (prevPerDay > 0) {
+            const diff = lastPerDay - prevPerDay;
+            const pct = (diff / prevPerDay) * 100;
+
+            if (pct > 5) {
+              add(
+                `最近 7 天平均每天約 ${formatNumber(lastPerDay, 1)} 則評論，` +
+                `比前 7 天的 ${formatNumber(prevPerDay, 1)} 則多了約 ${formatNumber(pct, 1)}%，` +
+                `評論產生量正在往上走。`
+              );
+            } else if (pct < -5) {
+              add(
+                `最近 7 天平均每天約 ${formatNumber(lastPerDay, 1)} 則評論，` +
+                `比前 7 天的 ${formatNumber(prevPerDay, 1)} 則少了約 ${formatNumber(-pct, 1)}%，` +
+                `可以考慮在現場多一點引導客人留下評論。`
+              );
+            } else {
+              add(
+                `最近 7 天與前 7 天的平均產生量大致相近（約 ` +
+                `${formatNumber(lastPerDay, 1)} vs ${formatNumber(prevPerDay, 1)} 則／天），` +
+                `整體表現算是穩定。`
+              );
+            }
+          }
+        }
+      }
+
+      // 標籤表現：最多使用 + 點擊率最高的熱門標籤 + 點擊率偏低的標籤
+      if (tagRows && tagRows.length) {
+        const sortedByGenerated = [...tagRows].sort(
+          (a, b) => (b.generated_count || 0) - (a.generated_count || 0)
+        );
+        const topByUsed = sortedByGenerated[0];
+        if (topByUsed && topByUsed.generated_count > 0) {
+          add(
+            `使用次數最多的標籤是「${topByUsed.tag}」，共被選擇 ` +
+            `${formatNumber(topByUsed.generated_count)} 次，是目前客人最常提到的亮點。`
+          );
+        }
+
+        // 篩出「有一定樣本數」的標籤
+        const withSample = tagRows.filter((t) => (t.generated_count || 0) >= 3);
+
+        if (withSample.length) {
+          // 高表現熱門標籤：Times selected >=3 且 Click-through rate >= 80%
+          const strong = withSample
+            .filter((t) => (t.click_rate_pct || 0) >= 80)
+            .sort((a, b) => (b.click_rate_pct || 0) - (a.click_rate_pct || 0));
+
+          if (strong.length) {
+            const names = strong.slice(0, 3).map((t) => `「${t.tag}」`).join('、');
+            add(
+              `${names} 的點擊率表現特別好，可以多鼓勵店內夥伴在介紹菜色時多提到這些亮點。`
+            );
+          }
+
+          // 需要優化的標籤：Times selected >=3 且 Click-through rate < 60%
+          const under = withSample
+            .filter((t) => (t.click_rate_pct || 0) < 60)
+            .sort((a, b) => (a.click_rate_pct || 0) - (b.click_rate_pct || 0));
+
+          if (under.length) {
+            const names = under.slice(0, 3).map((t) => `「${t.tag}」`).join('、');
+            add(
+              `${names} 的點擊率相對較低，建議檢查這些標籤的文案是否清楚，` +
+              `或是在現場多一點口頭引導，幫助客人理解這些賣點。`
+            );
+          }
+        }
+      }
+    }
+
     // ------ 通用排序功能 ------
     function setupSortableTable(tableId) {
       const table = document.getElementById(tableId);
@@ -611,6 +766,7 @@
         renderDailyTable(dailyRows);
         computeSummary(dailyRows, days);
         renderTagTable(tagRows);
+        buildInsights(dailyRows, tagRows, days);
       } catch (err) {
         console.error(err);
         alert('載入漏斗資料失敗，請稍後再試');
@@ -631,5 +787,6 @@
   </script>
 </body>
 </html>
+
 
 
