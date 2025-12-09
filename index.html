@@ -596,12 +596,13 @@
 
   // ⭐ mark likely_posted = true
   async function markAsPosted(reviewId) {
-    if (!reviewId) return;
+    const normalizedId = (reviewId || "").toString().trim();
+    if (!normalizedId) return;
     try {
       await fetch("/.netlify/functions/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewId })
+        body: JSON.stringify({ reviewId: normalizedId })
       });
     } catch (e) {
       console.error("markAsPosted error:", e);
@@ -650,7 +651,8 @@ $openGoogle.addEventListener('click', async (e)=>{
 
   // 4) 開啟 Google 評論頁（原本就有）
   try {
-    window.open(googleReviewUrl_global, '_blank');
+    const open = window.__nativeOpen || window.open;
+    open.call(window, googleReviewUrl_global, '_blank');
   } catch {}
 });
 
@@ -793,6 +795,7 @@ $openGoogle.addEventListener('click', async (e)=>{
     }
 
     const _open = window.open;
+    window.__nativeOpen = _open;
     window.open = function(url, target, features){
       const fromBtn = (document.activeElement === openBtn) || (url && String(url).includes('writereview'));
       return fromBtn ? _open.call(window, url, target, features) : null;
@@ -810,14 +813,6 @@ $openGoogle.addEventListener('click', async (e)=>{
     new MutationObserver(killThanks).observe(document.body,{childList:true,subtree:true});
     killThanks();
 
-    // hotfix 裡這個 click handler 只處理瀏覽器限制，不影響上面那個 markAsPosted + track
-    openBtn && openBtn.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      const txt=(output.value||'').trim();
-      if(!txt){ status && (status.textContent='尚無內容可複製'); return; }
-      try{ await navigator.clipboard.writeText(txt); status && (status.textContent=''); }catch{ status && (status.textContent='請手動複製'); }
-      try{ _open.call(window, window.googleReviewUrl_global || openBtn.href, '_blank'); }catch{}
-    }, { capture:false });
   })();
   </script>
 </body>

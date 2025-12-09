@@ -41,6 +41,17 @@ exports.handler = async (event) => {
   try {
     const { reviewId } = JSON.parse(event.body || "{}");
 
+    // Accept UUIDs or safe alphanumeric tokens (e.g. Snowflake-style IDs)
+    const normalizedId =
+      typeof reviewId === "string" ? reviewId.trim() : String(reviewId || "").trim();
+
+    const isUuid =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+        normalizedId
+      );
+    const isSafeToken = /^[A-Za-z0-9_-]{6,128}$/.test(normalizedId);
+
+    if (!normalizedId || (!isUuid && !isSafeToken)) {
     // Ensure reviewId exists and looks like a UUID to avoid DB errors
     const isValidUuid =
       typeof reviewId === "string" &&
@@ -66,7 +77,7 @@ exports.handler = async (event) => {
             posted_at     = COALESCE(posted_at, NOW())
         WHERE id = $1
       `,
-        [reviewId]
+        [normalizedId]
       );
     } finally {
       client.release();
