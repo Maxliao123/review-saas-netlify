@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Memory Corner · Review Funnel Dashboard</title>
+  <title>Memory Corner · Review Funnel</title>
   <style>
     :root {
       --bg:#0f172a;
@@ -91,6 +91,7 @@
       border:1px solid rgba(148,163,184,0.15);
       padding:14px 14px 12px;
       box-shadow:0 18px 45px rgba(15,23,42,0.8);
+      margin-bottom:14px;
     }
     .card-label{
       font-size:11px;
@@ -158,12 +159,14 @@
     tbody tr:nth-child(even){
       background:rgba(15,23,42,0.6);
     }
-    .pill-good{color:#4ade80;}
-    .pill-warn{color:#facc15;}
-    .pill-bad{color:#f97373;}
     .empty{
-      margin-top:24px;
+      margin-top:8px;
       font-size:13px;
+      color:var(--muted);
+    }
+    .tag-note{
+      margin-top:6px;
+      font-size:11px;
       color:var(--muted);
     }
   </style>
@@ -173,7 +176,7 @@
     <header class="header">
       <div class="title-block">
         <h1>Memory Corner · Review Funnel</h1>
-        <p>快速看出：每天產生幾則、點擊 Google 幾次、平均多久點擊。</p>
+        <p>快速看出每天產生幾則、點擊 Google 幾次、平均多久點擊，以及哪些標籤表現最好。</p>
       </div>
       <div class="controls">
         <span class="badge-soft">
@@ -219,6 +222,7 @@
       </article>
     </section>
 
+    <!-- Daily funnel -->
     <section class="card">
       <div class="card-label" style="margin-bottom:8px;">Daily funnel</div>
       <div style="overflow-x:auto;">
@@ -234,12 +238,35 @@
               <th>Avg hrs to click</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
-          </tbody>
+          <tbody id="tableBody"></tbody>
         </table>
       </div>
       <div id="emptyHint" class="empty" style="display:none;">
         目前沒有資料，先去跑幾次 Memory Corner 的表單吧 🐣
+      </div>
+    </section>
+
+    <!-- Tag performance -->
+    <section class="card">
+      <div class="card-label" style="margin-bottom:8px;">Tag performance</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Tag</th>
+              <th>Generated</th>
+              <th>Clicked</th>
+              <th>Click %</th>
+            </tr>
+          </thead>
+          <tbody id="tagTableBody"></tbody>
+        </table>
+      </div>
+      <div id="tagEmptyHint" class="empty" style="display:none;">
+        目前這個期間沒有任何帶標籤的事件。
+      </div>
+      <div class="tag-note">
+        註：Generated = 使用該標籤產生的評論數；Clicked = 使用該標籤且點擊「複製並開啟 Google 評論」次數。
       </div>
     </section>
   </div>
@@ -259,13 +286,21 @@
     const tableBody = document.getElementById('tableBody');
     const emptyHint = document.getElementById('emptyHint');
 
+    const tagTableBody = document.getElementById('tagTableBody');
+    const tagEmptyHint = document.getElementById('tagEmptyHint');
+
     async function fetchFunnel(days) {
       const url = `/.netlify/functions/funnel?days=${encodeURIComponent(days)}`;
       const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error('Fetch failed: ' + res.status);
-      }
-      return res.json(); // array of rows
+      if (!res.ok) throw new Error('Fetch funnel failed: ' + res.status);
+      return res.json();
+    }
+
+    async function fetchTagFunnel(days) {
+      const url = `/.netlify/functions/tag_funnel?days=${encodeURIComponent(days)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Fetch tag funnel failed: ' + res.status);
+      return res.json();
     }
 
     function formatNumber(n, digits = 0) {
@@ -341,14 +376,13 @@
       }
     }
 
-    function renderTable(rows) {
+    function renderDailyTable(rows) {
       tableBody.innerHTML = '';
 
       if (!rows.length) {
         emptyHint.style.display = 'block';
         return;
       }
-
       emptyHint.style.display = 'none';
 
       rows.forEach((r) => {
@@ -392,6 +426,40 @@
       });
     }
 
+    function renderTagTable(rows) {
+      tagTableBody.innerHTML = '';
+
+      if (!rows.length) {
+        tagEmptyHint.style.display = 'block';
+        return;
+      }
+      tagEmptyHint.style.display = 'none';
+
+      rows.forEach((r) => {
+        const tr = document.createElement('tr');
+
+        const tagTd = document.createElement('td');
+        tagTd.textContent = r.tag;
+        tr.appendChild(tagTd);
+
+        const genTd = document.createElement('td');
+        genTd.textContent = formatNumber(r.generated_count);
+        tr.appendChild(genTd);
+
+        const clickTd = document.createElement('td');
+        clickTd.textContent = formatNumber(r.clicked_count);
+        tr.appendChild(clickTd);
+
+        const rateTd = document.createElement('td');
+        rateTd.textContent = r.click_rate_pct === null
+          ? '–'
+          : formatNumber(r.click_rate_pct, 1) + '%';
+        tr.appendChild(rateTd);
+
+        tagTableBody.appendChild(tr);
+      });
+    }
+
     async function loadAndRender() {
       const days = parseInt(daysSelect.value, 10);
       rangeLabel.textContent = `最近 ${days} 天`;
@@ -399,9 +467,13 @@
       reloadBtn.textContent = 'Loading…';
 
       try {
-        const rows = await fetchFunnel(days);
-        renderTable(rows);
-        computeSummary(rows, days);
+        const [dailyRows, tagRows] = await Promise.all([
+          fetchFunnel(days),
+          fetchTagFunnel(days),
+        ]);
+        renderDailyTable(dailyRows);
+        computeSummary(dailyRows, days);
+        renderTagTable(tagRows);
       } catch (err) {
         console.error(err);
         alert('載入漏斗資料失敗，請稍後再試');
@@ -419,3 +491,4 @@
   </script>
 </body>
 </html>
+
