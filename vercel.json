@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fetch-reviews",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/publish-replies",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 17 * * 1"
+    }
+  ]
+}

@@ -34,6 +34,18 @@ function StoreLoader() {
             .then(data => {
                 setStoreData(data);
                 setStatus('success');
+
+                // Fire-and-forget scan tracking
+                const src = params.get('src') || 'link';
+                fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        store_id: data.id,
+                        scan_source: src,
+                        referrer: document.referrer || null,
+                    }),
+                }).catch(() => {}); // Never block UX
             })
             .catch((e) => {
                 console.error(e);
