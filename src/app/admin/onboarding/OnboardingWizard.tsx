@@ -169,6 +169,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
           name: businessName,
           slug: slug || generateSlug(businessName),
           owner_id: userId,
+          preferred_language: language,
         })
         .select()
         .single();
@@ -437,9 +438,18 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
                 </button>
               </div>
             ) : locations.length === 0 ? (
-              <div className="text-center py-4">
+              <div className="text-center py-4 space-y-3">
                 <p className="text-sm text-gray-600">No locations found in your Google Business account.</p>
-                <p className="text-xs text-gray-400 mt-1">Make sure your Google account has business locations.</p>
+                <p className="text-xs text-gray-400">Make sure your Google account has business locations set up.</p>
+                <div className="flex gap-2 justify-center">
+                  <button onClick={fetchLocations} className="text-sm text-blue-600 underline">
+                    Retry
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button onClick={() => { router.push('/admin/reviews'); }} className="text-sm text-gray-500 underline">
+                    Skip &amp; go to dashboard
+                  </button>
+                </div>
               </div>
             ) : (
               <>

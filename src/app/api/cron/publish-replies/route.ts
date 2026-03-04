@@ -55,11 +55,7 @@ export async function GET(request: Request) {
                 }
 
                 if (!authClient) {
-                    try {
-                        authClient = getGoogleOAuth2Client();
-                    } catch {
-                        throw new Error(`No Google credentials available for review ${review.id}`);
-                    }
+                    throw new Error(`No Google credentials for tenant ${tenantId || 'unknown'} (review ${review.id}). Ask tenant owner to reconnect Google Business.`);
                 }
 
                 console.log(`Publishing reply for ${review.author_name} (${resourceName})...`);

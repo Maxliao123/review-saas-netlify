@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { RefreshCw, CheckCircle2, MessageCircle, MessageCircleOff, Search } from 'lucide-react';
 
 interface Review {
@@ -30,6 +31,7 @@ interface ScannerManagerProps {
 type FilterTab = 'all' | 'replied' | 'not_replied';
 
 export default function ScannerManager({ reviews: initialReviews, stores, role, isGoogleConnected }: ScannerManagerProps) {
+  const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<any>(null);
   const [syncError, setSyncError] = useState('');
@@ -72,9 +74,9 @@ export default function ScannerManager({ reviews: initialReviews, stores, role, 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setSyncResult(data);
-      // Reload page to get fresh data
+      // Refresh server data without full page reload
       if (data.stats?.newReviews > 0) {
-        setTimeout(() => window.location.reload(), 1500);
+        setTimeout(() => router.refresh(), 1500);
       }
     } catch (err: any) {
       setSyncError(err.message);
