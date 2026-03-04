@@ -151,7 +151,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
       if (!res.ok) throw new Error(data.error || 'Failed to fetch locations');
       setLocations(data.locations || []);
       // Auto-select all locations
-      const allIds = new Set((data.locations || []).map((l: GoogleLocation) => l.placeId));
+      const allIds = new Set<string>((data.locations || []).map((l: GoogleLocation) => l.placeId));
       setSelectedPlaceIds(allIds);
     } catch (err: any) {
       setLocationError(err.message);
