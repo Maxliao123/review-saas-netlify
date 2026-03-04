@@ -165,7 +165,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
                 value={businessName}
                 onChange={(e) => { setBusinessName(e.target.value); setSlug(generateSlug(e.target.value)); }}
                 placeholder="Your Restaurant Name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl placeholder:text-gray-400 text-gray-900"
               />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
               <input
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700"
               />
             </div>
             <div>
@@ -181,7 +181,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl placeholder:text-gray-400 text-gray-900"
               >
                 <option value="en">English</option>
                 <option value="zh">繁體中文</option>
@@ -208,7 +208,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
                 value={placeId}
                 onChange={(e) => setPlaceId(e.target.value)}
                 placeholder="ChIJ... (from Google Maps)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl placeholder:text-gray-400 text-gray-900"
               />
               <p className="text-xs text-gray-400 mt-1">
                 You can find your Place ID on Google Maps or connect Google Business later in Settings.
@@ -257,7 +257,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
               <input
                 value={supportEmail}
                 onChange={(e) => setSupportEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl placeholder:text-gray-400 text-gray-900"
               />
             </div>
             <button
@@ -281,7 +281,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
               <input
                 value={notifEmail}
                 onChange={(e) => setNotifEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl placeholder:text-gray-400 text-gray-900"
               />
             </div>
             <button
