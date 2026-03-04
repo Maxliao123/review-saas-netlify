@@ -7,6 +7,50 @@ import { FeedbackForm } from '@/components/FeedbackForm';
 import { ReviewGenerator } from '@/components/ReviewGenerator';
 import { Loader2 } from 'lucide-react';
 
+function HeroSection({ storeData }: { storeData: any }) {
+    const [heroError, setHeroError] = useState(false);
+    const [logoError, setLogoError] = useState(false);
+
+    const heroSrc = storeData.placePhotoUrl || storeData.heroUrl;
+    const logoSrc = storeData.logoUrl || storeData.placePhotoUrl;
+    const initials = (storeData.name || 'S').slice(0, 2).toUpperCase();
+
+    return (
+        <div className="relative h-[180px] md:h-[220px] w-full bg-gradient-to-br from-blue-50 to-slate-100">
+            {heroSrc && !heroError ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src={heroSrc}
+                    alt={`${storeData.name} storefront`}
+                    className="h-full w-full object-cover"
+                    onError={() => setHeroError(true)}
+                />
+            ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                    <div className="text-6xl font-bold text-blue-200/50 select-none">{initials}</div>
+                </div>
+            )}
+
+            {/* Logo Badge */}
+            <div className="absolute bottom-[-24px] left-1/2 h-16 w-16 -translate-x-1/2 transform rounded-xl bg-white p-2 shadow-lg md:h-[72px] md:w-[72px]">
+                {logoSrc && !logoError ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={logoSrc}
+                        alt={`${storeData.name} logo`}
+                        className="h-full w-full rounded-lg object-contain"
+                        onError={() => setLogoError(true)}
+                    />
+                ) : (
+                    <div className="h-full w-full rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                        {initials}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function StoreLoader() {
     const params = useSearchParams();
     const storeId = params.get('store') || params.get('storeid') || 'decision'; // Default ?
@@ -90,32 +134,7 @@ function StoreLoader() {
                 <div className="relative overflow-hidden rounded-[20px] bg-white shadow-xl ring-1 ring-black/5">
 
                     {/* Hero Section */}
-                    <div className="relative h-[180px] md:h-[220px] w-full bg-slate-100">
-                        {storeData.placePhotoUrl || storeData.heroUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={storeData.placePhotoUrl || storeData.heroUrl}
-                                alt="Hero"
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="h-full w-full flex items-center justify-center text-slate-300">
-                                No Image
-                            </div>
-                        )}
-
-                        {/* Logo Badge */}
-                        {(storeData.logoUrl || storeData.placePhotoUrl) && (
-                            <div className="absolute bottom-[-24px] left-1/2 h-16 w-16 -translate-x-1/2 transform rounded-xl bg-white p-2 shadow-lg md:h-[72px] md:w-[72px]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={storeData.logoUrl || storeData.placePhotoUrl}
-                                    alt="Logo"
-                                    className="h-full w-full rounded-lg object-contain"
-                                />
-                            </div>
-                        )}
-                    </div>
+                    <HeroSection storeData={storeData} />
 
                     {/* Content Area */}
                     <div className="px-4 pb-8 pt-12 md:px-8">

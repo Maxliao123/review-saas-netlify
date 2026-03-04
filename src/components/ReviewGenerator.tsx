@@ -106,14 +106,11 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                 }));
             });
 
-            // Reconstruct groups based on config order
+            // Reconstruct groups based on config order — always show all categories
             CHIP_GROUPS_CONFIG.forEach(config => {
                 const itemsSet = groupsMap.get(config.id);
                 const items = itemsSet ? Array.from(itemsSet).map((s: any) => JSON.parse(s)) : [];
-
-                if (items.length > 0 || config.id === 'food') {
-                    groups.push({ ...config, items });
-                }
+                groups.push({ ...config, items });
             });
 
             // If we found nothing relevant for this lang, logic below might help fallback? 
@@ -143,10 +140,8 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
             });
 
             const uniqueTags = Array.from(seenInThisGroup.values());
-            // Always show food/top3 group even if empty (for custom input), others only if has tags
-            if (uniqueTags.length > 0 || config.id === 'food') {
-                groups.push({ ...config, items: uniqueTags });
-            }
+            // Always show all groups for consistent UX
+            groups.push({ ...config, items: uniqueTags });
         });
 
         return groups;
