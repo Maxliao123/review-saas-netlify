@@ -54,7 +54,7 @@ export async function getGoogleClientForTenant(tenantId: string) {
 }
 
 // Generate the OAuth consent URL for a tenant to connect their Google Business
-export function getGoogleOAuthUrl(tenantId: string) {
+export function getGoogleOAuthUrl(tenantId: string, redirectTo?: string) {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -65,7 +65,7 @@ export function getGoogleOAuthUrl(tenantId: string) {
     access_type: 'offline',
     prompt: 'consent',
     scope: SCOPES,
-    state: JSON.stringify({ tenant_id: tenantId }),
+    state: JSON.stringify({ tenant_id: tenantId, redirect_to: redirectTo }),
   });
 }
 

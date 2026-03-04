@@ -1,17 +1,15 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getGoogleOAuthUrl } from '@/lib/google-business';
+import { listGoogleLocations } from '@/lib/google-business-locations';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
-
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's tenant (must be owner)
     const { data: membership } = await supabase
       .from('tenant_members')
       .select('tenant_id, role')
@@ -20,16 +18,13 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: 'Only tenant owners can connect Google Business' }, { status: 403 });
+      return NextResponse.json({ error: 'No tenant found' }, { status: 404 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const redirectTo = searchParams.get('redirect') || undefined;
-
-    const authUrl = getGoogleOAuthUrl(membership.tenant_id, redirectTo);
-    return NextResponse.redirect(authUrl);
+    const locations = await listGoogleLocations(membership.tenant_id);
+    return NextResponse.json({ locations });
   } catch (error: any) {
-    console.error('Google OAuth start error:', error);
+    console.error('Error fetching Google locations:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

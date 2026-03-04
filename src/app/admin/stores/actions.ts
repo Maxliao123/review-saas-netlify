@@ -1,15 +1,18 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient, getUserTenantContext } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function getStores() {
+  const ctx = await getUserTenantContext();
+  if (!ctx?.tenant) return [];
+
   const supabase = await createSupabaseServerClient();
 
-  // RLS filters stores to the user's tenant automatically
   const { data, error } = await supabase
     .from('stores')
     .select('*')
+    .eq('tenant_id', ctx.tenant.id)
     .order('name');
 
   if (error) {

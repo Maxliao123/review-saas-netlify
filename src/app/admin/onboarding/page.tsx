@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getAuthUser } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import OnboardingWizard from './OnboardingWizard';
@@ -10,7 +11,9 @@ export default async function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <OnboardingWizard userId={user.id} userEmail={user.email || ''} />
+      <Suspense fallback={<div className="text-gray-500">Loading...</div>}>
+        <OnboardingWizard userId={user.id} userEmail={user.email || ''} />
+      </Suspense>
     </div>
   );
 }
