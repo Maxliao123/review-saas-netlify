@@ -6,6 +6,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const secret = searchParams.get('cron_secret');
+
+        if (secret !== process.env.CRON_SECRET) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { data: approvedReviews } = await supabase
             .from('reviews_raw')
             .select('*')
