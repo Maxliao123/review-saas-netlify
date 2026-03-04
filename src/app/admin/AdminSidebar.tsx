@@ -14,6 +14,7 @@ import {
   Bell,
   LogOut,
   Link as LinkIcon,
+  Radar,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ interface SidebarProps {
 
 const NAV_ITEMS = [
   { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
+  { href: '/admin/scanner', label: 'Review Scanner', icon: Radar },
   { href: '/admin/analytics/scans', label: 'Scan Analytics', icon: QrCode },
   { href: '/admin/reports', label: 'Weekly Reports', icon: FileText },
   { href: '/admin/stores/setup', label: 'Store Setup', icon: Store },
