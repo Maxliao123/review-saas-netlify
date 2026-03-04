@@ -189,9 +189,20 @@ export async function GET(request: NextRequest) {
             themeOnBlue,
         };
 
-        // 3. Supabase Generator Tags Overlay
-        // This is the primary way to get tags now if not in sheet
+        // 3. Supabase Generator Tags — raw tags + legacy overlay
         try {
+            const { data: rawTagRows } = await supabase
+                .from('generator_tags')
+                .select('question_key, label, locale')
+                .eq('store_id', id)
+                .eq('is_active', true)
+                .order('order_index', { ascending: true });
+
+            if (rawTagRows && rawTagRows.length > 0) {
+                payload.rawTags = rawTagRows;
+            }
+
+            // Also build legacy overlay for backward compat
             const overlay = await buildTagOverlayFromSupabase(id);
             if (overlay) {
                 Object.assign(payload, overlay);

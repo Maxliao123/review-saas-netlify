@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getStores, updateStoreSettings } from '../actions';
+import TagEditor from '../TagEditor';
 
 // Define Interface (matching DB columns)
 interface Store {
@@ -192,8 +193,16 @@ export default function StoreSetupPage() {
                         </button>
                     </div>
                 </div>
-            )
-            }
+            )}
+
+            {/* Survey Tag Editor */}
+            {selectedStoreId && (
+                <TagEditor
+                    key={selectedStoreId}
+                    storeId={selectedStoreId}
+                    storeName={stores.find(s => s.id === selectedStoreId)?.name || ''}
+                />
+            )}
         </div >
     );
 }
