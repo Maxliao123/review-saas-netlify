@@ -11,13 +11,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's tenant (must be owner)
-    const { data: membership } = await supabase
+    // Get user's tenant (must be owner) — use limit(1) in case of multiple tenants
+    const { data: memberships } = await supabase
       .from('tenant_members')
       .select('tenant_id, role')
       .eq('user_id', user.id)
       .eq('role', 'owner')
-      .single();
+      .limit(1);
+    const membership = memberships?.[0] || null;
 
     if (!membership) {
       return NextResponse.json({ error: 'Only tenant owners can connect Google Business' }, { status: 403 });

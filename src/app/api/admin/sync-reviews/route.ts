@@ -19,13 +19,14 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's tenant (owner only)
-    const { data: membership } = await supabase
+    // Get user's tenant (owner only) — use limit(1) in case of multiple tenants
+    const { data: memberships } = await supabase
       .from('tenant_members')
       .select('tenant_id, role')
       .eq('user_id', user.id)
       .eq('role', 'owner')
-      .single();
+      .limit(1);
+    const membership = memberships?.[0] || null;
 
     if (!membership) {
       return NextResponse.json({ error: 'Only tenant owners can sync reviews' }, { status: 403 });

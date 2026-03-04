@@ -10,12 +10,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: membership } = await supabase
+    const { data: memberships } = await supabase
       .from('tenant_members')
       .select('tenant_id, role')
       .eq('user_id', user.id)
       .eq('role', 'owner')
-      .single();
+      .limit(1);
+    const membership = memberships?.[0] || null;
 
     if (!membership) {
       return NextResponse.json({ error: 'No tenant found' }, { status: 404 });
