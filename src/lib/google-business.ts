@@ -1,7 +1,10 @@
 import { google } from 'googleapis';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-const SCOPES = ['https://www.googleapis.com/auth/business.manage'];
+const SCOPES = [
+  'https://www.googleapis.com/auth/business.manage',
+  'https://www.googleapis.com/auth/userinfo.email',
+];
 
 // ============================================================
 // Per-tenant Google OAuth (reads tokens from DB)
