@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, checkEnv } from '@/lib/db';
+import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 const DEFAULT_THEME_BLUE = '#0A84FF';
 const DEFAULT_THEME_ON_BLUE = '#FFFFFF';
@@ -134,6 +135,12 @@ async function buildTagOverlayFromSupabase(storeId: any) {
 }
 
 export async function GET(request: NextRequest) {
+    // Rate limit check
+    const ip = getClientIP(request);
+    const rl = checkRateLimit(`store:${ip}`, RATE_LIMITS.store);
+    const rlResp = rateLimitResponse(rl);
+    if (rlResp) return rlResp;
+
     try {
         // Debug
         checkEnv();

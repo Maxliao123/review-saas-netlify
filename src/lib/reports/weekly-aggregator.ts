@@ -27,6 +27,12 @@ export interface WeeklyReportData {
     likely_posted: number;
     conversion_rate_pct: number;
   };
+  sentiment?: {
+    avg_score: number;
+    positive_pct: number;
+    top_emotions: string[];
+    top_topics: string[];
+  };
 }
 
 export async function generateWeeklyReport(
@@ -68,6 +74,15 @@ export async function generateWeeklyReport(
     .from('generated_reviews')
     .select('likely_posted')
     .eq('store_id', storeId)
+    .gte('created_at', weekStart.toISOString())
+    .lt('created_at', weekEnd.toISOString());
+
+  // 5. Sentiment data
+  const { data: sentimentReviews } = await supabaseAdmin
+    .from('reviews_raw')
+    .select('sentiment_score, sentiment_label, emotion_tags, key_topics')
+    .eq('store_id', storeId)
+    .not('sentiment_analyzed_at', 'is', null)
     .gte('created_at', weekStart.toISOString())
     .lt('created_at', weekEnd.toISOString());
 
@@ -134,6 +149,30 @@ export async function generateWeeklyReport(
   // Generation metrics
   const likelyPosted = genList.filter(g => g.likely_posted).length;
 
+  // Sentiment summary
+  const sentimentList = sentimentReviews || [];
+  let sentimentSummary: WeeklyReportData['sentiment'] = undefined;
+  if (sentimentList.length > 0) {
+    const totalScore = sentimentList.reduce((s, r) => s + (r.sentiment_score ?? 0), 0);
+    const positiveCount = sentimentList.filter(r => r.sentiment_label === 'positive').length;
+    const emotionFreq: Record<string, number> = {};
+    const topicFreq: Record<string, number> = {};
+    sentimentList.forEach(r => {
+      if (Array.isArray(r.emotion_tags)) {
+        r.emotion_tags.forEach((e: string) => { emotionFreq[e] = (emotionFreq[e] || 0) + 1; });
+      }
+      if (Array.isArray(r.key_topics)) {
+        r.key_topics.forEach((t: string) => { topicFreq[t] = (topicFreq[t] || 0) + 1; });
+      }
+    });
+    sentimentSummary = {
+      avg_score: Math.round((totalScore / sentimentList.length) * 1000) / 1000,
+      positive_pct: Math.round((positiveCount / sentimentList.length) * 100),
+      top_emotions: Object.entries(emotionFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([e]) => e),
+      top_topics: Object.entries(topicFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t]) => t),
+    };
+  }
+
   return {
     period: {
       start: weekStart.toISOString().split('T')[0],
@@ -164,5 +203,6 @@ export async function generateWeeklyReport(
       likely_posted: likelyPosted,
       conversion_rate_pct: genList.length > 0 ? Math.round((likelyPosted / genList.length) * 100) : 0,
     },
+    sentiment: sentimentSummary,
   };
 }

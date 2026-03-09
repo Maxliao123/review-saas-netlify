@@ -67,7 +67,8 @@ export default function NotificationSettings({ stores, channels: initialChannels
         .from('notification_channels')
         .insert({ store_id: selectedStore, channel_type: type, is_active: true, config })
         .select()
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (!error && data) {
         setChannels(prev => [...prev, data]);

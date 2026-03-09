@@ -53,7 +53,8 @@ function HeroSection({ storeData }: { storeData: any }) {
 
 function StoreLoader() {
     const params = useSearchParams();
-    const storeId = params.get('store') || params.get('storeid') || 'decision'; // Default ?
+    const storeId = params.get('store') || params.get('storeid') || 'decision';
+    const lang = params.get('lang') || 'en';
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [storeData, setStoreData] = useState<any>(null);
@@ -164,6 +165,7 @@ function StoreLoader() {
                                 <ReviewGenerator
                                     storeId={storeId}
                                     storeData={storeData}
+                                    initialLang={lang}
                                 />
                             </div>
                         )}

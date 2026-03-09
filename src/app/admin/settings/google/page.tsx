@@ -14,7 +14,8 @@ export default async function GoogleSettingsPage() {
     .from('google_credentials')
     .select('google_email, updated_at')
     .eq('tenant_id', ctx.tenant.id)
-    .single();
+    .limit(1)
+    .maybeSingle();
 
   return (
     <div className="p-8 max-w-2xl">

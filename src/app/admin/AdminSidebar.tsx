@@ -15,6 +15,28 @@ import {
   LogOut,
   Link as LinkIcon,
   Radar,
+  MessageCircleWarning,
+  LayoutDashboard,
+  CreditCard,
+  Brain,
+  Globe,
+  Send,
+  BookTemplate,
+  Inbox,
+  FlaskConical,
+  TrendingUp,
+  Trophy,
+  ShieldAlert,
+  Route,
+  Key,
+  Webhook,
+  GraduationCap,
+  MonitorSpeaker,
+  Palette,
+  ScanSearch,
+  Zap,
+  HardDrive,
+  ShoppingBag,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,13 +47,36 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
+  { href: '/admin/team/inbox', label: 'Team Inbox', icon: Inbox },
+  { href: '/admin/feedback', label: 'Feedback', icon: MessageCircleWarning },
   { href: '/admin/scanner', label: 'Review Scanner', icon: Radar },
   { href: '/admin/analytics/scans', label: 'Scan Analytics', icon: QrCode },
+  { href: '/admin/analytics/sentiment', label: 'Sentiment', icon: Brain },
+  { href: '/admin/analytics/competitors', label: 'Competitors', icon: BarChart3 },
+  { href: '/admin/invites', label: 'Invites', icon: Send },
+  { href: '/admin/templates', label: 'Reply Templates', icon: BookTemplate },
+  { href: '/admin/experiments', label: 'A/B Tests', icon: FlaskConical },
+  { href: '/admin/analytics/benchmarks', label: 'Benchmarks', icon: Trophy },
+  { href: '/admin/analytics/predictions', label: 'Predictions', icon: TrendingUp },
+  { href: '/admin/analytics/anomalies', label: 'Anomaly Detection', icon: ShieldAlert },
+  { href: '/admin/analytics/journeys', label: 'Customer Journey', icon: Route },
   { href: '/admin/reports', label: 'Weekly Reports', icon: FileText },
   { href: '/admin/stores/setup', label: 'Store Setup', icon: Store },
   { href: '/admin/settings/notifications', label: 'Notifications', icon: Bell },
   { href: '/admin/settings/google', label: 'Google Business', icon: LinkIcon, ownerOnly: true },
+  { href: '/admin/settings/platforms', label: 'Platforms', icon: Globe, ownerOnly: true },
+  { href: '/admin/settings/api', label: 'API Keys', icon: Key, ownerOnly: true },
+  { href: '/admin/settings/webhooks', label: 'Webhooks', icon: Webhook, ownerOnly: true },
+  { href: '/admin/settings/ai-training', label: 'AI Training', icon: GraduationCap, ownerOnly: true },
+  { href: '/admin/settings/pos', label: 'POS Integrations', icon: MonitorSpeaker, ownerOnly: true },
+  { href: '/admin/settings/whitelabel', label: 'White Label', icon: Palette, ownerOnly: true },
+  { href: '/admin/settings/realtime', label: 'Real-Time Reviews', icon: Zap, ownerOnly: true },
+  { href: '/admin/settings/hardware', label: 'Hardware & Devices', icon: HardDrive, ownerOnly: true },
+  { href: '/admin/marketplace', label: 'Specialist Market', icon: ShoppingBag },
+  { href: '/admin/analytics/audit', label: 'Review Auditor', icon: ScanSearch },
+  { href: '/admin/settings/billing', label: 'Billing', icon: CreditCard, ownerOnly: true },
 ];
 
 export default function AdminSidebar({ user, tenant, role, stores }: SidebarProps) {
@@ -62,7 +107,9 @@ export default function AdminSidebar({ user, tenant, role, stores }: SidebarProp
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
         {filteredNav.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link

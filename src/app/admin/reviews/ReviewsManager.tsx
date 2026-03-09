@@ -13,6 +13,7 @@ interface Review {
     reply_status: string;
     google_review_id?: string;
     store_name?: string;
+    platform?: string;
 }
 
 interface Store {
@@ -27,6 +28,8 @@ interface ReviewsManagerProps {
     role?: 'owner' | 'manager' | 'staff';
 }
 
+const PAGE_SIZE = 30;
+
 export default function ReviewsManager({ reviews, stores: propStores, role }: ReviewsManagerProps) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [draftText, setDraftText] = useState('');
@@ -35,6 +38,8 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
     const [stores, setStores] = useState<Store[]>(propStores || []);
     const [selectedStoreId, setSelectedStoreId] = useState<number | 'all'>('all');
     const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all');
+    const [selectedPlatform, setSelectedPlatform] = useState<string | 'all'>('all');
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
     useEffect(() => {
         if (!propStores) {
@@ -63,13 +68,26 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
             return store && r.store_name === store.name;
         });
 
-    // 2. Filter by Category
-    const filteredReviews = selectedCategory === 'all'
+    // 2. Filter by Platform
+    const platformFilteredReviews = selectedPlatform === 'all'
         ? storeFilteredReviews
-        : storeFilteredReviews.filter(r => {
+        : storeFilteredReviews.filter(r => (r.platform || 'google') === selectedPlatform);
+
+    // 3. Filter by Category
+    const filteredReviews = selectedCategory === 'all'
+        ? platformFilteredReviews
+        : platformFilteredReviews.filter(r => {
             const { category } = parseDraft(r.reply_draft || '');
             return category === selectedCategory;
         });
+
+    // Platform counts
+    const platformCounts = storeFilteredReviews.reduce((acc, r) => {
+        const p = r.platform || 'google';
+        acc[p] = (acc[p] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+    const platformKeys = Object.keys(platformCounts).sort();
 
     // Counts Logic
     const storeCounts = stores.reduce((acc, store) => {
@@ -117,13 +135,21 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
         setLoadingId(null);
     };
 
+    // Count how many filtered reviews are approvable
+    const approvableFilteredCount = filteredReviews.filter(
+        r => r.reply_status === 'drafted' || r.reply_status === 'pending'
+    ).length;
+
     const handleBulkApprove = async () => {
         if (isBulkApproving) return;
-        const confirm = window.confirm('Are you sure you want to approve all currently drafted reviews?');
+        const confirm = window.confirm(
+            `Approve ${approvableFilteredCount} review${approvableFilteredCount > 1 ? 's' : ''} currently shown? They will be queued for daily publishing.`
+        );
         if (!confirm) return;
 
         setIsBulkApproving(true);
-        const draftIds = reviews
+        // Only approve reviews that match current filters (store + category)
+        const draftIds = filteredReviews
             .filter(r => r.reply_status === 'drafted' || r.reply_status === 'pending')
             .map(r => r.id);
 
@@ -138,14 +164,13 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleBulkApprove}
-                        disabled={isBulkApproving}
+                        disabled={isBulkApproving || approvableFilteredCount === 0}
                         className="px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                     >
-                        {isBulkApproving ? 'Approving...' : 'Approve All Drafts'}
+                        {isBulkApproving ? 'Approving...' : `Approve All (${approvableFilteredCount})`}
                     </button>
                     <div className="text-sm text-gray-500 bg-blue-50 px-3 py-2 rounded border border-blue-100 max-w-md">
-                        ℹ️ <strong>Note:</strong> Approving reviews (either individually or in bulk) queues them for the daily automated publishing schedule. They will not be published immediately.
-                    </div>
+                        ℹ️ Approved replies are queued for daily automated publishing.</div>
                 </div>
                 <div className="text-sm text-gray-500">
                     Showing {filteredReviews.length} reviews
@@ -157,7 +182,7 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                 <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Store</label>
                 <div className="flex gap-2 flex-wrap">
                     <button
-                        onClick={() => { setSelectedStoreId('all'); setSelectedCategory('all'); }}
+                        onClick={() => { setSelectedStoreId('all'); setSelectedCategory('all'); setVisibleCount(PAGE_SIZE); }}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStoreId === 'all'
                             ? 'bg-gray-800 text-white shadow-md'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -168,7 +193,7 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                     {stores.map(store => (
                         <button
                             key={store.id}
-                            onClick={() => { setSelectedStoreId(store.id); setSelectedCategory('all'); }}
+                            onClick={() => { setSelectedStoreId(store.id); setSelectedCategory('all'); setVisibleCount(PAGE_SIZE); }}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStoreId === store.id
                                 ? 'bg-blue-600 text-white shadow-md'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -180,12 +205,42 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                 </div>
             </div>
 
+            {/* Platform Filter */}
+            {platformKeys.length > 1 && (
+                <div className="mb-8">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Platform</label>
+                    <div className="flex gap-2 flex-wrap">
+                        <button
+                            onClick={() => { setSelectedPlatform('all'); setVisibleCount(PAGE_SIZE); }}
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${selectedPlatform === 'all'
+                                ? 'bg-gray-800 text-white border-gray-800'
+                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                            All Platforms ({storeFilteredReviews.length})
+                        </button>
+                        {platformKeys.map(p => (
+                            <button
+                                key={p}
+                                onClick={() => { setSelectedPlatform(p); setVisibleCount(PAGE_SIZE); }}
+                                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors capitalize ${selectedPlatform === p
+                                    ? 'bg-gray-800 text-white border-gray-800'
+                                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                {p} ({platformCounts[p]})
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Category Filter */}
             <div className="mb-8">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
                 <div className="flex gap-2 flex-wrap">
                     <button
-                        onClick={() => setSelectedCategory('all')}
+                        onClick={() => { setSelectedCategory('all'); setVisibleCount(PAGE_SIZE); }}
                         className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${selectedCategory === 'all'
                             ? 'bg-purple-600 text-white border-purple-600'
                             : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
@@ -196,7 +251,7 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                     {categories.map(cat => (
                         <button
                             key={cat}
-                            onClick={() => setSelectedCategory(cat)}
+                            onClick={() => { setSelectedCategory(cat); setVisibleCount(PAGE_SIZE); }}
                             className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${selectedCategory === cat
                                 ? 'bg-purple-600 text-white border-purple-600'
                                 : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
@@ -208,15 +263,45 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                 </div>
             </div>
 
+            {/* Empty State */}
+            {reviews.length === 0 && (
+                <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+                    <div className="text-5xl mb-4">📭</div>
+                    <h3 className="text-lg font-bold text-gray-700 mb-2">No reviews yet</h3>
+                    <p className="text-sm text-gray-500 max-w-md mx-auto">
+                        Reviews will appear here once your Google Business reviews are synced.
+                        Make sure you&apos;ve connected your Google Business profile in{' '}
+                        <a href="/admin/settings/google" className="text-blue-600 underline">Settings</a>.
+                    </p>
+                </div>
+            )}
+
+            {reviews.length > 0 && filteredReviews.length === 0 && (
+                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                    <p className="text-gray-500">No reviews match the current filters.</p>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredReviews.map((review) => {
+                {filteredReviews.slice(0, visibleCount).map((review) => {
                     const { body: draftBody, category } = parseDraft(review.reply_draft || '');
 
                     return (
                         <div key={review.id} className="bg-white shadow rounded-lg p-6 flex flex-col border border-gray-200 relative overflow-hidden">
-                            {/* Store Label */}
-                            <div className="absolute top-0 left-0 bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-br-lg font-mono z-10 max-w-[60%] truncate">
-                                {review.store_name || 'Store ID: ' + review.id}
+                            {/* Store + Platform Label */}
+                            <div className="absolute top-0 left-0 flex items-center gap-1 z-10">
+                                <div className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-br-lg font-mono max-w-[50%] truncate">
+                                    {review.store_name || 'Unknown Store'}
+                                </div>
+                                {review.platform && review.platform !== 'google' && (
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded text-white font-bold ${
+                                        review.platform === 'facebook' ? 'bg-blue-600' :
+                                        review.platform === 'yelp' ? 'bg-red-600' :
+                                        'bg-green-600'
+                                    }`}>
+                                        {review.platform.toUpperCase()}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Category Label */}
@@ -273,35 +358,25 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="mb-4 group relative">
+                                    <div className="mb-4">
                                         <div
-                                            className="p-3 bg-gray-50 rounded text-sm text-gray-800 border border-gray-100 min-h-[4rem] cursor-pointer hover:bg-gray-100 transition-colors whitespace-pre-wrap"
+                                            className="p-3 bg-gray-50 rounded text-sm text-gray-800 border border-gray-100 min-h-[4rem] cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors whitespace-pre-wrap relative group"
                                             onClick={() => handleEdit(review)}
-                                            title="Click to edit"
                                         >
-                                            {draftBody || '(No draft generated)'}
-                                        </div>
-                                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleEdit(review)} className="text-gray-400 hover:text-gray-600">
-                                                ✎
-                                            </button>
+                                            {draftBody || <span className="text-gray-400 italic">(Generating draft...)</span>}
+                                            <span className="absolute bottom-1 right-2 text-[10px] text-gray-400 group-hover:text-blue-500">✎ click to edit</span>
                                         </div>
                                     </div>
                                 )}
 
                                 {review.reply_status !== 'approved' && review.reply_status !== 'published' && (
-                                    <div className="group relative">
-                                        <button
-                                            onClick={() => handleApprove(review.id)}
-                                            disabled={!!loadingId}
-                                            className="w-full py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-                                        >
-                                            {loadingId === review.id ? 'Processing...' : 'Approve & Publish'}
-                                        </button>
-                                        <div className="hidden group-hover:block absolute bottom-full left-0 w-full mb-2 bg-black text-white text-xs p-2 rounded text-center z-10 opacity-90">
-                                            Queues for daily publishing
-                                        </div>
-                                    </div>
+                                    <button
+                                        onClick={() => handleApprove(review.id)}
+                                        disabled={!!loadingId}
+                                        className="w-full py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                    >
+                                        {loadingId === review.id ? 'Processing...' : '✓ Approve'}
+                                    </button>
                                 )}
 
                                 {review.reply_status === 'approved' && (
@@ -319,6 +394,18 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                     );
                 })}
             </div>
+
+            {/* Load More */}
+            {filteredReviews.length > visibleCount && (
+                <div className="text-center mt-8">
+                    <button
+                        onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
+                    >
+                        Load More ({filteredReviews.length - visibleCount} remaining)
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

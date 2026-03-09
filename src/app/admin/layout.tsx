@@ -2,6 +2,7 @@ import { getUserTenantContext } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import AdminSidebar from './AdminSidebar';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default async function AdminLayout({
   children,
@@ -41,7 +42,9 @@ export default async function AdminLayout({
         stores={ctx.stores || []}
       />
       <main className="flex-1 overflow-auto">
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
     </div>
   );

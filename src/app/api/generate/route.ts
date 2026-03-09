@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
 import { buildPrompt, FLAVORS, PERSONAS } from '@/lib/generation-prompts';
+import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
+import { getPlanLimits } from '@/lib/plan-limits';
 
 // Config
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -142,6 +144,12 @@ async function enforceNoImprovementIfNoCons(text: string, lang: string, hasCons:
 }
 
 export async function POST(request: NextRequest) {
+    // Rate limit check
+    const ip = getClientIP(request);
+    const rl = checkRateLimit(`generate:${ip}`, RATE_LIMITS.generate);
+    const rlResp = rateLimitResponse(rl);
+    if (rlResp) return rlResp;
+
     if (!OPENAI_API_KEY) {
         return NextResponse.json({ error: "Missing OPENAI_API_KEY" }, { status: 500 });
     }
@@ -187,6 +195,36 @@ export async function POST(request: NextRequest) {
         if (!storeDbId) {
             console.error("Store not found (stores table):", storeid);
             return NextResponse.json({ error: "Store not configured in backend." }, { status: 404 });
+        }
+
+        // ── Plan limit enforcement ──
+        if (tenantId) {
+            const { data: tenantRow } = await supabase
+                .from('tenants')
+                .select('plan')
+                .eq('id', tenantId)
+                .limit(1)
+                .single();
+
+            const plan = tenantRow?.plan || 'free';
+            const limits = getPlanLimits(plan);
+            const yearMonth = new Date().toISOString().slice(0, 7); // '2026-03'
+
+            const { data: usage } = await supabase
+                .from('usage_monthly')
+                .select('reviews_generated')
+                .eq('tenant_id', tenantId)
+                .eq('year_month', yearMonth)
+                .limit(1)
+                .maybeSingle();
+
+            const currentCount = usage?.reviews_generated || 0;
+            if (currentCount >= limits.maxReviewsPerMonth) {
+                return NextResponse.json(
+                    { error: `Monthly review limit reached (${limits.maxReviewsPerMonth}). Upgrade your plan for more.` },
+                    { status: 429 }
+                );
+            }
         }
 
         const promptData = buildPrompt({
@@ -244,6 +282,32 @@ export async function POST(request: NextRequest) {
 
         if (error) {
             console.error("Supabase insert error:", error.message);
+        }
+
+        // ── Increment usage counter (fire-and-forget) ──
+        if (tenantId) {
+            const yearMonth = new Date().toISOString().slice(0, 7);
+            (async () => {
+                try {
+                    const { error: rpcErr } = await supabase.rpc('increment_usage', {
+                        p_tenant_id: tenantId,
+                        p_store_id: storeDbId,
+                        p_year_month: yearMonth,
+                        p_field: 'reviews_generated',
+                    });
+                    if (rpcErr) {
+                        // Fallback: upsert directly if RPC doesn't exist yet
+                        await supabase
+                            .from('usage_monthly')
+                            .upsert(
+                                { tenant_id: tenantId, store_id: storeDbId, year_month: yearMonth, reviews_generated: 1, updated_at: new Date().toISOString() },
+                                { onConflict: 'tenant_id,store_id,year_month' }
+                            );
+                    }
+                } catch {
+                    // Silent — never block review delivery
+                }
+            })();
         }
 
         return NextResponse.json({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
+import { checkRateLimit, getClientIP, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit';
 
 function jsonResponse(body: any, status = 200) {
     return NextResponse.json(body, {
@@ -13,6 +14,12 @@ function jsonResponse(body: any, status = 200) {
 }
 
 export async function POST(request: NextRequest) {
+    // Rate limit check
+    const ip = getClientIP(request);
+    const rl = checkRateLimit(`feedback:${ip}`, RATE_LIMITS.feedback);
+    const rlResp = rateLimitResponse(rl);
+    if (rlResp) return rlResp;
+
     try {
         const body = await request.json();
         const { store_id, rating, feedback_text, contact_info } = body;
@@ -23,7 +30,23 @@ export async function POST(request: NextRequest) {
 
         const ratingTag = `${rating}-star`;
 
-        // Log to generator_events
+        // Store feedback in dedicated table
+        const { error: fbError } = await supabase
+            .from('customer_feedback')
+            .insert({
+                store_id,
+                rating,
+                feedback_text: feedback_text || null,
+                contact_info: contact_info || null,
+                status: 'new',
+            });
+
+        if (fbError) {
+            // Fallback: if table doesn't exist yet, just log to events
+            console.warn('customer_feedback insert failed (table may not exist yet):', fbError.message);
+        }
+
+        // Also log to generator_events for analytics
         const { error } = await supabase
             .from('generator_events')
             .insert({
@@ -33,8 +56,6 @@ export async function POST(request: NextRequest) {
             });
 
         if (error) throw error;
-
-        console.log(`[Negative Feedback] Store ${store_id} | Rating: ${rating} | Text: ${feedback_text} | Contact: ${contact_info}`);
 
         return jsonResponse({ success: true }, 200);
 

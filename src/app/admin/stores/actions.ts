@@ -89,7 +89,8 @@ export async function getStoreTags(storeId: number): Promise<TagRow[]> {
     .select('id, tenant_id')
     .eq('id', storeId)
     .eq('tenant_id', ctx.tenant.id)
-    .single();
+    .limit(1)
+    .maybeSingle();
 
   if (!store) return [];
 
@@ -122,7 +123,8 @@ export async function saveStoreTags(
       .select('id, tenant_id')
       .eq('id', storeId)
       .eq('tenant_id', ctx.tenant.id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (!store) throw new Error('Store not found');
 
@@ -155,6 +157,128 @@ export async function saveStoreTags(
     console.error('Error saving tags:', error);
     return { success: false, error: error.message };
   }
+}
+
+// ── Store Image Upload ──────────────────────────────────────────────
+
+export async function uploadStoreImage(
+  storeId: number,
+  imageType: 'hero' | 'logo',
+  formData: FormData
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const ctx = await getUserTenantContext();
+    if (!ctx?.tenant) throw new Error('Not authenticated');
+
+    // Verify store belongs to tenant
+    const supabase = await createSupabaseServerClient();
+    const { data: store } = await supabase
+      .from('stores')
+      .select('id, tenant_id')
+      .eq('id', storeId)
+      .eq('tenant_id', ctx.tenant.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (!store) throw new Error('Store not found');
+
+    const file = formData.get('file') as File;
+    if (!file || file.size === 0) throw new Error('No file provided');
+
+    // Validate file type and size (max 5MB)
+    if (!file.type.startsWith('image/')) throw new Error('File must be an image');
+    if (file.size > 5 * 1024 * 1024) throw new Error('File must be under 5MB');
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const filePath = `${storeId}/${imageType}.${ext}`;
+
+    // Upload to Supabase Storage (upsert to overwrite existing)
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('store-images')
+      .upload(filePath, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) throw uploadError;
+
+    // Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from('store-images')
+      .getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl;
+
+    // Update store record
+    const column = imageType === 'hero' ? 'hero_url' : 'logo_url';
+    const { error: updateError } = await supabaseAdmin
+      .from('stores')
+      .update({ [column]: publicUrl })
+      .eq('id', storeId);
+
+    if (updateError) throw updateError;
+
+    revalidatePath('/admin/stores/setup');
+    return { success: true, url: publicUrl };
+  } catch (error: any) {
+    console.error('Error uploading store image:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function removeStoreImage(
+  storeId: number,
+  imageType: 'hero' | 'logo'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const ctx = await getUserTenantContext();
+    if (!ctx?.tenant) throw new Error('Not authenticated');
+
+    const supabase = await createSupabaseServerClient();
+    const { data: store } = await supabase
+      .from('stores')
+      .select('id, tenant_id')
+      .eq('id', storeId)
+      .eq('tenant_id', ctx.tenant.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (!store) throw new Error('Store not found');
+
+    // Clear the URL in the store record
+    const column = imageType === 'hero' ? 'hero_url' : 'logo_url';
+    const { error: updateError } = await supabaseAdmin
+      .from('stores')
+      .update({ [column]: null })
+      .eq('id', storeId);
+
+    if (updateError) throw updateError;
+
+    // Try to delete from storage (best effort — file may not exist)
+    const { data: files } = await supabaseAdmin.storage
+      .from('store-images')
+      .list(`${storeId}`, { search: imageType });
+
+    if (files && files.length > 0) {
+      const toDelete = files
+        .filter(f => f.name.startsWith(imageType))
+        .map(f => `${storeId}/${f.name}`);
+      if (toDelete.length > 0) {
+        await supabaseAdmin.storage.from('store-images').remove(toDelete);
+      }
+    }
+
+    revalidatePath('/admin/stores/setup');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error removing store image:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ── Tenant Plan ─────────────────────────────────────────────────────
+
+export async function getTenantPlan(): Promise<string> {
+  const ctx = await getUserTenantContext();
+  if (!ctx?.tenant) return 'free';
+  return ctx.tenant.plan || 'free';
 }
 
 // ── Store Settings ──────────────────────────────────────────────────

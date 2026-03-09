@@ -78,7 +78,8 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
         .select('tenant_id, role, tenants(id, name, slug)')
         .eq('user_id', userId)
         .eq('role', 'owner')
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (membership?.tenant_id) {
         setTenantId(membership.tenant_id);
@@ -115,7 +116,8 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
           .from('google_credentials')
           .select('google_email')
           .eq('tenant_id', membership.tenant_id)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         if (creds) {
           setGoogleConnected(true);
@@ -403,9 +405,9 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(0)}
-                className="px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                className="px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" /> Back
               </button>
               {googleConnected && (
                 <button
@@ -484,9 +486,9 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                className="px-4 py-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" /> Back
               </button>
               <button
                 onClick={handleCreateStores}
