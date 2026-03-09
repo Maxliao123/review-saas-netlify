@@ -55,13 +55,18 @@ export default function StoreSetupPage() {
     };
 
     const loadStores = async () => {
-        const data = await getStores();
-        setStores(data);
-        if (data.length > 0) {
-            setSelectedStoreId(data[0].id);
-            setFormData(data[0]);
+        try {
+            const data = await getStores();
+            setStores(data || []);
+            if (data && data.length > 0) {
+                setSelectedStoreId(data[0].id);
+                setFormData(data[0]);
+            }
+        } catch (err) {
+            console.error('Failed to load stores:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleStoreChange = (id: number) => {
