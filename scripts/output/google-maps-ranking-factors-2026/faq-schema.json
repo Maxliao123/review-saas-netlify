@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How often should I post on my Google Business Profile to help rankings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Aim for at least one post per week. Consistency is more important than volume. Use posts to share updates, offers, events, or new products/services. Each post provides fresh content for Google to index and can improve engagement, which is a positive ranking signal. Google Posts typically expire after 7 days, so a weekly schedule ensures your profile always has active content."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I improve my Google Maps ranking if I'm outside the main city center?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, by dominating hyper-local relevance and prominence. Optimize your GBP for neighborhoods or suburbs you serve in your description and posts. Acquire reviews from customers in your immediate service area. Use local schema on your website mentioning those areas. While you may not win for broad city queries, you can rank #1 for more specific queries like 'electrician in [Your Suburb]' or '[Service] near [Local Landmark]'."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do responses to Google reviews affect my ranking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While not a direct ranking factor, responding to reviews has significant indirect benefits. It increases engagement on your listing, provides more keyword-rich content for Google, and improves potential customer perception, which can boost click-through rates (CTR). A higher CTR is a known behavioral ranking signal. It also demonstrates active management of your profile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's more important for ranking: review quantity or star rating?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both are critical, but they serve different purposes. A high star rating (4.5+) is a basic qualifying factor; dropping below 4.0 can severely limit visibility. Review quantity is a key *differentiating* factor for prominence. A business with a 4.7-star rating and 200 reviews will almost always outrank a business with a 4.7-star rating and 50 reviews. Focus on maintaining a high rating while systematically growing volume."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to see results from Google Maps SEO efforts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Some signals, like correcting your primary category or fixing major citation errors, can show an impact in 2-4 weeks. Building review prominence and website authority are longer-term efforts, often taking 3-6 months to see sustained ranking improvements. Local SEO is an ongoing process, not a one-time fix."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I use a service like Yext or Moz Local for citations?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For multi-location businesses or those with severe inconsistency issues, these services are valuable for initial cleanup and distribution. For single-location businesses, you can manually manage key citations (Apple Maps, Facebook, major industry sites) and use a free tool like Google's own 'Profile strength' indicator and a spreadsheet to track them. The investment depends on your time and the scale of the problem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are paid Google Ads necessary to appear in the Local Pack?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The 'Local Pack' (the organic 3-pack) is separate from Google Ads (which appear above or below it as 'Sponsored' pins). You cannot pay to appear in the organic Local Pack. Your ranking there is determined solely by the SEO factors discussed in this article. Ads can give you additional visibility, but they do not influence your organic map ranking."
+      }
+    }
+  ]
+}

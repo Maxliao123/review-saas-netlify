@@ -28,13 +28,24 @@ export const metadata: Metadata = {
     "google business reviews",
     "review reply automation",
     "QR code reviews",
+    "Google 評論管理",
+    "AI 評論生成",
+    "聲譽管理",
   ],
   authors: [{ name: "Reputation Monitor" }],
   creator: "Reputation Monitor",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://reputationmonitor.ai"),
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en": "/",
+      "zh-TW": "/?lang=zh",
+    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
+    alternateLocale: ["zh_TW"],
     siteName: "Reputation Monitor",
     title: "Reputation Monitor — AI-Powered Google Review Management",
     description:
@@ -57,6 +68,9 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
   },
 };
 

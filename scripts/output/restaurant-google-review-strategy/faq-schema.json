@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is it against Google's rules to offer a free dessert for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, offering any incentive in exchange for a review is against Google's policy if it is contingent on leaving a positive review. You cannot say 'Get a free dessert for a 5-star review.' However, you can ask for feedback neutrally. A compliant approach is to offer a discount or free item on a future visit to anyone who shows a review they have already posted, regardless of its star rating. Always prioritize authentic feedback."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check and respond to new Google reviews for my restaurant?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should aim to check for new reviews at least once every 24-48 hours. For negative reviews, a response within 48 hours is ideal to show you are proactive. For positive reviews, responding within a week is good practice. Using a tool with notifications can alert you instantly when a new review is posted, ensuring you never miss one."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A customer posted an unfair, angry review about a wait time we couldn't control. Should I delete it or argue with them?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You cannot delete a Google review unless it violates Google's content policy (e.g., spam, hate speech). Arguing publicly will always make your business look worse. Instead, respond calmly and factually. Acknowledge their frustration, briefly explain the circumstance (e.g., 'We apologize for the wait. Saturday nights are our busiest, and we do our best to seat guests promptly'), and invite them to contact you privately to discuss it further."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's more important for my restaurant's search ranking: having a 4.8-star rating with 50 reviews or a 4.5-star rating with 300 reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In most local SEO cases, the 4.5-star rating with 300 reviews will rank higher. Google values review quantity and recency (velocity) very highly as signs of an active, popular business. A large volume of good reviews (4.5+) typically outweighs a perfect score with few reviews. Focus on generating a consistent stream of authentic feedback."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I ask for reviews via text message after a customer dines with us?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can, but you must have explicit permission to market to them via SMS. The best practice is to collect phone numbers for reservation or waitlist purposes and include an opt-in for follow-up messages. A post-visit text with a direct link to your Google review page can be very effective, but ensure you comply with telecom regulations like the TCPA."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every single positive review, or just the negative ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should respond to as many positive reviews as possible. Thanking guests for positive reviews reinforces their loyalty, encourages them to return, and shows potential customers that you engage with your community. It also adds fresh content to your Google Business Profile. If volume is very high, you can use template variations to save time while still personalizing each thank you."
+      }
+    }
+  ]
+}

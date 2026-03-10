@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { updateReviewStatus, updateReviewDraft, approveReviews } from './actions';
 import { getStores } from '../stores/actions';
 
@@ -41,6 +41,67 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
     const [selectedPlatform, setSelectedPlatform] = useState<string | 'all'>('all');
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+    // AI Draft Generation State
+    const [tone, setTone] = useState<'professional' | 'friendly' | 'enthusiastic'>('friendly');
+    const [isDrafting, setIsDrafting] = useState(false);
+    const [draftProgress, setDraftProgress] = useState({ drafted: 0, remaining: 0 });
+    const [draftError, setDraftError] = useState<string | null>(null);
+    const draftIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Count pending reviews (no AI draft yet)
+    const pendingReviewCount = reviews.filter(r => r.reply_status === 'pending').length;
+
+    const stopDraftPolling = useCallback(() => {
+        if (draftIntervalRef.current) {
+            clearInterval(draftIntervalRef.current);
+            draftIntervalRef.current = null;
+        }
+    }, []);
+
+    const handleGenerateDrafts = useCallback(async () => {
+        if (isDrafting || stores.length === 0) return;
+        setIsDrafting(true);
+        setDraftError(null);
+        setDraftProgress({ drafted: 0, remaining: pendingReviewCount });
+
+        const storeIds = stores.map(s => s.id);
+
+        const poll = async () => {
+            try {
+                const res = await fetch('/api/admin/onboarding/draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ storeIds, tone }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Draft generation failed');
+
+                setDraftProgress({ drafted: data.drafted || 0, remaining: data.remaining || 0 });
+
+                if (data.status === 'done') {
+                    stopDraftPolling();
+                    setIsDrafting(false);
+                    // Reload page to get fresh data
+                    window.location.reload();
+                }
+            } catch (err: any) {
+                setDraftError(err.message);
+                stopDraftPolling();
+                setIsDrafting(false);
+            }
+        };
+
+        // Start first call, then poll
+        await poll();
+        // If still drafting after first call, start interval
+        draftIntervalRef.current = setInterval(poll, 3000);
+    }, [isDrafting, stores, tone, pendingReviewCount, stopDraftPolling]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => stopDraftPolling();
+    }, [stopDraftPolling]);
+
     useEffect(() => {
         if (!propStores) {
             getStores().then(setStores);
@@ -53,10 +114,11 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
             const parsed = JSON.parse(raw);
             return {
                 body: parsed.draft,
-                category: parsed.category || 'Legacy/Manual'
+                category: parsed.category || 'Legacy/Manual',
+                confidence: parsed.confidence || null,
             };
         } catch {
-            return { body: raw, category: 'Legacy/Manual' };
+            return { body: raw, category: 'Legacy/Manual', confidence: null };
         }
     };
 
@@ -159,6 +221,68 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
 
     return (
         <div>
+            {/* AI Draft Generation Panel */}
+            {pendingReviewCount > 0 && (
+                <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-200">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div className="flex-1 min-w-[200px]">
+                            <h3 className="text-sm font-bold text-gray-800 mb-1">
+                                {pendingReviewCount} reviews need AI replies
+                            </h3>
+                            <p className="text-xs text-gray-500 mb-3">
+                                Select a tone and generate AI draft replies for all pending reviews.
+                            </p>
+                            {/* Tone Selector */}
+                            <div className="flex gap-2 flex-wrap">
+                                {([
+                                    { value: 'professional', label: 'Professional', icon: '💼' },
+                                    { value: 'friendly', label: 'Friendly', icon: '😊' },
+                                    { value: 'enthusiastic', label: 'Enthusiastic', icon: '🎉' },
+                                ] as const).map((t) => (
+                                    <button
+                                        key={t.value}
+                                        onClick={() => setTone(t.value)}
+                                        disabled={isDrafting}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                                            tone === t.value
+                                                ? 'bg-blue-600 text-white border-blue-600'
+                                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                        } disabled:opacity-50`}
+                                    >
+                                        {t.icon} {t.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                            <button
+                                onClick={handleGenerateDrafts}
+                                disabled={isDrafting}
+                                className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm text-sm"
+                            >
+                                {isDrafting ? 'Generating...' : `Generate AI Drafts (${pendingReviewCount})`}
+                            </button>
+                            {isDrafting && (
+                                <div className="text-xs text-blue-600">
+                                    Drafted: {draftProgress.drafted} | Remaining: {draftProgress.remaining}
+                                </div>
+                            )}
+                            {draftError && (
+                                <div className="text-xs text-red-600">{draftError}</div>
+                            )}
+                        </div>
+                    </div>
+                    {isDrafting && (
+                        <div className="mt-3 w-full bg-blue-200 rounded-full h-2">
+                            <div
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                style={{ width: `${draftProgress.drafted + draftProgress.remaining > 0 ? (draftProgress.drafted / (draftProgress.drafted + draftProgress.remaining)) * 100 : 0}%` }}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Header Actions */}
             <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                 <div className="flex items-center gap-4">
@@ -284,7 +408,7 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredReviews.slice(0, visibleCount).map((review) => {
-                    const { body: draftBody, category } = parseDraft(review.reply_draft || '');
+                    const { body: draftBody, category, confidence } = parseDraft(review.reply_draft || '');
 
                     return (
                         <div key={review.id} className="bg-white shadow rounded-lg p-6 flex flex-col border border-gray-200 relative overflow-hidden">
@@ -304,10 +428,24 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                                 )}
                             </div>
 
-                            {/* Category Label */}
+                            {/* Category + Confidence Label */}
                             {category && category !== 'Legacy/Manual' && (
-                                <div className="absolute top-0 right-0 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-bl-lg font-medium border-l border-b border-purple-200 z-10">
-                                    AI: {category}
+                                <div className="absolute top-0 right-0 flex items-center gap-1 z-10">
+                                    <div className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-bl-lg font-medium border-l border-b border-purple-200">
+                                        AI: {category}
+                                    </div>
+                                    {confidence && (
+                                        <span
+                                            className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                                confidence.level === 'high' ? 'bg-green-100 text-green-700' :
+                                                confidence.level === 'medium' ? 'bg-amber-100 text-amber-700' :
+                                                'bg-red-100 text-red-700'
+                                            }`}
+                                            title={confidence.reasons?.join(', ') || ''}
+                                        >
+                                            {confidence.score != null ? `${confidence.score}%` : confidence.level}
+                                        </span>
+                                    )}
                                 </div>
                             )}
 

@@ -1,0 +1,18 @@
+{
+  "slug": "schema-markup-local-business-seo",
+  "title": "Schema Markup for Local Business SEO: Technical Implementation Guide",
+  "titleZh": "本地商家 Schema 標記：技術實作指南",
+  "targetQuery": "local business schema markup, structured data seo, review schema",
+  "priority": "p2",
+  "category": "strategies",
+  "tags": [
+    "schema markup",
+    "structured data",
+    "technical SEO",
+    "local business"
+  ],
+  "metaDescription": "Local business schema markup is code that tells search engines about your business. This structured data SEO improves visibility in local search results and review schema can generate star ratings in snippets.",
+  "author": "Marcus Liu",
+  "generatedAt": "2026-03-10T06:15:47.196Z",
+  "model": "deepseek-chat-v3"
+}

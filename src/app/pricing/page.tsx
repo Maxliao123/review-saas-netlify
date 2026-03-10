@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
   Check,
   ArrowRight,
@@ -8,15 +8,33 @@ import {
   Shield,
   Headphones,
 } from 'lucide-react';
+import UpgradeButton from './UpgradeButton';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Reputation Monitor',
+  title: 'Pricing — AI-Powered Google Review Management Plans',
   description:
-    'Simple, transparent pricing for AI-powered Google review management. Start free, upgrade when you grow.',
+    'Simple, transparent pricing for AI-powered Google review management. Free plan with 50 AI reviews/month. Starter $29/mo. Pro $79/mo. No credit card required.',
+  openGraph: {
+    title: 'Pricing — Reputation Monitor',
+    description:
+      'Start free with 50 AI reviews/month. Upgrade to Starter ($29/mo) or Pro ($79/mo) as you grow.',
+    type: 'website',
+    siteName: 'Reputation Monitor',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Reputation Monitor Pricing',
+    description:
+      'Start free. Upgrade as you grow. AI-powered Google review management plans.',
+  },
+  alternates: {
+    canonical: '/pricing',
+  },
 };
 
 const PLANS = [
   {
+    id: 'free',
     name: 'Free',
     price: '$0',
     period: 'forever',
@@ -30,16 +48,16 @@ const PLANS = [
       'Community support',
     ],
     cta: 'Get Started Free',
-    href: '/auth/signup',
     highlighted: false,
   },
   {
+    id: 'starter',
     name: 'Starter',
     price: '$29',
     period: '/month',
     description: 'For growing restaurants',
     features: [
-      'Up to 3 store locations',
+      '1 store location',
       '500 AI-generated reviews / month',
       'Full analytics dashboard',
       'Email + Slack notifications',
@@ -49,16 +67,16 @@ const PLANS = [
       'Google Business sync',
     ],
     cta: 'Start 14-Day Free Trial',
-    href: '/auth/signup?plan=starter',
     highlighted: false,
   },
   {
+    id: 'pro',
     name: 'Pro',
     price: '$79',
     period: '/month',
     description: 'For multi-location businesses',
     features: [
-      'Up to 10 store locations',
+      'Up to 3 store locations',
       'Unlimited AI-generated reviews',
       'Advanced analytics & cohort reports',
       'All notification channels (Email, Slack, LINE, WhatsApp)',
@@ -69,10 +87,10 @@ const PLANS = [
       'Negative review alerts',
     ],
     cta: 'Start 14-Day Free Trial',
-    href: '/auth/signup?plan=pro',
     highlighted: true,
   },
   {
+    id: 'enterprise',
     name: 'Enterprise',
     price: 'Custom',
     period: '',
@@ -82,14 +100,12 @@ const PLANS = [
       'Unlimited AI-generated reviews',
       'API access & webhooks',
       'SSO / SAML authentication',
-      'White-label option',
       'Custom AI model training',
       'Dedicated account manager',
       'SLA & uptime guarantee',
       'Invoice billing',
     ],
     cta: 'Contact Sales',
-    href: 'mailto:hello@reputationmonitor.ai?subject=Enterprise%20Inquiry',
     highlighted: false,
   },
 ];
@@ -117,10 +133,23 @@ const FAQ = [
   },
 ];
 
-export default function PricingPage() {
+// Detect auth state server-side (optional — graceful if not logged in)
+async function getAuthContext() {
+  try {
+    const { getUserTenantContext } = await import('@/lib/supabase/server');
+    const ctx = await getUserTenantContext();
+    return ctx?.tenant ? { isAuthenticated: true, currentPlan: ctx.tenant.plan || 'free' } : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function PricingPage() {
+  const auth = await getAuthContext();
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar (minimal for pricing page) */}
+      {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -133,15 +162,23 @@ export default function PricingPage() {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-                Log in
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white"
-              >
-                Start Free <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              {auth ? (
+                <Link href="/admin" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                    Log in
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Start Free <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -209,23 +246,20 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={plan.href}
-                  className={`mt-8 block rounded-lg py-2.5 text-center text-sm font-semibold transition-all ${
-                    plan.highlighted
-                      ? 'bg-white text-blue-700 hover:bg-blue-50'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                <UpgradeButton
+                  planId={plan.id}
+                  label={plan.cta}
+                  highlighted={plan.highlighted}
+                  isAuthenticated={!!auth}
+                  currentPlan={auth?.currentPlan || null}
+                />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Feature comparison highlights */}
+      {/* Feature highlights */}
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-12">

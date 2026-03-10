@@ -74,7 +74,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
 
   starter: {
     name: 'Starter',
-    maxStores: 3,
+    maxStores: 1,
     maxReviewsPerMonth: 500,
     maxInvitesPerMonth: 0,
     features: {
@@ -107,7 +107,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
 
   pro: {
     name: 'Pro',
-    maxStores: 10,
+    maxStores: 3,
     maxReviewsPerMonth: Infinity,
     maxInvitesPerMonth: 500,
     features: {
@@ -153,7 +153,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       apiAccess: true,
       sso: true,
       prioritySupport: true,
-      whiteLabel: true,
+      whiteLabel: false,
       multiPlatformReviews: true,
       sentimentAnalysis: true,
       reviewInvites: true,
@@ -222,11 +222,11 @@ export const PRICING_DISPLAY = [
     period: '/month',
     tagline: 'For growing restaurants',
     highlights: [
-      'Up to 3 store locations',
+      '1 store location',
       '500 AI reviews / month',
-      'Full analytics dashboard',
-      'Email + Slack notifications',
       'AI reply drafts',
+      'Daily monitoring & notifications',
+      'Sentiment analysis & Insights',
       'Weekly reports',
     ],
     stripePriceId: process.env.STRIPE_STARTER_PRICE_ID || null,
@@ -238,12 +238,12 @@ export const PRICING_DISPLAY = [
     period: '/month',
     tagline: 'For multi-location businesses',
     highlights: [
-      'Up to 10 store locations',
+      'Up to 3 store locations',
       'Unlimited AI reviews',
-      'Advanced analytics & reports',
+      'AI auto-reply',
+      'Competitor analysis',
+      'Full analytics & reports',
       'All notification channels',
-      'Auto-publish AI replies',
-      'Priority support',
       'Custom AI tone & handbook',
     ],
     stripePriceId: process.env.STRIPE_PRO_PRICE_ID || null,
@@ -258,11 +258,10 @@ export const PRICING_DISPLAY = [
     highlights: [
       'Unlimited store locations',
       'Unlimited AI reviews',
+      'Everything in Pro',
       'API access',
       'SSO / SAML',
-      'White-label option',
       'Dedicated account manager',
-      'Custom AI model training',
     ],
     stripePriceId: null,
   },

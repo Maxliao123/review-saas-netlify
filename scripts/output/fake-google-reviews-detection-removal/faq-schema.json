@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I pay someone to remove a fake Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, you should never pay a third-party service that promises guaranteed removal of Google reviews. These are often scams. The only legitimate ways to remove a review are through Google's official flagging process, escalation to Google Support, or, in extreme cases, legal action. Any service claiming to have a 'special relationship' with Google is misleading you."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take Google to remove a flagged fake review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google does not provide a specific timeline. The review process can take anywhere from a few days to several weeks. The review is assessed by Google's team against their policies. You will not receive a notification if it is removed; you must check your profile periodically. Complex cases or those requiring escalation may take longer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if a fake review is from a former employee or a competitor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reviews from former employees or competitors often violate Google's 'Conflict of Interest' policy. When flagging, explicitly state this. For example: 'This review is from the owner of [Competitor Business Name], which is a direct conflict of interest.' For an ex-employee, you might say, 'This reviewer is a former employee posting as a customer, which is a misrepresentation.' Providing evidence, like a LinkedIn profile link, can help."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I sue someone for posting a fake Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, if the review contains provably false statements that harm your business, you may have grounds for a defamation lawsuit. This is a complex and expensive process. The first step is consulting with a lawyer who specializes in internet defamation law. They can advise on sending a cease-and-desist letter or filing a 'John Doe' lawsuit to subpoena the reviewer's identity from Google."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it illegal to post fake positive reviews for my own business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, according to the Federal Trade Commission (FTC), posting fake positive reviews or paying for them without disclosure is considered deceptive advertising and is illegal. The FTC can pursue legal action and impose fines. Furthermore, it violates Google's policies and can result in the removal of all reviews or the suspension of your Google Business Profile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between a fake review and a negative review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A negative review is a legitimate critique from a real customer based on their experience, even if you disagree with it. A fake review is inauthentic: it may be from someone who was never a customer, posted by a bot, from a competitor, or contain factually false information. Google removes fake reviews for policy violations, but it does not remove genuine negative reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many fake reviews does it take for Google to suspend a business profile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google does not publish a specific threshold. However, a sudden, large influx of fake reviews (positive or negative) can trigger an automated suspension because it appears as 'suspicious activity.' This is why monitoring your review velocity is critical. If your profile is suspended due to fake positive reviews from a misguided campaign, you will need to go through Google's reinstatement process."
+      }
+    }
+  ]
+}

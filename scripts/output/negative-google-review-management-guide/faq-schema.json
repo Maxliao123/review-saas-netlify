@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does Google take to remove a flagged review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The review process typically takes 3 to 7 business days. Google will notify you of the decision via email. If the review is not removed after your first flag and you have strong evidence of a policy violation, you can submit a second, more detailed report through the Google Business Profile support portal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I offer a refund in my public response to a negative review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Never discuss specific compensation or refunds in the public response. Your goal is to show you care and are taking action. State your desire to resolve the issue and provide a direct contact method (email/phone) to discuss it privately. This protects the customer's privacy and allows for a tailored resolution."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay or incentivize customers to remove a negative review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, this violates Google's policies and can result in penalties for your Business Profile. You can offer compensation to resolve a customer's complaint, but you cannot make it conditional on them removing or changing their review. You can, however, politely ask them to update their review after the issue is resolved to their satisfaction."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the biggest mistake businesses make when responding to bad reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most common and damaging mistake is responding defensively or arguing with the customer. This makes the business look unprofessional and validates the reviewer's complaint in the eyes of other readers. Always maintain a calm, apologetic, and solution-oriented tone, even if the review is unfair."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do negative reviews impact my local SEO rankings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Negative reviews can hurt your local search ranking by lowering your overall star rating and affecting sentiment signals Google may assess. More importantly, they reduce click-through rates from search results, as users avoid businesses with poor reviews. For a full analysis, read our data study on Google Reviews and Local SEO."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it okay to use AI to generate responses to negative reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, AI can be a useful tool for drafting responses, saving time and ensuring a professional tone. However, you must always personalize the AI-generated response. Add specific details, use the customer's name, and ensure the reply sounds human and empathetic. Generic AI responses are easily spotted and can backfire. We cover this in our AI Review Reply Best Practices guide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many negative reviews are considered 'normal' for a business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no fixed number, but a healthy business profile typically has a rating between 4.0 and 4.7 stars. A few negative reviews (5-10%) are expected and can actually build credibility, as a perfect 5.0 score can seem suspicious. The key is the overall trend, the ratio of positive to negative, and how you respond."
+      }
+    }
+  ]
+}

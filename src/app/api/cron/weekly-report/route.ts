@@ -6,6 +6,7 @@ import { sendEmail } from '@/lib/notifications/channels/email';
 import { sendLine } from '@/lib/notifications/channels/line';
 import { sendSlack } from '@/lib/notifications/channels/slack';
 import { sendWhatsApp } from '@/lib/notifications/channels/whatsapp';
+import { hasFeature } from '@/lib/plan-limits';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Allow up to 60s for processing all stores
@@ -28,16 +29,23 @@ export async function GET(request: Request) {
     lastMonday.setDate(now.getDate() - dayOfWeek - 6); // Previous Monday
     lastMonday.setHours(0, 0, 0, 0);
 
-    // Fetch all active stores
+    // Fetch all stores with weekly reports enabled + tenant plan
     const { data: stores } = await supabaseAdmin
       .from('stores')
-      .select('id, name, tenant_id');
+      .select('id, name, tenant_id, weekly_report_enabled, tenants!inner(plan)')
+      .eq('weekly_report_enabled', true);
 
     if (!stores || stores.length === 0) {
-      return NextResponse.json({ success: true, message: 'No stores found' });
+      return NextResponse.json({ success: true, message: 'No stores with weekly reports enabled' });
     }
 
     for (const store of stores) {
+      // Plan gating: skip if plan doesn't include weekly reports
+      const tenantPlan = (store as any).tenants?.plan || 'free';
+      if (!hasFeature(tenantPlan, 'weeklyReports')) {
+        outputLog.push(`${store.name}: skipped (plan "${tenantPlan}" does not include weekly reports)`);
+        continue;
+      }
       try {
         // Generate report
         const reportData = await generateWeeklyReport(store.id, lastMonday);

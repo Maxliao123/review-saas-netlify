@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QrCode, Smartphone, MapPin, TrendingUp } from 'lucide-react';
+import { QrCode, Smartphone, MapPin, TrendingUp, ArrowRight } from 'lucide-react';
 
 interface Store {
   id: number;
@@ -22,6 +22,10 @@ export default function ScanDashboard({ stores }: { stores: Store[] }) {
   const [days, setDays] = useState(30);
   const [data, setData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [funnel, setFunnel] = useState<{
+    scans: number; generated: number; posted: number;
+    rates: { scanToGenerate: number; generateToPost: number; overall: number };
+  } | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -33,6 +37,11 @@ export default function ScanDashboard({ stores }: { stores: Store[] }) {
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    fetch(`/api/dashboard/funnel?${params}`)
+      .then(r => r.json())
+      .then(setFunnel)
+      .catch(() => {});
   }, [selectedStore, days]);
 
   if (loading) {
@@ -107,6 +116,23 @@ export default function ScanDashboard({ stores }: { stores: Store[] }) {
           value={data.trend.length > 0 ? data.trend[data.trend.length - 1].count : 0}
         />
       </div>
+
+      {/* Conversion Funnel */}
+      {funnel && funnel.scans > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">Conversion Funnel</h3>
+          <div className="flex items-center gap-3">
+            <FunnelStep label="Scans" value={funnel.scans} pct={100} color="bg-blue-500" />
+            <FunnelArrow rate={funnel.rates.scanToGenerate} />
+            <FunnelStep label="Generated" value={funnel.generated} pct={funnel.rates.scanToGenerate} color="bg-indigo-500" />
+            <FunnelArrow rate={funnel.rates.generateToPost} />
+            <FunnelStep label="Posted" value={funnel.posted} pct={funnel.rates.overall} color="bg-green-500" />
+          </div>
+          <p className="mt-3 text-xs text-gray-400 text-center">
+            Overall conversion: {funnel.rates.overall}% of scans result in a posted review
+          </p>
+        </div>
+      )}
 
       {/* Trend Chart (simple bar chart) */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
@@ -189,6 +215,27 @@ function StatCard({ icon: Icon, label, value }: { icon: any; label: string; valu
         <span className="text-xs font-medium text-gray-500">{label}</span>
       </div>
       <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
+    </div>
+  );
+}
+
+function FunnelStep({ label, value, pct, color }: { label: string; value: number; pct: number; color: string }) {
+  return (
+    <div className="flex-1 text-center">
+      <div className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</div>
+      <div className="text-xs text-gray-500 mb-2">{label}</div>
+      <div className="w-full bg-gray-100 rounded-full h-3">
+        <div className={`${color} h-3 rounded-full transition-all`} style={{ width: `${Math.max(pct, 3)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function FunnelArrow({ rate }: { rate: number }) {
+  return (
+    <div className="flex flex-col items-center shrink-0 px-1">
+      <span className="text-xs font-semibold text-gray-600">{rate}%</span>
+      <ArrowRight className="w-4 h-4 text-gray-300" />
     </div>
   );
 }

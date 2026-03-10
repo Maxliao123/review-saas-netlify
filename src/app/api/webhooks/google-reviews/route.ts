@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     // 6. Match to a store in our DB
     const { data: stores } = await supabaseAdmin
       .from('stores')
-      .select('id, name, slug, place_id, auto_reply_mode, auto_reply_min_rating, tone_setting, custom_handbook_overrides, support_email, business_vertical, can_dine_in, can_takeout, has_restroom, has_sauce_bar, has_parking, has_free_dessert, has_happy_hour, dessert_description, business_hours, tenants!inner(plan)')
+      .select('id, name, slug, place_id, auto_reply_mode, auto_reply_min_rating, negative_review_threshold, tone_setting, custom_handbook_overrides, support_email, business_vertical, can_dine_in, can_takeout, has_restroom, has_sauce_bar, has_parking, has_free_dessert, has_happy_hour, dessert_description, business_hours, tenants!inner(plan)')
       .eq('tenant_id', tenantId);
 
     if (!stores || stores.length === 0) {
@@ -264,7 +264,8 @@ export async function POST(request: Request) {
       .eq('id', inserted.id);
 
     // 11. Urgent alert for negative reviews needing manual review
-    if (numericRating <= 2 && newStatus !== 'approved') {
+    const negThreshold = (matchedStore as any).negative_review_threshold ?? 2;
+    if (numericRating <= negThreshold && newStatus !== 'approved') {
       notifyUrgentReview(matchedStore.id, {
         reviewId: inserted.id,
         author_name: review.reviewer?.displayName || 'Anonymous',

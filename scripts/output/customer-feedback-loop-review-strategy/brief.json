@@ -1,0 +1,18 @@
+{
+  "slug": "customer-feedback-loop-review-strategy",
+  "title": "The Customer Feedback Loop: Turn Internal Feedback Into Public Reviews",
+  "titleZh": "客戶回饋循環：將內部回饋轉化為公開評論",
+  "targetQuery": "customer feedback loop, feedback to reviews pipeline, customer satisfaction reviews",
+  "priority": "p3",
+  "category": "strategies",
+  "tags": [
+    "customer feedback",
+    "feedback loop",
+    "customer satisfaction",
+    "review pipeline"
+  ],
+  "metaDescription": "Learn how to build a customer feedback loop that turns private feedback into public 5-star reviews. A proven feedback-to-reviews pipeline boosts customer satisfaction and online reputation.",
+  "author": "Rachel Torres",
+  "generatedAt": "2026-03-10T06:16:30.385Z",
+  "model": "deepseek-chat-v3"
+}

@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How often should I update my Google Business Profile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should update your profile anytime core business information changes (hours, address, phone number). For active engagement, aim to post a new Google Post at least once a week and upload new photos at least once a month. Regularly check and answer Q&A questions within 24-48 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it worth paying for Google Business Profile management services?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For most small businesses, the free Google Business Profile manager provides all necessary tools. However, paying for specialized services can be worthwhile if you lack time. Services might include professional photo shoots, monthly Post scheduling, in-depth ranking tracking, or reputation management software that aggregates reviews and suggests responses. Evaluate cost against the time you would spend manually."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I have multiple Google Business Profiles for the same business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should only have one GBP per physical location. Creating multiple profiles for the same location (e.g., one for 'Bob's Plumbing' and one for 'Bob's Plumbing & Heating') is a violation of Google's guidelines and can lead to suspension. If you have multiple distinct departments under one roof that serve customers face-to-face (like a hospital with separate clinics), they may be eligible for separate listings."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the single most important thing to do for GBP optimization?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ensuring 100% consistency of your Name, Address, and Phone number (NAP) across your GBP, your website, and all major online directories is the most critical foundational step. Inconsistency here creates confusion for Google's algorithm and can severely limit your visibility in local search results."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I remove a fake or spammy review from my Google Business Profile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use the Google Business Profile manager to flag the review for removal. Google will only remove reviews that violate its policies, such as fake content, spam, or hate speech. For negative but legitimate reviews, you cannot remove them. Instead, respond professionally to address the feedback publicly, which shows other customers you are attentive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do responses to Google reviews help with SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While Google has not confirmed that responding directly influences ranking algorithms, it is a best practice that influences user behavior. Responding shows engagement, can improve your reputation, and may increase the likelihood of other customers leaving reviews. Google recommends that business owners respond to reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I do if my Google Business Profile gets suspended?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, check the email associated with your GBP for a notification from Google explaining the reason. Common causes include NAP inconsistencies, misleading categories, or violating the guidelines (like having a virtual office for a service-area business). Address the specific issue, then follow Google's reinstatement request process through the Google Business Profile Help Center. Be detailed and polite in your appeal."
+      }
+    }
+  ]
+}

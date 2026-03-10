@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many Google reviews do I need for my salon to be considered trustworthy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no magic number, but data suggests that potential clients look for a minimum average rating of 4.3 stars and a volume of reviews that seems active and recent. A salon with 50+ reviews is generally perceived as more established and reliable than one with only 5. Consistency is key, a few new, detailed reviews each month is more valuable than 100 reviews that are three years old."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I offer a discount in exchange for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google's review policy strictly prohibits offering incentives in exchange for reviews. You cannot offer a discount, free service, or entry into a contest conditional on posting a positive review. However, you can offer a small thank you gift to all clients after their service, regardless of whether they leave a review. The key is that the incentive is not tied to the content or posting of the review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A client posted an unfair, angry review about a style I know they loved when they left. What should I do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Respond professionally and publicly, as outlined in the article. Thank them for feedback, apologize for their current dissatisfaction, and invite them to contact you privately to resolve it. If the review violates Google's policies (e.g., contains hate speech, is off-topic, or is fake), you can flag it for removal through your Google Business Profile dashboard. However, removal is not guaranteed for simply negative opinions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every positive review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, whenever possible. A personalized thank you to a positive review (e.g., 'Thanks so much, Jessica! We loved creating that beach-wave look for you. Can't wait to see you again!') shows you value all client feedback, not just the negative. It reinforces the client's decision and encourages future loyalty. For efficiency, you can use AI-powered reply suggestions to craft personalized responses quickly, as discussed in our AI Review Reply Best Practices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get my stylists to ask for reviews without being pushy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Train them on the 'why' and the 'how.' Explain how reviews directly impact the salon's success and, by extension, their own booking schedules. Role-play the ask so it feels natural. Provide them with tools like QR code cards to make it easy. Finally, consider a non-cash team recognition program for the stylist who generates the most positive client feedback each month, focusing on the behavior, not just the review count."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it worth paying for a review management software for a single-location salon?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For many small salons, a dedicated software can provide a strong return on investment. It automates review request follow-ups, centralizes monitoring, and provides analytics that would take hours to compile manually. The time saved and the potential increase in review volume (and thus new clients) often justifies the monthly cost. Evaluate tools based on features specific to local service businesses."
+      }
+    }
+  ]
+}

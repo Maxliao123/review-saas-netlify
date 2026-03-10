@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is it free to create a QR code for Google reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, creating a basic QR code is free. You can use free online generators like QRCode Monkey or the QR code generator built into many smartphones. These tools will create a static image file you can download and print. However, free codes offer no analytics, branding, or ability to change the destination link later. For business use, investing in a dynamic QR code service (typically $10-$30/month) is recommended for tracking performance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I change where the QR code goes after I've printed it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only if you use a dynamic QR code service. Static QR codes, which are the free kind, permanently encode the URL you used during creation. If you need to change the link, you must create and reprint a brand new code. Dynamic QR codes from paid services allow you to update the destination URL at any time in your dashboard, and all existing printed codes will automatically redirect to the new link."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the best place to put a review QR code for a retail store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The best placements intercept customers post-purchase. Prime locations include the sales receipt or invoice, a sticker on the product packaging, a sign at the checkout counter, or a decal on the exit door. The call-to-action should be immediate, such as \"Scan your receipt to review your purchase!\" Testing a placement near the fitting rooms with a CTA about service can also work well."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are QR code reviews against Google's terms of service?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, using a QR code to make it easier for customers to find your review page is not against Google's terms. However, violating Google's Review Policy is. You must not offer any incentive (discounts, freebies, contest entries) in exchange for a review. The QR code should simply be a convenient pathway, not a tool for bribing for positive reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get my specific Google review link to make the QR code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Log into your Google Business Profile dashboard at business.google.com. Select your location. On the main \"Home\" tab, find the \"Get more reviews\" card or section. Click \"Share review form\" or a similar button. A pop-up will appear containing your unique, shortened `g.page` review link. Copy this URL. This is the only link you should use for your QR code."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use a QR code to get reviews on sites other than Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. The same principle applies. You would need the direct review page URL for other platforms like Yelp, Facebook, or TripAdvisor. You can create a separate QR code for each platform or use a dynamic QR code service to create a single code that opens a menu page letting the customer choose which platform to review you on."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good scan-to-review conversion rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A good conversion rate depends on your method. For a basic QR code that links directly to Google, a rate of 10-15% is solid. If you use a guided review system that reduces friction by offering tag selection and AI-generated drafts, conversion rates of 25-35% are common. Track your scans (via a dynamic code) and compare them to new review counts to calculate your own rate."
+      }
+    }
+  ]
+}

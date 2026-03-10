@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the most effective way to get more Google reviews for my hotel?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most effective method is a multi-touchpoint system. Place QR codes in guest rooms linking directly to your Google review page. Train front desk staff to make a polite, verbal request at check-out. Follow up with a personalized email within 24 hours of departure that includes a clear 'Leave a Review' button. Consistency across these channels significantly increases conversion rates."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How quickly should I respond to negative hotel reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should aim to respond to all negative reviews within 24 hours, especially on Google. A swift, professional, and empathetic public response shows the reviewer and future guests that you take feedback seriously. After your public apology and offer to resolve the issue, always move the detailed conversation to a private email or phone call to address the guest's specific concerns."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to positive reviews, or just the negative ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should respond to all reviews. Thanking guests for positive reviews reinforces their good experience, encourages loyalty, and signals to Google that you are an engaged business owner. A simple, personalized 'Thank you, [Guest Name]! We're so glad you enjoyed the spa and hope to welcome you back soon,' is sufficient and effective."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle fake or malicious reviews about my hotel?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, report the review to the platform (Google, TripAdvisor) if it clearly violates their policies, such as containing hate speech, being off-topic, or from someone who demonstrably never stayed at your hotel. If the review is questionable but not clearly fake, respond professionally and factually in public. For example, 'We have no record of a guest under this name during the dates mentioned. We take all feedback seriously and invite you to contact our management directly to discuss your concerns.' Avoid emotional language."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between managing Google reviews and OTA (Booking.com, Expedia) reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google reviews are critical for local SEO and attracting guests who search directly on Google. OTA reviews are critical for converting users who are already on booking sites. Response times should be slightly faster for Google (24 hrs vs. 48 hrs). OTA reviews often contain more detailed feedback about the booking and stay experience, so responses should be equally detailed to influence high-intent bookers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I offer a discount to guests in exchange for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Offering any form of incentive in exchange for a positive review is strictly against Google's review policies and can result in the removal of reviews or penalization of your Business Profile. You can run a general contest where anyone who leaves a review is entered into a draw for a prize, but the incentive cannot be contingent on the review being positive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do reviews impact my hotel's search engine ranking on Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reviews are a confirmed local SEO ranking factor. Google considers the quantity, quality (star rating), recency (velocity), and sentiment of your reviews. A hotel with a high volume of recent, positive, and detailed reviews will typically rank higher in the 'hotels near me' local pack and organic search results than a competitor with fewer or poorer reviews."
+      }
+    }
+  ]
+}

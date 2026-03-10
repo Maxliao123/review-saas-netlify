@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many Google reviews do I need to be considered trustworthy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no magic number, but data shows a tipping point. Profiles with less than 10 reviews can seem new or untested. Aiming for 50+ quality reviews establishes social proof. More important than sheer quantity is recency and quality. Ten detailed reviews from the past six months are far more powerful than 50 vague reviews from five years ago. Consistency signals an active, reliable business."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I ask for reviews on Zillow or Google first?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Always ask for the Google review first. Your Google Business Profile is your most visible asset in local search and maps. It influences your ranking directly. After a client has left a Google review, you can then ask if they wouldn't mind copying it to Zillow or Realtor.com to help others on those platforms. Google should be your primary focus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it okay to offer a small gift card in exchange for a review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Offering any incentive for a review is strictly against Google's policy and can result in the removal of reviews or penalization of your profile. You can offer a thank-you gift after a transaction closes, but it must not be contingent on leaving a review. The gift should be for their business, not for the feedback. Always follow the Google Review Policy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A past client left a 3-star review but didn't write any comments. What should I do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Respond anyway. A generic 3-star review can be more damaging than a detailed negative one because it leaves potential clients guessing. Respond with: 'Thank you for the feedback and for your business. I'm sorry to see your experience was only 3 stars. I strive for a perfect 5-star experience with every client. If there's anything I could have done better, please reach out to me directly at [your email]. I value your perspective.' This shows you care about improvement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get my Google review link to leave a review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You need to generate a personalized 'short URL' from your Google Business Profile. Log into your profile, go to the 'Home' tab, and look for the 'Get more reviews' card. Click 'Share review form' to copy a direct link. You can also use a third-party review generation platform that creates a simple QR code or link for this purpose, making it even easier for clients on mobile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I delete a bad review from my Google profile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You cannot delete a review yourself. You can only flag it to Google for removal if it violates their policies (e.g., contains hate speech, is spam, or is from someone who was never a client). For legitimate negative reviews from real clients, your only recourse is to respond professionally. Google provides a process for reporting policy-violating reviews through your Business Profile dashboard or the Google Business Profile Help Center."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How quickly should I respond to a new review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Aim to respond within 24-48 hours, especially to negative reviews. A quick response to a positive review shows appreciation and engagement. A prompt response to a negative review demonstrates that you are attentive and proactive about client concerns. Setting up mobile notifications for new reviews is the best way to stay on top of this."
+      }
+    }
+  ]
+}

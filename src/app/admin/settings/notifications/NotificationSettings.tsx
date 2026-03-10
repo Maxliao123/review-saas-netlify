@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { Mail, MessageSquare, Hash, Phone, Plus, Trash2, TestTube } from 'lucide-react';
+import { Mail, MessageSquare, Hash, Phone, Plus, Trash2, TestTube, FileText } from 'lucide-react';
+import { hasFeature } from '@/lib/plan-limits';
 
 interface Store {
   id: number;
@@ -25,16 +26,22 @@ const CHANNEL_TYPES = [
   { type: 'whatsapp', label: 'WhatsApp', icon: Phone, description: 'WhatsApp via Twilio' },
 ];
 
-export default function NotificationSettings({ stores, channels: initialChannels, role }: {
+export default function NotificationSettings({ stores, channels: initialChannels, role, storeThresholds: initialThresholds, weeklyReportEnabled: initialWeekly, plan }: {
   stores: Store[];
   channels: Channel[];
   role: 'owner' | 'manager' | 'staff';
+  storeThresholds?: Record<number, number>;
+  weeklyReportEnabled?: Record<number, boolean>;
+  plan?: string;
 }) {
   const [channels, setChannels] = useState(initialChannels);
   const [selectedStore, setSelectedStore] = useState<number>(stores[0]?.id || 0);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [message, setMessage] = useState('');
+  const [thresholds, setThresholds] = useState<Record<number, number>>(initialThresholds || {});
+  const [weeklyReport, setWeeklyReport] = useState<Record<number, boolean>>(initialWeekly || {});
+  const planSupportsWeekly = hasFeature(plan || 'free', 'weeklyReports');
 
   const supabase = createSupabaseBrowserClient();
   const canEdit = role !== 'staff';
@@ -140,6 +147,91 @@ export default function NotificationSettings({ stores, channels: initialChannels
       {message && (
         <div className={`p-3 rounded-lg text-sm ${message.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
           {message}
+        </div>
+      )}
+
+      {/* Urgent Alert Threshold */}
+      {canEdit && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 mb-1">Urgent Alert Threshold</h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Reviews at or below this rating trigger urgent notifications with AI draft reply.
+          </p>
+          <div className="flex gap-2">
+            {[
+              { value: 2, label: '1-2 stars (strict)' },
+              { value: 3, label: '1-3 stars (recommended)' },
+            ].map(opt => {
+              const current = thresholds[selectedStore] ?? 2;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={async () => {
+                    const { error } = await supabase
+                      .from('stores')
+                      .update({ negative_review_threshold: opt.value })
+                      .eq('id', selectedStore);
+                    if (!error) {
+                      setThresholds(prev => ({ ...prev, [selectedStore]: opt.value }));
+                      setMessage('Threshold saved!');
+                      setTimeout(() => setMessage(''), 2000);
+                    }
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                    current === opt.value
+                      ? 'bg-red-600 text-white border-red-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Weekly Report Toggle */}
+      {canEdit && (
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${weeklyReport[selectedStore] !== false ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                <FileText className={`w-5 h-5 ${weeklyReport[selectedStore] !== false ? 'text-blue-600' : 'text-gray-400'}`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Weekly Report</h3>
+                <p className="text-xs text-gray-500">
+                  {planSupportsWeekly
+                    ? 'Receive a weekly summary of reviews, ratings, and insights every Monday.'
+                    : 'Upgrade to Starter or above to enable weekly reports.'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                if (!planSupportsWeekly) return;
+                const newVal = !(weeklyReport[selectedStore] ?? true);
+                const { error } = await supabase
+                  .from('stores')
+                  .update({ weekly_report_enabled: newVal })
+                  .eq('id', selectedStore);
+                if (!error) {
+                  setWeeklyReport(prev => ({ ...prev, [selectedStore]: newVal }));
+                  setMessage(newVal ? 'Weekly reports enabled!' : 'Weekly reports disabled.');
+                  setTimeout(() => setMessage(''), 2000);
+                }
+              }}
+              disabled={!planSupportsWeekly}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                weeklyReport[selectedStore] !== false && planSupportsWeekly ? 'bg-blue-600' : 'bg-gray-300'
+              } ${!planSupportsWeekly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                weeklyReport[selectedStore] !== false && planSupportsWeekly ? 'translate-x-6' : 'translate-x-0.5'
+              }`} />
+            </button>
+          </div>
         </div>
       )}
 

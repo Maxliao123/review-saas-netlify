@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is it against Google's rules to ask for reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, it is perfectly within Google's policies to ask your customers for reviews. The violation occurs if you incentivize only positive reviews, write reviews for customers, or post reviews on behalf of customers without their consent. You should ask all customers neutrally, not just those you think will be positive. Avoid offering discounts, gifts, or cash in exchange for a review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best time to send an email asking for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The best time is 3-7 days after a purchase or service is completed. This gives the customer time to use the product or experience the results of the service. For a restaurant, emailing the next day is fine. For a longer-term service like a home renovation, wait a week or two. Always send these emails mid-week (Tuesday-Thursday) during business hours for higher open rates."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay a service to get me more Google reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can pay for services that help you manage and collect reviews ethically (like CRM tools, SMS platforms, or review generation software). You should never pay a service that promises to post a certain number of 5-star reviews for you. These services often use fake accounts or violate Google's terms, which can lead to all your reviews being removed or your Business Profile being suspended."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get a short link for my Google review page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, get the long URL to your review prompt by going to your Google Business Profile, clicking 'Ask for reviews,' and copying the link. Then, use a URL shortener like Bitly (which has a free tier), Rebrandly, or even a feature within your review management tool. Create a short, memorable link like 'yoursite.com/review' or 'bit.ly/YourBizLove.'"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many reviews should I aim to get per month?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This depends on your transaction volume. A good benchmark is to aim for a review from 5-10% of your customers. If you serve 300 customers a month, 15-30 new reviews is a strong, sustainable goal. Focus on consistency over spikes. A steady flow of 2-5 reviews per week looks more natural and trustworthy to Google and consumers than 50 reviews in one day followed by silence."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do responses to reviews encourage more people to leave reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, actively responding to reviews, both positive and negative, signals to potential reviewers that you read and value feedback. When customers see that you thoughtfully respond to reviews, they are more likely to believe their own review will be seen and appreciated, increasing their motivation to write one."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do reviews directly impact my business revenue?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reviews impact revenue in three main ways: they improve local SEO ranking (leading to more visibility), they increase click-through rates from search results, and they directly convert browsers into buyers by building trust. Studies show businesses that increase their average rating by one star can see a 5-9% increase in revenue."
+      }
+    }
+  ]
+}

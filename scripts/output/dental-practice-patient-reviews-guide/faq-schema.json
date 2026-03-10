@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How can I ask for Google reviews without violating HIPAA?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can absolutely ask for reviews without violating HIPAA. The key is to make a general request that does not reference specific treatment. Use language like, 'If you're happy with your experience at our practice, we'd appreciate you sharing it on Google.' Do not ask about a specific procedure. Send the request via a general email or text blast that does not contain PHI, or use an in-office method like a QR code. The patient's review is their own voluntary disclosure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best time to ask a dental patient for a review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The timing depends on the appointment type. For routine preventive care like cleanings and exams, ask within 24-48 hours while the experience is fresh. For more complex procedures (fillings, crowns, extractions), wait 5-7 days to allow for initial recovery. For multi-visit treatments like implants or orthodontics, consider asking after a key milestone visit, such as the placement of the final crown or an adjustment appointment where the patient sees progress."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every single Google review for my dental practice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you should aim to respond to every review. Responding to positive reviews shows appreciation and encourages more feedback. Responding to negative reviews is critical, as it demonstrates to all potential patients that you care about feedback and are committed to resolution. According to Google's guidelines, professional, respectful responses contribute to a trustworthy profile. Always respond within 48 hours when possible."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle a fake or malicious review about my dental practice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, assess if the review violates Google's policies (e.g., fake, spam, contains hate speech). If it does, use the 'Flag as inappropriate' option in your Google Business Profile to report it. Google may remove it. If it is a genuine but negative review from someone you cannot identify, respond professionally without accusing them of being fake. State, 'We take all feedback seriously, but we cannot locate your patient record. Please contact our office manager so we can address your concerns directly.' This shows other viewers you are proactive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I offer an incentive for patients to leave a review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You must be very careful. Google's policies strictly prohibit offering incentives in exchange for positive reviews. You cannot offer discounts, gift cards, or entry into a raffle specifically for a 5-star review. However, you can ask for honest feedback. A safe practice is to run a general 'Thank You' campaign for all patients, not tied to review content or star rating. The best incentive is simply providing an exceptional patient experience."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many Google reviews do I need to be competitive as a dentist?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no magic number, but benchmarks are helpful. In most suburban/urban markets, top-ranking dental practices often have 100+ reviews with an average rating of 4.7 stars or higher. More important than the total count is the recency and quality. Having 50 detailed, recent reviews is more powerful than 200 old, one-word reviews. Focus on consistently generating 15-20 new, high-quality reviews per quarter to stay competitive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A patient posted a review with a photo of their smile after whitening. Is this okay?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If the patient voluntarily posts their own photo, that is their choice and is generally acceptable. However, you should never repost or share that photo on your own marketing channels without their explicit written consent. The patient has disclosed their own PHI (their image) in a public forum, but you must still protect it. A safe response would be, 'Thank you for sharing your feedback! We're delighted with your results.' without referencing the photo directly."
+      }
+    }
+  ]
+}

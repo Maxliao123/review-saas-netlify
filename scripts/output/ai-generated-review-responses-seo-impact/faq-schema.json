@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can Google tell if I'm using AI to write review responses?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google's algorithms are designed to identify patterns of low-quality, unhelpful, or repetitive content, which are common hallmarks of poorly implemented AI. They likely don't have a simple 'AI detector' for reviews, but they can easily spot if dozens of your responses are 90% identical. The outcome—demotion due to poor content quality—is the same whether the source is a human using a template or an AI."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will using AI review responses get my Google Business Profile suspended?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is highly unlikely that using AI for responses alone would cause a suspension. Suspensions typically result from severe policy violations like fake review generation, keyword stuffing, or prohibited content. However, if your AI generates spammy, promotional, or off-topic replies at scale, it could trigger a policy violation. The safe approach is to use AI for drafting and ensure a human verifies each reply complies with Google's guidelines."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the best AI tool for replying to Google reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no single 'best' tool, as it depends on your business size and needs. For most local businesses, dedicated review management platforms like Reputation Monitor, Birdeye, or Podium are excellent choices. They integrate directly with your Google Business Profile, offer AI suggestions within a workflow, and provide crucial analytics. For solopreneurs, manually using a chatbot like ChatGPT with careful prompting can work but is less efficient."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How quickly should I respond to reviews for the best SEO impact?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Speed is a positive signal, indicating active management. Aim to respond within 24-48 hours, especially to negative reviews. A swift response to criticism is often viewed favorably by both the customer and future readers. AI tools enable this fast turnaround. Consistency (a high overall response rate) is more important for SEO than being first by a few minutes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every single review, even the positive ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, for maximum SEO benefit, you should aim to respond to all reviews. Responding to positive reviews reinforces customer loyalty and adds fresh, positive content to your profile. It also contributes to your overall response rate, a known ranking factor. AI makes this scalable. A simple, personalized thank you is sufficient for most positive reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I personalize an AI-generated review response?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Always add at least one specific element not in the AI's first draft. This could be the customer's name (from the review), the name of a staff member they praised, a menu item or service they mentioned, or a specific detail about their experience ('We remember your large group last Saturday!'). This small step transforms a generic reply into a personal one."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do negative review responses affect SEO differently than positive ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, they can. A thoughtful, professional response to a negative review is a powerful trust signal to potential customers and to Google's algorithms. It shows you manage your reputation actively. A poorly handled negative review (or no response at all) can increase profile bounce rates, a negative behavioral signal. The impact is indirect but significant. Always handle negative reviews with care, using AI only for drafting an apology framework."
+      }
+    }
+  ]
+}

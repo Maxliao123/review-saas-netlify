@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the most important citation for local SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Google Business Profile (GBP) is the single most important citation. It is directly integrated into Google Search and Maps, and its accuracy and optimization have the most direct impact on your local pack and map rankings. Always ensure your GBP listing is 100% accurate, complete, and actively managed before focusing on other directories."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many citations does my local business need?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no universal magic number, but a strong baseline is 50-100 consistent citations. Focus on quality and relevance over sheer volume. Ensure you are listed on the core platforms (Google, Apple, Facebook, Bing), major aggregators, 10-15 key industry-specific directories, and relevant local business directories. A tool like BrightLocal can benchmark you against local competitors."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take for new citations or corrections to affect rankings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It can take 4 to 8 weeks for search engines to crawl, process, and trust updated citation information. Corrections on major data aggregators (Localeze, Data Axle) may take the longest to propagate but have the widest impact. Updates to your Google Business Profile can be reflected within a few days, but the full ranking effect takes longer as consistency signals are reassessed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between a citation and a backlink?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A citation mentions your business NAP (Name, Address, Phone) and is primarily a local SEO trust signal. A backlink is a hyperlink from another website to yours and is a primary ranking factor for general SEO, signaling authority and relevance. A citation may or may not include a backlink. Both are important, but for local visibility, citations are foundational."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I pay for a citation building service?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on your time, technical skill, and number of locations. For a single-location business, you can manually claim the top 20-30 citations. For multiple locations or if your time is limited, a service like Moz Local (for distribution) or a manual service from an agency can be a worthwhile investment to ensure accuracy and save dozens of hours. Avoid services that promise thousands of cheap, low-quality directory submissions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can incorrect citations hurt my business even if my Google listing is correct?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Search engines cross-reference data from multiple sources. If trusted directories like Yelp or major aggregators show an old address or phone number, it creates a conflict that can cause Google to distrust your verified listing, potentially lowering your ranking. Incorrect citations also directly frustrate customers who find wrong information elsewhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check my citations for accuracy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Perform a full, comprehensive audit using a software tool at least once a year. Do a quick manual check for your core listings (Google, Apple, Facebook, Yelp) every quarter, especially if you change hours for seasons, get a new phone line, or run a special promotion. Any change to your core NAP should trigger an immediate audit and update campaign."
+      }
+    }
+  ]
+}

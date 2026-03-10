@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { constructWebhookEvent } from '@/lib/stripe';
+import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { PlanId } from '@/lib/plan-limits';
 
-/**
- * Stripe webhook handler.
- * Handles subscription lifecycle events to keep tenant plans in sync.
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -16,7 +12,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
-    const event = constructWebhookEvent(body, signature);
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+    if (!webhookSecret) {
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    }
+
+    // Verify signature locally (no network call)
+    const event = Stripe.webhooks.constructEvent(body, signature, webhookSecret);
     const supabase = supabaseAdmin;
 
     switch (event.type) {
@@ -25,15 +27,38 @@ export async function POST(request: NextRequest) {
         const tenantId = session.metadata?.tenant_id;
         if (!tenantId) break;
 
-        // Store Stripe customer ID on tenant
+        // Get subscription details to determine plan
+        const subscriptionId = session.subscription;
+        let plan: PlanId = 'starter'; // default for paid
+
+        if (subscriptionId) {
+          // Fetch subscription from Stripe to get the price ID
+          const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+          if (stripeKey) {
+            try {
+              const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+                headers: { 'Authorization': `Bearer ${stripeKey}` },
+              });
+              const sub = await res.json();
+              const priceId = sub.items?.data?.[0]?.price?.id;
+              plan = mapPriceToPlan(priceId);
+            } catch (e) {
+              console.error('[webhook] Failed to fetch subscription:', e);
+            }
+          }
+        }
+
+        // Store Stripe IDs AND update plan
         await supabase
           .from('tenants')
           .update({
             stripe_customer_id: session.customer,
-            stripe_subscription_id: session.subscription,
+            stripe_subscription_id: subscriptionId,
+            plan,
           })
-          .eq('id', Number(tenantId));
+          .eq('id', tenantId);
 
+        console.log(`[webhook] checkout.session.completed: tenant=${tenantId} plan=${plan}`);
         break;
       }
 
@@ -42,15 +67,15 @@ export async function POST(request: NextRequest) {
         const tenantId = subscription.metadata?.tenant_id;
         if (!tenantId) break;
 
-        // Map Stripe price to plan
         const priceId = subscription.items?.data?.[0]?.price?.id;
         const plan = mapPriceToPlan(priceId);
 
         await supabase
           .from('tenants')
           .update({ plan })
-          .eq('id', Number(tenantId));
+          .eq('id', tenantId);
 
+        console.log(`[webhook] subscription.updated: tenant=${tenantId} plan=${plan}`);
         break;
       }
 
@@ -59,26 +84,31 @@ export async function POST(request: NextRequest) {
         const tenantId = subscription.metadata?.tenant_id;
         if (!tenantId) break;
 
-        // Downgrade to free
         await supabase
           .from('tenants')
           .update({
             plan: 'free',
             stripe_subscription_id: null,
           })
-          .eq('id', Number(tenantId));
+          .eq('id', tenantId);
 
+        console.log(`[webhook] subscription.deleted: tenant=${tenantId} → free`);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as any;
+        console.error(`[webhook] Payment failed for customer ${invoice.customer}`);
         break;
       }
 
       default:
-        // Unhandled event type
         break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('[billing/webhook]', error);
+    console.error('[billing/webhook]', error?.message || error);
     return NextResponse.json(
       { error: error.message || 'Webhook processing failed' },
       { status: 400 }
@@ -89,8 +119,8 @@ export async function POST(request: NextRequest) {
 function mapPriceToPlan(priceId: string | undefined): PlanId {
   if (!priceId) return 'free';
 
-  const starterPriceId = process.env.STRIPE_STARTER_PRICE_ID;
-  const proPriceId = process.env.STRIPE_PRO_PRICE_ID;
+  const starterPriceId = process.env.STRIPE_STARTER_PRICE_ID?.trim();
+  const proPriceId = process.env.STRIPE_PRO_PRICE_ID?.trim();
 
   if (priceId === starterPriceId) return 'starter';
   if (priceId === proPriceId) return 'pro';

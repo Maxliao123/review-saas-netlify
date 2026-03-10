@@ -8,9 +8,11 @@ import {
   QrCode,
   Star,
   ArrowUpRight,
-  Clock,
   AlertTriangle,
+  Bell,
 } from 'lucide-react';
+import DashboardInsights from './DashboardInsights';
+import ReviewAnalytics from './ReviewAnalytics';
 
 export const metadata = {
   title: 'Dashboard — Reputation Monitor',
@@ -99,6 +101,21 @@ async function getDashboardData(tenantId: number, storeIds: number[]) {
     ? avgData.reduce((sum, r) => sum + r.rating, 0) / avgData.length
     : 0;
 
+  // Check notification setup
+  const notificationSetup = await supabase
+    .from('notification_channels')
+    .select('id', { count: 'exact', head: true })
+    .in('store_id', storeIds)
+    .eq('is_active', true);
+
+  // Funnel: posted reviews this month
+  const postedThisMonth = await supabase
+    .from('generated_reviews')
+    .select('id', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .eq('likely_posted', true)
+    .gte('created_at', monthStart);
+
   return {
     reviewsThisMonth: reviewsThisMonth.count || 0,
     reviewsLastMonth: reviewsLastMonth.count || 0,
@@ -108,6 +125,8 @@ async function getDashboardData(tenantId: number, storeIds: number[]) {
     recentReviews: recentReviews.data || [],
     generatedThisMonth: generatedThisMonth.count || 0,
     avgRating: Math.round(avgRating * 10) / 10,
+    hasNotifications: (notificationSetup.count || 0) > 0,
+    postedThisMonth: postedThisMonth.count || 0,
   };
 }
 
@@ -257,79 +276,44 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      {/* Action Items + Recent Reviews */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
-        {/* Pending Actions */}
-        <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-400" />
-            Action Items
-          </h2>
-          <div className="mt-4 space-y-3">
-            {data.pendingReplies > 0 ? (
-              <Link
-                href="/admin/reviews"
-                className="flex items-center justify-between rounded-lg bg-amber-50 p-3 hover:bg-amber-100 transition-colors"
-              >
-                <span className="text-sm font-medium text-amber-900">
-                  {data.pendingReplies} reply draft{data.pendingReplies !== 1 ? 's' : ''} awaiting approval
-                </span>
-                <ArrowUpRight className="h-4 w-4 text-amber-600" />
-              </Link>
-            ) : (
-              <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
-                All caught up! No pending actions.
-              </div>
-            )}
-          </div>
+      {/* Funnel summary */}
+      {data.scansThisMonth > 0 && data.generatedThisMonth > 0 && (
+        <div className="mt-3 text-xs text-gray-500 flex items-center gap-3 flex-wrap">
+          <span>{data.scansThisMonth} scans</span>
+          <span className="text-gray-300">&rarr;</span>
+          <span>{data.generatedThisMonth} generated ({Math.round((data.generatedThisMonth / data.scansThisMonth) * 100)}%)</span>
+          <span className="text-gray-300">&rarr;</span>
+          <span>{data.postedThisMonth} posted ({data.generatedThisMonth > 0 ? Math.round((data.postedThisMonth / data.generatedThisMonth) * 100) : 0}%)</span>
+          <Link href="/admin/analytics/scans" className="text-blue-600 hover:text-blue-800 font-medium ml-auto">
+            View funnel &rarr;
+          </Link>
         </div>
+      )}
 
-        {/* Recent Reviews */}
-        <div className="lg:col-span-2 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-900">Recent Reviews</h2>
-            <Link href="/admin/reviews" className="text-xs font-medium text-blue-600 hover:text-blue-800">
-              View all
+      {/* Notification setup prompt */}
+      {!data.hasNotifications && (
+        <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
+          <Bell className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+          <div>
+            <h3 className="font-semibold text-blue-900 text-sm">Set up notifications</h3>
+            <p className="mt-0.5 text-xs text-blue-700">
+              Get instant alerts when customers leave negative reviews so you can respond quickly.
+            </p>
+            <Link href="/admin/settings/notifications" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-blue-800 hover:text-blue-900">
+              Configure now <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="mt-4 space-y-3">
-            {data.recentReviews.length === 0 ? (
-              <p className="text-sm text-gray-500 py-4 text-center">
-                No reviews yet. Connect Google Business to start syncing.
-              </p>
-            ) : (
-              data.recentReviews.map((review: RecentReview) => (
-                <div key={review.id} className="flex items-start gap-3 border-b border-gray-50 pb-3 last:border-0">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600 shrink-0">
-                    {(review.author_name || '?').slice(0, 1).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900 truncate">
-                        {review.author_name || 'Anonymous'}
-                      </span>
-                      <RatingStars rating={review.rating} />
-                    </div>
-                    {review.content && (
-                      <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">{review.content}</p>
-                    )}
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      review.reply_status === 'published'
-                        ? 'bg-green-50 text-green-700'
-                        : review.reply_status === 'drafted'
-                          ? 'bg-amber-50 text-amber-700'
-                          : 'bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    {review.reply_status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
         </div>
+      )}
+
+      {/* Insights + Actions */}
+      <div className="mt-8">
+        <DashboardInsights pendingReplies={data.pendingReplies} />
+      </div>
+
+      {/* Review Analytics — star distribution, sentiment tags, word cloud, filtered reviews */}
+      <div className="mt-6">
+        <ReviewAnalytics />
       </div>
     </div>
   );

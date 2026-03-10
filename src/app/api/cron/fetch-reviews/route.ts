@@ -41,10 +41,6 @@ export async function GET(request: Request) {
 
         const outputLog: string[] = [];
 
-        // --- 90 Days Lookback ---
-        const lookbackWindow = new Date();
-        lookbackWindow.setDate(lookbackWindow.getDate() - 90);
-
         // --- MULTI-TENANT: Iterate over all connected tenants ---
         const tenantIds = await getConnectedTenants();
 
@@ -62,6 +58,7 @@ export async function GET(request: Request) {
             mode: string;
             minRating: number;
             tenantPlan: string;
+            negativeThreshold: number;
         }>();
 
         // Cache per-tenant OAuth clients for publish step
@@ -120,7 +117,7 @@ export async function GET(request: Request) {
                 // Fetch stores for this tenant (include auto_reply settings + tenant plan)
                 const { data: tenantStores } = await supabase
                     .from('stores')
-                    .select('id, name, slug, place_id, auto_reply_mode, auto_reply_min_rating, tenants!inner(plan)')
+                    .select('id, name, slug, place_id, auto_reply_mode, auto_reply_min_rating, negative_review_threshold, tenants!inner(plan)')
                     .eq('tenant_id', tenantId);
 
                 for (const loc of locations) {
@@ -150,6 +147,7 @@ export async function GET(request: Request) {
                                 mode: (matchedStore as any).auto_reply_mode || 'manual',
                                 minRating: (matchedStore as any).auto_reply_min_rating || 4,
                                 tenantPlan: tenantData?.plan || 'free',
+                                negativeThreshold: (matchedStore as any).negative_review_threshold ?? 2,
                             });
 
                             if (loc.regularHours) {
@@ -180,9 +178,6 @@ export async function GET(request: Request) {
                             const reviews = reviewsRes.reviews || [];
 
                             for (const review of reviews) {
-                                const reviewDate = new Date(review.updateTime);
-                                if (reviewDate < lookbackWindow) continue;
-
                                 const { data: existing } = await supabase
                                     .from('reviews_raw')
                                     .select('id, google_review_id, store_id')
@@ -446,8 +441,9 @@ export async function GET(request: Request) {
                         autoApprovedReviewIds.push(review.id);
                     }
 
-                    // URGENT ALERT: 1-2 star reviews that need manual approval
-                    if (review.rating <= 2 && newStatus !== 'approved' && review.store_id) {
+                    // URGENT ALERT: negative reviews that need manual approval
+                    const negThreshold = storeSettings?.negativeThreshold ?? 2;
+                    if (review.rating <= negThreshold && newStatus !== 'approved' && review.store_id) {
                         notifyUrgentReview(review.store_id, {
                             reviewId: review.id,
                             author_name: review.author_name || 'Anonymous',

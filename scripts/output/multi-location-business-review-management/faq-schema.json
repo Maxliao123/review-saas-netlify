@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does multi-location review management software cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pricing is typically based on the number of locations or the volume of reviews monitored. Entry-level plans for small chains can start around $50-$100 per location per month. Enterprise plans for large franchises with advanced analytics, API integrations, and custom workflows can range from $200 to $500+ per location monthly. Many providers offer custom quotes. Always request a demo and a pilot period to test the platform's fit for your specific operational workflow."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can franchisees be forced to use a centralized review system?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on the franchise agreement. The most effective approach is to include the use of a specified reputation management platform as a requirement in the franchise operations manual. Frame it as a support tool, not a surveillance tool. Demonstrate how it saves the franchisee time (with AI reply suggestions) and directly helps their business (by driving more local customers via better SEO and ratings). Providing the corporate license for the platform can also reduce resistance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do we handle reviews for a closed or relocated location?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For a permanent closure, you should mark the Google Business Profile as 'Permanently Closed.' Do not delete it. For a relocation, use the 'Move' feature in Google Business Profile Manager to change the address. In both cases, post a final update on the GBP listing informing customers of the change. If a new business has taken over the old address, Google may eventually transfer the listing, but the reviews are tied to the location's history and cannot be migrated to a new profile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the most important metric to track across locations?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While average star rating is key, the review response rate, especially to negative reviews, is the most telling operational metric. A low response rate indicates local management is not engaged with customer feedback. A high response rate (aim for 100% to negative reviews and 70%+ to all reviews) shows proactive customer care. Track this alongside 'sentiment trend' (is rating improving or declining month-over-month?) for a complete picture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can we prevent fake or malicious reviews across our chain?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vigilant monitoring is the first step. Train managers to flag reviews that are clearly about a different business, contain profane language, or are obvious spam. Use the management platform to report these reviews directly to Google for violation of its Google Review Policy. For a pattern of malicious reviews, you may need to document the pattern and seek legal advice. The best defense is a strong volume of legitimate, positive reviews that dilute the impact of any single fake review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should responses to reviews be signed by the manager or the brand?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A hybrid approach works best. For positive reviews, a response from 'The [Brand Name] Team' is sufficient and efficient. For negative reviews requiring service recovery, the response should be signed with the local manager's first name (e.g., 'Hi Jane, this is Mark, the store manager here...'). This adds a layer of personal accountability and shows the customer that a human with authority is addressing their concern."
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I offer a discount or freebie in exchange for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Offering any incentive, whether a discount, free item, contest entry, or special treatment, in exchange for a review is a direct violation of Google's policy. This is true even if you offer it for any review, not just a positive one. The incentive undermines the authenticity of the feedback and can result in penalties for your Business Profile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A competitor left me a fake 1-star review. What should I do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Flag the review for removal through your Google Business Profile dashboard. Select the flag icon next to the review, choose the reason 'Conflict of interest' or 'Spam,' and in the explanation, clearly state that the reviewer is the owner or an agent of a direct competitor. Provide the competitor's business name if possible. While not guaranteed, Google often removes these when the conflict is clearly stated."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it against Google's rules to ask employees or family to leave reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Reviews from current employees, owners, or individuals with a close personal relationship to the business (like family members) are considered conflicts of interest and violate Google's guidelines. You should instruct anyone directly affiliated with your business not to post reviews. Reviews from former employees can also be flagged for removal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is 'review gating' and why is it illegal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Review gating is the practice of intercepting customers after a purchase with a survey and only directing those who report a positive experience (e.g., 4-5 stars) to leave a public Google review. Those with negative experiences are sent to a private feedback channel. This artificially inflates your public rating and is explicitly prohibited by Google because it misleads consumers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take for Google to remove a flagged review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The timeframe varies widely. For clear violations like hate speech or explicit content, removal can happen within 24-48 hours. For more nuanced cases like potential fake reviews or conflicts, it can take several days or even weeks. Google does not always notify you of the outcome, so you need to check your review listing periodically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I delete a bad review from my Google Business Profile myself?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, business owners cannot delete reviews directly. You can only flag a review for Google to assess against its policies. If the review does not violate a policy (i.e., it is simply a negative opinion), Google will not remove it, and you must address it with a public response."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I find the official Google review policy document?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The official and always-updated policy is published by Google on their support site. You can find it here: Google's Prohibited and Restricted Content. It is the definitive source for all guidelines."
+      }
+    }
+  ]
+}

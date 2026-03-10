@@ -54,7 +54,8 @@ function HeroSection({ storeData }: { storeData: any }) {
 function StoreLoader() {
     const params = useSearchParams();
     const storeId = params.get('store') || params.get('storeid') || 'decision';
-    const lang = params.get('lang') || 'en';
+    const langParam = params.get('lang');
+    const lang = langParam || (typeof navigator !== 'undefined' && navigator.language?.split('-')[0]) || 'en';
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [storeData, setStoreData] = useState<any>(null);

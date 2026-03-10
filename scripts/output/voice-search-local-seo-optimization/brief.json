@@ -1,0 +1,19 @@
+{
+  "slug": "voice-search-local-seo-optimization",
+  "title": "Voice Search & Local SEO: How to Optimize Your Business",
+  "titleZh": "語音搜尋與本地 SEO：如何優化你的商家",
+  "targetQuery": "voice search local seo, optimize for voice search business, voice search optimization",
+  "priority": "p2",
+  "category": "strategies",
+  "tags": [
+    "voice search",
+    "local SEO",
+    "Alexa",
+    "Siri",
+    "Google Assistant"
+  ],
+  "metaDescription": "Learn how to optimize your local business for voice search. This guide covers conversational keywords, Google Business Profile setup, and structured data to capture more \"near me\" voice queries.",
+  "author": "Sarah Kim",
+  "generatedAt": "2026-03-10T06:27:43.175Z",
+  "model": "deepseek-chat-v3"
+}

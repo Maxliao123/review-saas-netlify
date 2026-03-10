@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -18,14 +19,12 @@ import {
   MessageCircleWarning,
   LayoutDashboard,
   CreditCard,
-  Brain,
   Globe,
   Send,
   BookTemplate,
   Inbox,
   FlaskConical,
   TrendingUp,
-  Trophy,
   ShieldAlert,
   Route,
   Key,
@@ -37,6 +36,11 @@ import {
   Zap,
   HardDrive,
   ShoppingBag,
+  Lightbulb,
+  User,
+  Menu,
+  X,
+  Star,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -46,84 +50,149 @@ interface SidebarProps {
   stores: Array<{ id: number; name: string; slug: string }>;
 }
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
-  { href: '/admin/team/inbox', label: 'Team Inbox', icon: Inbox },
-  { href: '/admin/feedback', label: 'Feedback', icon: MessageCircleWarning },
-  { href: '/admin/scanner', label: 'Review Scanner', icon: Radar },
-  { href: '/admin/analytics/scans', label: 'Scan Analytics', icon: QrCode },
-  { href: '/admin/analytics/sentiment', label: 'Sentiment', icon: Brain },
-  { href: '/admin/analytics/competitors', label: 'Competitors', icon: BarChart3 },
-  { href: '/admin/invites', label: 'Invites', icon: Send },
-  { href: '/admin/templates', label: 'Reply Templates', icon: BookTemplate },
-  { href: '/admin/experiments', label: 'A/B Tests', icon: FlaskConical },
-  { href: '/admin/analytics/benchmarks', label: 'Benchmarks', icon: Trophy },
-  { href: '/admin/analytics/predictions', label: 'Predictions', icon: TrendingUp },
-  { href: '/admin/analytics/anomalies', label: 'Anomaly Detection', icon: ShieldAlert },
-  { href: '/admin/analytics/journeys', label: 'Customer Journey', icon: Route },
-  { href: '/admin/reports', label: 'Weekly Reports', icon: FileText },
-  { href: '/admin/stores/setup', label: 'Store Setup', icon: Store },
-  { href: '/admin/settings/notifications', label: 'Notifications', icon: Bell },
-  { href: '/admin/settings/google', label: 'Google Business', icon: LinkIcon, ownerOnly: true },
-  { href: '/admin/settings/platforms', label: 'Platforms', icon: Globe, ownerOnly: true },
-  { href: '/admin/settings/api', label: 'API Keys', icon: Key, ownerOnly: true },
-  { href: '/admin/settings/webhooks', label: 'Webhooks', icon: Webhook, ownerOnly: true },
-  { href: '/admin/settings/ai-training', label: 'AI Training', icon: GraduationCap, ownerOnly: true },
-  { href: '/admin/settings/pos', label: 'POS Integrations', icon: MonitorSpeaker, ownerOnly: true },
-  { href: '/admin/settings/whitelabel', label: 'White Label', icon: Palette, ownerOnly: true },
-  { href: '/admin/settings/realtime', label: 'Real-Time Reviews', icon: Zap, ownerOnly: true },
-  { href: '/admin/settings/hardware', label: 'Hardware & Devices', icon: HardDrive, ownerOnly: true },
-  { href: '/admin/marketplace', label: 'Specialist Market', icon: ShoppingBag },
-  { href: '/admin/analytics/audit', label: 'Review Auditor', icon: ScanSearch },
-  { href: '/admin/settings/billing', label: 'Billing', icon: CreditCard, ownerOnly: true },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: any;
+  exact?: boolean;
+  ownerOnly?: boolean;
+  section?: string;
+}
+
+const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
+  {
+    title: '',
+    items: [
+      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+    ],
+  },
+  {
+    title: 'Core Flow',
+    items: [
+      { href: '/admin/settings/google', label: '1. Google Business', icon: LinkIcon, ownerOnly: true },
+      { href: '/admin/stores/setup', label: '2. Store Setup', icon: Store },
+      { href: '/admin/reviews', label: '3. Reviews & AI Reply', icon: MessageSquare },
+      { href: '/admin/templates', label: '4. Reply Templates', icon: BookTemplate },
+      { href: '/admin/analytics/scans', label: '5. QR Scan Analytics', icon: QrCode },
+    ],
+  },
+  {
+    title: 'Team',
+    items: [
+      { href: '/admin/team/inbox', label: 'Team Inbox', icon: Inbox },
+      { href: '/admin/invites', label: 'Invites', icon: Send },
+      { href: '/admin/settings/notifications', label: 'Notifications', icon: Bell },
+    ],
+  },
+  {
+    title: 'Analytics',
+    items: [
+      { href: '/admin/analytics/insights', label: 'Review Insights', icon: Lightbulb },
+      { href: '/admin/analytics/competitors', label: 'Competitors', icon: BarChart3 },
+      { href: '/admin/reports', label: 'Weekly Reports', icon: FileText },
+    ],
+  },
+  {
+    title: 'Advanced',
+    items: [
+      { href: '/admin/analytics/predictions', label: 'Predictions', icon: TrendingUp },
+      { href: '/admin/analytics/anomalies', label: 'Anomaly Detection', icon: ShieldAlert },
+      { href: '/admin/analytics/journeys', label: 'Customer Journey', icon: Route },
+      { href: '/admin/analytics/audit', label: 'Review Auditor', icon: ScanSearch },
+      { href: '/admin/feedback', label: 'Feedback', icon: MessageCircleWarning },
+      { href: '/admin/scanner', label: 'Review Scanner', icon: Radar },
+      { href: '/admin/experiments', label: 'A/B Tests', icon: FlaskConical },
+      { href: '/admin/settings/ai-training', label: 'AI Training', icon: GraduationCap, ownerOnly: true },
+      { href: '/admin/settings/realtime', label: 'Real-Time Reviews', icon: Zap, ownerOnly: true },
+      { href: '/admin/marketplace', label: 'Specialist Market', icon: ShoppingBag },
+    ],
+  },
+  {
+    title: 'Settings',
+    items: [
+      { href: '/admin/settings/platforms', label: 'Platforms', icon: Globe, ownerOnly: true },
+      { href: '/admin/settings/api', label: 'API Keys', icon: Key, ownerOnly: true },
+      { href: '/admin/settings/webhooks', label: 'Webhooks', icon: Webhook, ownerOnly: true },
+      { href: '/admin/settings/pos', label: 'POS Integrations', icon: MonitorSpeaker, ownerOnly: true },
+      { href: '/admin/settings/whitelabel', label: 'White Label', icon: Palette, ownerOnly: true },
+      { href: '/admin/settings/hardware', label: 'Hardware & Devices', icon: HardDrive, ownerOnly: true },
+      { href: '/admin/settings/profile', label: 'Profile & Language', icon: User },
+      { href: '/admin/settings/billing', label: 'Billing', icon: CreditCard, ownerOnly: true },
+    ],
+  },
 ];
 
 export default function AdminSidebar({ user, tenant, role, stores }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push('/auth/login');
   }
 
-  const filteredNav = NAV_ITEMS.filter(item => {
-    if (item.ownerOnly && role === 'staff') return false;
-    return true;
-  });
-
-  return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+  /* ── Shared sidebar content ── */
+  const sidebarContent = (
+    <>
       {/* Tenant Header */}
       <div className="p-4 border-b border-gray-200">
-        <h2 className="font-bold text-gray-900 truncate">{tenant.name}</h2>
-        <p className="text-xs text-gray-500 mt-0.5">
-          {stores.length} store{stores.length !== 1 ? 's' : ''} &middot; {tenant.plan} plan
-        </p>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shrink-0">
+            <Star className="h-4 w-4 text-white fill-white" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-bold text-gray-900 truncate text-sm">{tenant.name}</h2>
+            <p className="text-[10px] text-gray-500">
+              {stores.length} store{stores.length !== 1 ? 's' : ''} &middot; {tenant.plan} plan
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
-        {filteredNav.map((item) => {
-          const isActive = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
-          const Icon = item.icon;
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        {NAV_SECTIONS.map((section, si) => {
+          const filteredItems = section.items.filter(item => {
+            if (item.ownerOnly && role === 'staff') return false;
+            return true;
+          });
+          if (filteredItems.length === 0) return null;
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {item.label}
-            </Link>
+            <div key={si} className={section.title ? 'pt-4 first:pt-0' : ''}>
+              {section.title && (
+                <p className="px-3 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                  {section.title}
+                </p>
+              )}
+              {filteredItems.map((item) => {
+                const isActive = item.exact
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           );
         })}
       </nav>
@@ -146,6 +215,47 @@ export default function AdminSidebar({ user, tenant, role, stores }: SidebarProp
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ── Mobile: hamburger button (fixed, always visible on small screens) ── */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-3 left-3 z-40 p-2.5 bg-white rounded-xl shadow-md border border-gray-200 hover:bg-gray-50 transition-colors"
+        aria-label="Open menu"
+      >
+        <Menu className="h-5 w-5 text-gray-700" />
+      </button>
+
+      {/* ── Mobile: slide-out drawer ── */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer */}
+          <aside className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
+            {/* Close button */}
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 z-10"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* ── Desktop: static sidebar ── */}
+      <aside className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col shrink-0">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long should a Google review response be?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep responses concise. For positive reviews, 2-3 sentences are perfect. For negative reviews, you may need 3-5 sentences to properly apologize, explain, and offer a resolution. The key is to be thorough yet scannable. Avoid long paragraphs that most readers will skip."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I delete a bad Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You cannot delete a review directly. You can only flag it to Google for removal if it violates Google's Review Policies, such as containing hate speech, fake content, or conflicts of interest. For legitimate critical reviews, your best course is to respond professionally."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every single Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you should aim to respond to all reviews. Responding to positive reviews encourages more of them and shows appreciation. Responding to negative reviews is critical for damage control. A high response rate signals an active, customer-focused business to both potential customers and Google's local search algorithm."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best way to get more Google reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The best method is to ask satisfied customers at the right moment. In-person requests, follow-up emails, and SMS links are effective. Using a QR code system that directs customers to a simple, mobile-friendly review page can significantly increase volume."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it okay to use the same response for multiple reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Using a similar structure or template is fine, but you must personalize each response. Change the customer's name, reference something specific they mentioned, or tailor the closing. Copy-pasting identical replies looks lazy and insincere, which can damage trust more than not responding at all."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I respond to a fake Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, flag the review to Google for violation of their policies. Then, if it remains, you can post a polite, factual public response. Example: 'Hi, we have no record of a transaction matching this description. We believe this review may be intended for another business or is inaccurate. We have reported it to Google for investigation.' Do not accuse the reviewer directly."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do Google review responses affect my SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, indirectly. Google confirms that review quantity, velocity, and sentiment are local ranking factors. While a single response may not boost SEO, a consistent pattern of engaging with reviews signals a healthy, reputable business. This can improve click-through rates from search results and build trust, which supports overall SEO performance."
+      }
+    }
+  ]
+}

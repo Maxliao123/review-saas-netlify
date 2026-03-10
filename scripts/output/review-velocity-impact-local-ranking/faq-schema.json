@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is more important for local SEO, total review count or review velocity?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Review velocity is increasingly more important for local search ranking. While a high total count builds authority, Google's algorithms heavily weight recency. A business with 100 total reviews but only 2 in the past year will often be outranked by a competitor with 60 total reviews but 15 in the past 90 days. Velocity provides a consistent freshness signal that total count alone cannot."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I get penalized for getting too many reviews too quickly?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. A sudden, large spike in reviews that deviates from your historical pattern can trigger Google's automated fraud filters. The reviews may be filtered out (not displayed) or, in severe cases, could lead to a manual penalty against your Google Business Profile. It is safer to grow your reviews steadily over time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I find out my competitors' review velocity?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can perform a manual audit by visiting their Google Business Profile weekly and noting new reviews in the 'Most recent' section. For efficiency, use competitive analysis tools like BrightLocal, Local Falcon, or ReviewTrackers. These tools can track competitor review counts over time and estimate their monthly acquisition rate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do responses to reviews impact review velocity SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Indirectly, yes. While responding doesn't affect the velocity metric directly, it is a strong engagement signal to Google. An actively managed profile that responds to reviews (both positive and negative) is seen as more trustworthy and customer-focused. This positive engagement complements a good velocity signal for overall ranking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the minimum review velocity to see an SEO impact?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Data suggests you need a minimum of 4-5 new, authentic Google reviews per month to establish a baseline freshness signal that Google's algorithm will notice. For a tangible competitive advantage, most local businesses should target 8-12 or more per month, depending on their industry benchmark."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I ask for reviews on other platforms besides Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, for brand reputation, but prioritize Google for local SEO. Google reviews have the most direct impact on your local pack and map rankings. Reviews on sites like Yelp or Facebook are valuable for social proof but do not influence Google's local search algorithm. Focus 80% of your effort on Google."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take for improved review velocity to affect rankings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You may see minor ranking fluctuations within 2-4 weeks of establishing a consistent, higher velocity. However, for sustained, measurable improvement in competitive local packs, plan for a 3-6 month period of consistent review acquisition. SEO is a cumulative process, and velocity builds a durable signal over time."
+      }
+    }
+  ]
+}

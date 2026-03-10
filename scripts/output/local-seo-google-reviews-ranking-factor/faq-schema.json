@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many Google reviews do I need to improve my SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no magic number, as it depends on your competition. A good benchmark is to have more reviews than your direct local competitors. Focus first on consistency: aim for 5-10 new, genuine reviews per month. This steady velocity is a stronger signal to Google than a single burst of 50 reviews followed by silence. For most small businesses, reaching 100+ quality reviews establishes strong authority."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do negative reviews hurt my Google ranking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, but not in the way you might think. A single negative review among many positives has minimal direct algorithmic impact. However, a pattern of negative reviews (especially recent ones) that mention specific problems like 'slow service' or 'poor quality' can hurt your relevance for related positive searches. The larger impact is on click-through rate; a low star average or a negative snippet visible in search results will deter customers from clicking your listing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you should aim for a 100% response rate. Responding to positive reviews reinforces customer relationships and adds positive, keyword-rich content to your profile. Responding to negative reviews is critical for reputation management and shows potential customers you care about feedback. Google also sees a high response rate as a sign of an engaged, reputable business. For a detailed framework, read our guide on responding to negative reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay for Google reviews to boost my SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, you should never pay for reviews. This violates Google's terms of service and can result in the removal of reviews or the suspension of your Business Profile. Google's algorithms are designed to detect fake or incentivized reviews based on patterns like sudden bursts, similar language, or reviews from accounts with no other history. Focus on earning genuine reviews through excellent service and polite, non-coercive solicitation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which is more important for local SEO: review quantity or star rating?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both are important, but they serve different purposes. Star rating (especially staying above 4.0) is critical for consumer trust and click-through rate, which is a key ranking signal. Quantity and velocity (the rate of new reviews) are stronger direct signals of business prominence and engagement to Google's algorithm. You need a healthy balance: a high rating sustained by a consistent flow of new reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do reviews on other sites (Yelp, Facebook) help my Google ranking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not directly for your Google local pack ranking. Google's algorithm primarily uses data from its own ecosystem. However, reviews on other platforms can generate indirect SEO benefits. They can contribute to your overall online reputation, which may influence the creation of positive blog posts or social media mentions about your business, which can lead to backlinks. Your primary focus should be Google Reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How quickly can I expect to see SEO results from improving my reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google's local index updates frequently, but it can take 2-4 weeks for the effects of a sustained increase in review quantity/quality to be reflected in ranking shifts. Significant improvements, like moving into the local pack for a competitive term, often require 60-90 days of consistent effort, as seen in the case study above. It's a marathon, not a sprint."
+      }
+    }
+  ]
+}

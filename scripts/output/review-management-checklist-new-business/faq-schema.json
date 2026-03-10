@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many reviews do I need for Google to take my business seriously?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no official threshold, but data shows clear milestones. Businesses with at least 10 reviews see a meaningful increase in local search visibility. The 'local pack' (the top 3 map results) is dominated by businesses with an average of 47 reviews, according to a 2025 Moz study. Your initial goal should be 10 genuine reviews, then 50, then 100. Consistency matters more than a single burst."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it okay to offer a discount or free item in exchange for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Google's policies explicitly prohibit offering incentives in exchange for reviews. This includes discounts, free products, coupons, or entries into a contest. Such practices can lead to the removal of reviews or the suspension of your Google Business Profile. You can ask for feedback, but the review must be an unbiased reflection of a genuine experience. You can offer incentives for feedback collected via a private survey instead."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the fastest way to get my first 5 Google reviews as a brand-new business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The fastest ethical method is direct, personal outreach to people who have already transacted with you. This includes friends, family, suppliers, or soft-launch clients. Send individual emails or texts with your direct review link, reminding them of their specific positive experience. Avoid public social media posts. This targeted approach can yield 5 reviews within 48 hours if done correctly."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to every single review, even the positive ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Responding to all reviews shows you value customer feedback and are an engaged business owner. It also encourages future reviewers, as they see their voice will be heard. For positive reviews, a simple 'Thank you!' is sufficient, but personalizing it by mentioning a detail they included is better. This public dialogue improves your profile's engagement signals."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check for new reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "At a minimum, daily. Set a calendar reminder or use the Google Business Profile app with notifications enabled. For businesses with higher transaction volumes (like restaurants or clinics), checking twice a day is advisable. Prompt responses, especially to negative reviews, are crucial for reputation management and demonstrating responsiveness to potential customers reading them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I delete a bad Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You cannot delete a review yourself. You can flag it to Google for removal if it violates their policies (e.g., contains hate speech, is spam, is from someone who never was a customer). To flag, click the three dots next to the review. For legitimate negative reviews, your only recourse is to respond professionally and try to resolve the issue offline. If resolved, you can ask the customer if they would consider updating their review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is more important for local SEO, the number of reviews or the star rating?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both are critical, but they serve different purposes. The star rating (aim for 4.0+) is a primary click-through factor—customers often filter out businesses below a certain threshold. The number of reviews is a key ranking factor for local search pack placement; more reviews signal popularity and trust to Google's algorithm. A high volume of reviews with a high average rating is the ideal combination."
+      }
+    }
+  ]
+}

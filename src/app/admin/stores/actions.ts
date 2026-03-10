@@ -281,6 +281,27 @@ export async function getTenantPlan(): Promise<string> {
   return ctx.tenant.plan || 'free';
 }
 
+// ── Onboarding Completion ────────────────────────────────────────────
+
+export async function completeOnboarding() {
+  try {
+    const ctx = await getUserTenantContext();
+    if (!ctx?.tenant) throw new Error('Not authenticated');
+
+    const { error } = await supabaseAdmin
+      .from('tenants')
+      .update({ onboarding_completed_at: new Date().toISOString() })
+      .eq('id', ctx.tenant.id);
+
+    if (error) throw error;
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error completing onboarding:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // ── Store Settings ──────────────────────────────────────────────────
 
 export async function updateStoreSettings(id: number, settings: any) {

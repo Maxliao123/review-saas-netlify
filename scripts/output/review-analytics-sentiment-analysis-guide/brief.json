@@ -1,0 +1,18 @@
+{
+  "slug": "review-analytics-sentiment-analysis-guide",
+  "title": "Review Analytics & Sentiment Analysis: Extract Business Insights",
+  "titleZh": "評論分析與情緒分析：提取商業洞察",
+  "targetQuery": "review analytics, review sentiment analysis tools, analyze customer reviews",
+  "priority": "p3",
+  "category": "guides",
+  "tags": [
+    "analytics",
+    "sentiment analysis",
+    "review data",
+    "business intelligence"
+  ],
+  "metaDescription": "Learn how review analytics and sentiment analysis tools help businesses analyze customer reviews for actionable insights. Compare top platforms and methods to improve operations.",
+  "author": "Rachel Torres",
+  "generatedAt": "2026-03-10T06:20:07.535Z",
+  "model": "deepseek-chat-v3"
+}

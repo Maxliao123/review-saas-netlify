@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a good ROI for review management?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A 'good' ROI is anything significantly positive, but in practice, effective review management often yields returns of 300% to 1000% or more. This is because the costs (software, minimal staff time) are relatively low compared to the substantial revenue impact of a higher star rating and increased review volume. The key is systematizing the process to keep costs down while maximizing genuine, positive feedback."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does a 1-star drop on Google really cost my business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Based on economic research, a one-star drop in your average rating can decrease revenue by 5 to 9 percent. For a business earning $50,000 monthly, that's a loss of $2,500 to $4,500 per month, or $30,000 to $54,000 annually. This cost comes from potential customers choosing competitors with higher ratings and from the loss of trust among your existing audience."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use a free tool to calculate review revenue impact?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can build a simple calculator using a free spreadsheet tool like Google Sheets. The formulas provided in this article (linking revenue, star rating changes, and conversion rates) are all you need. While dedicated SaaS platforms offer integrated analytics, a manual spreadsheet model is an excellent and free starting point to understand the potential impact for your specific business."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many new reviews do I need to see a real impact on sales?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Volume has a compounding effect. While even a few new positive reviews can help, data suggests a tipping point exists. Businesses with more than 42 reviews earn significantly more revenue than those with fewer. A practical goal is to consistently add enough reviews to steadily increase your total count and maintain a recent stream of positive feedback, which Google's algorithm favors for local search ranking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is responding to negative reviews worth the time investment?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. Data shows that responding to negative reviews can convince up to 70% of readers that you are a business that cares about customer satisfaction. It can also lead to the reviewer updating or removing their negative feedback in about 30% of cases. This makes response time a high-ROI activity, directly protecting your revenue and reputation asset."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do reviews affect my local SEO, and how does that factor into ROI?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google's local search algorithm uses review quantity, quality (star rating), recency, and keywords within reviews as ranking factors. More and better reviews can improve your visibility in 'local pack' and map results, driving more organic profile views. This increased visibility should be factored into your ROI calculator as a source of additional leads and revenue, separate from the direct trust effect of the reviews themselves."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the most effective way to ask for reviews without violating Google's policy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most effective and compliant method is to make the process easy and timely. Ask satisfied customers shortly after their purchase or service experience. Provide a direct link or, even better, a QR code that takes them directly to your review page. The key is to ask everyone equally, not to offer incentives for positive reviews. Tools that generate QR codes and guide customers through a simple feedback process can significantly increase conversion rates while staying within policy guidelines."
+      }
+    }
+  ]
+}

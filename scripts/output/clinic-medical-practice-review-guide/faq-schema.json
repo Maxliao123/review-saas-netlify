@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I offer an incentive for patients to leave a Google review for my clinic?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, offering any incentive for a Google review is strictly against Google's Review Policy. This includes discounts, gift cards, entry into a drawing, or any form of compensation. Google's algorithms can detect incentivized review patterns and may penalize your Business Profile by removing reviews or lowering your local ranking. The only compliant approach is to simply ask for feedback to help improve your practice."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A patient posted a detailed review mentioning their specific medical condition and treatment. How should I respond?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This is a high-risk scenario. The patient has voluntarily disclosed their own PHI, but you still cannot confirm it. Do not repeat or acknowledge the medical details. Your response should be generic and focused on redirecting: 'Thank you for sharing your feedback. We are glad you chose our practice for your healthcare needs. For any further questions about your care, we encourage you to contact our office directly for a private conversation.' Do not delete the review unless it violates Google's policies."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check and respond to new Google reviews for my medical practice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should aim to check your Google Business Profile at least once every 24-48 hours. Setting up email notifications for new reviews is essential. Responding to positive reviews within a day or two shows engagement. Critical negative reviews should be addressed within 24 hours with your standard 'take it offline' response to demonstrate attentiveness. A consistent response schedule is key."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I respond to positive reviews, or just the negative ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should respond to all reviews. Thanking patients for positive reviews reinforces their good experience and encourages future reviews. It also shows prospective patients that you are an engaged, appreciative practice. A simple 'Thank you for your kind words and for trusting us with your care' is sufficient and HIPAA-safe. Ignoring positive reviews misses a major opportunity to build community and goodwill."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between managing reviews for a telehealth practice vs. a physical clinic?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The core HIPAA rules are identical. The collection points differ: request reviews after a telehealth visit via the secure patient portal or post-visit SMS. Reviews for telehealth often focus on technology ease-of-use, audio/video quality, and the provider's ability to connect virtually. Your response templates should include language like 'We're continuously working to improve our virtual care platform' for tech-related feedback. The 'take it offline' rule remains critical for any clinical care complaints."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A review is factually wrong (e.g., says we're closed on a day we're open). Can I correct it publicly?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, for purely factual, non-clinical information, you can politely correct the record in a public response. For example: 'Thank you for your feedback. For the benefit of others seeking care, we'd like to note that our clinic hours are 8am-5pm Monday through Friday. We hope to see you again.' Keep it factual, polite, and avoid any sarcasm or defensiveness."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who in my practice should be responsible for managing review responses?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This task should not fall to clinical staff like doctors or nurses during patient care time. It is best handled by a practice manager, office administrator, or a designated marketing/patient experience coordinator. This person should be thoroughly trained on HIPAA compliance for public communications and have access to approved response templates. They should also have the authority to escalate serious care complaints for offline follow-up."
+      }
+    }
+  ]
+}

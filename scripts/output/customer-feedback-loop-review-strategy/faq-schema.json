@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What's the difference between a customer feedback loop and just asking for reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Asking for reviews is a single, often random, action. A feedback loop is a closed system. It involves systematically collecting private feedback first, analyzing the sentiment, and then taking appropriate action: routing happy customers to review sites and resolving unhappy customers' issues privately. The loop includes acting on the feedback to improve the business, which then generates better future reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it against Google's rules to ask customers for reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, Google allows businesses to ask for reviews. However, its policy strictly prohibits offering incentives in exchange for reviews, selectively asking only happy customers, or creating fake reviews. The ethical approach is to ask customers consistently (e.g., via a receipt or follow-up email) without filtering for positivity and never offering a discount, gift, or payment for a review. Always follow the Google Review Policy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best tool to start a feedback loop for a small business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start with simple, low-cost tools that automate key steps. Use an SMS marketing platform (like ManyChat or SimpleTexting) for post-service surveys. Use a QR code generator to create a link to your Google review page. For managing and analyzing the reviews you receive, a dedicated tool like Reputation Monitor can consolidate analytics and response management into one dashboard. The best tool is the one you will use consistently."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I analyze my customer feedback data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sentiment and keyword trends should be reviewed weekly in operational meetings. This allows for quick reactions to emerging issues. A deeper, formal analysis of your Net Promoter Score (NPS) and review trends should be conducted monthly. This rhythm balances tactical problem-solving with strategic planning for improvement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I do if a customer leaves a negative review despite my private feedback loop?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, ensure you have already attempted to resolve their issue privately via your loop protocol. If they still post, respond publicly following best practices: thank them, apologize for the shortfall, explain any corrective action taken, and invite further private discussion. This shows other readers you take feedback seriously. Never argue online. Our detailed negative response guide provides specific templates."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a feedback loop really improve my local SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. Google's local search algorithm uses review quantity, quality (star rating), recency, and keyword content as ranking signals. A functioning feedback loop directly increases the volume and velocity of positive reviews, which can improve local pack rankings. Furthermore, responding to all reviews increases engagement, another positive signal. The correlation is strong, as detailed in our Local SEO and reviews study."
+      }
+    }
+  ]
+}

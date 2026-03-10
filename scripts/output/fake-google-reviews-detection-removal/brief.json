@@ -1,0 +1,18 @@
+{
+  "slug": "fake-google-reviews-detection-removal",
+  "title": "Fake Google Reviews: How to Detect, Report, and Remove Them",
+  "titleZh": "假 Google 評論：如何偵測、檢舉和移除",
+  "targetQuery": "fake google reviews, how to remove fake reviews, flag fake review google",
+  "priority": "p3",
+  "category": "guides",
+  "tags": [
+    "fake reviews",
+    "review removal",
+    "google policy",
+    "fraud detection"
+  ],
+  "metaDescription": "Learn how to identify and remove fake Google reviews. This guide covers detection red flags, Google's official flagging process, legal options, and tools to protect your business reputation.",
+  "author": "Sarah Kim",
+  "generatedAt": "2026-03-10T06:05:29.244Z",
+  "model": "deepseek-chat-v3"
+}

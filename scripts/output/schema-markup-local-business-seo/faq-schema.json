@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is schema markup a direct Google ranking factor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google states schema markup is not a direct ranking factor. However, it is a strong indirect factor. By enabling rich results like review stars and FAQ snippets, it significantly increases click-through rates (CTR). A higher CTR is a positive user engagement signal that can influence rankings. More importantly, it makes your content understandable to AI systems, which is critical for visibility in AI Overviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between JSON-LD and Microdata format for schema?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "JSON-LD is a JavaScript block placed in the `<head>` of your HTML, separate from your visible content. Microdata uses HTML attributes (`itemscope`, `itemtype`) woven directly into your page's body tags. Google recommends JSON-LD because it's easier to implement and maintain without risking errors in your page layout. Most modern SEO tools and plugins generate JSON-LD."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use schema markup for a service-area business (SAB) without a physical address?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Instead of using the `LocalBusiness` type with a full `address`, you use the `Service` type or `LocalBusiness` with a `serviceArea` property. You define the `serviceArea` as a `GeoCircle` (a radius from a central point) or a `Place` (like a city or state). You must still provide a `telephone` number and clearly state your service areas on your visible webpage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I update my business schema markup?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should update it immediately any time your core business information changes: business name, permanent change of address, main phone number, or permanent changes to operating hours. For dynamic data like `AggregateRating`, it's good practice to update the `reviewCount` and `ratingValue` monthly to keep it reasonably current. Some CMS plugins can automate this sync."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need separate schema for my Google Business Profile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Your Google Business Profile is a separate entity. You do not add schema markup to it. Instead, you add schema markup to your own website. The data in both places (name, address, phone, hours) should be consistent. The schema on your site acts as the authoritative, canonical source that search engines can cross-reference with your GBP and other citations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I make a mistake in my schema markup?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If the mistake is minor (a warning in the Rich Results Test), your markup may still work but not generate the intended rich result. If it's a critical error (like invalid JSON syntax or a missing required property), the entire markup for that item will be ignored. Google Search Console will often notify you of structured data errors in the 'Enhancements' section, allowing you to fix them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can schema markup help my business appear in voice search results?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, significantly. Voice assistants like Google Assistant rely heavily on structured data to provide concise, factual answers. A query like 'Hey Google, what time does Mario's Pizzeria close tonight?' is answered by parsing the `openingHoursSpecification` from your `LocalBusiness` schema. Complete and accurate markup makes your business a more reliable source for voice search answers."
+      }
+    }
+  ]
+}

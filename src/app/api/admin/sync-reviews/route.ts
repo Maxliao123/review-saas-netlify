@@ -71,10 +71,6 @@ export async function POST() {
       return NextResponse.json({ error: 'No stores found for this tenant' }, { status: 404 });
     }
 
-    // 90 day lookback
-    const lookback = new Date();
-    lookback.setDate(lookback.getDate() - 90);
-
     let totalFetched = 0;
     let newReviews = 0;
     const log: string[] = [];
@@ -109,8 +105,6 @@ export async function POST() {
           const reviews = reviewsRes.reviews || [];
 
           for (const review of reviews) {
-            const reviewDate = new Date(review.updateTime);
-            if (reviewDate < lookback) continue;
             totalFetched++;
 
             // Check if already exists

@@ -28,6 +28,7 @@ interface Store {
     business_vertical: string;
     auto_reply_mode: string;
     auto_reply_min_rating: number;
+    custom_handbook_overrides: any;
 }
 
 export default function StoreSetupPage() {
@@ -97,6 +98,7 @@ export default function StoreSetupPage() {
             business_vertical: formData.business_vertical || 'restaurant',
             auto_reply_mode: formData.auto_reply_mode || 'manual',
             auto_reply_min_rating: formData.auto_reply_min_rating || 4,
+            custom_handbook_overrides: formData.custom_handbook_overrides || null,
         });
 
         if (result.success) {
@@ -148,13 +150,14 @@ export default function StoreSetupPage() {
                     <div className="text-5xl mb-4">🏪</div>
                     <h3 className="text-lg font-bold text-gray-700 mb-2">No stores found</h3>
                     <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        Connect your Google Business Profile to import your store locations.
-                        Go to <a href="/admin/settings/google" className="text-blue-600 underline">Google Business Settings</a> to get started.
+                        Complete the <a href="/admin/onboarding" className="text-blue-600 underline">Onboarding Wizard</a> to connect your Google Business Profile and import store locations.
                     </p>
                 </div>
             </div>
         );
     }
+
+    const selectedStore = stores.find(s => s.id === selectedStoreId);
 
     return (
         <div className="p-8 max-w-4xl mx-auto">
@@ -178,6 +181,39 @@ export default function StoreSetupPage() {
                     ))}
                 </div>
             </div>
+
+            {/* Store Identity Card */}
+            {selectedStore && (
+                <div className="bg-white shadow rounded-lg p-6 border border-gray-200 mb-6">
+                    <div className="flex items-center gap-4">
+                        {formData.logo_url ? (
+                            <img src={formData.logo_url} alt={selectedStore.name} className="w-14 h-14 rounded-lg object-cover border border-gray-200" />
+                        ) : (
+                            <div className="w-14 h-14 rounded-lg bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600">
+                                {selectedStore.name.charAt(0)}
+                            </div>
+                        )}
+                        <div className="flex-1">
+                            <h2 className="text-lg font-bold text-gray-800">{selectedStore.name}</h2>
+                            <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                <span className="inline-flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                                    Connected
+                                </span>
+                                {formData.place_id && (
+                                    <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">
+                                        {formData.place_id.substring(0, 20)}...
+                                    </span>
+                                )}
+                                <span className="capitalize">{formData.business_vertical || 'restaurant'}</span>
+                            </div>
+                        </div>
+                        <div className="text-right text-xs text-gray-400">
+                            Store ID: {selectedStore.id}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Store Images */}
             {selectedStoreId && (
@@ -402,6 +438,32 @@ export default function StoreSetupPage() {
                             {saving ? 'Saving...' : 'Save Settings'}
                         </button>
                     </div>
+                </div>
+            )}
+
+            {/* Custom Reply Handbook */}
+            {selectedStoreId && (
+                <div className="bg-white shadow rounded-lg p-8 border border-gray-200 mt-6">
+                    <h2 className="text-xl font-bold mb-2 text-gray-800">Custom Reply Handbook</h2>
+                    <p className="text-sm text-gray-500 mb-4 border-b pb-4">
+                        Paste your company&apos;s apology guidelines, compensation policies, and reply scripts here.
+                        The AI will use these as override rules when generating review replies.
+                    </p>
+                    <textarea
+                        className="w-full border rounded-lg p-4 text-sm font-mono h-64 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
+                        placeholder={`Example format:\n\nHygiene & Cleanliness:\n- Problems: Dirty utensils, dirty washroom\n- Apology: "We're sorry to hear about the hygiene concerns..."\n- Compensation: $5 - $10\n\nPoor Service:\n- Problems: Rude staff, inattentive\n- Apology: "We're truly sorry about the poor service..."\n- Compensation: $20 - $30\n\nPositive Review (4-5 stars):\n- "Thank you for the amazing review! We're thrilled you enjoyed..."`}
+                        value={
+                            typeof formData.custom_handbook_overrides === 'string'
+                                ? formData.custom_handbook_overrides
+                                : formData.custom_handbook_overrides
+                                    ? JSON.stringify(formData.custom_handbook_overrides, null, 2)
+                                    : ''
+                        }
+                        onChange={(e) => handleChange('custom_handbook_overrides', e.target.value)}
+                    />
+                    <p className="text-xs text-gray-400 mt-2">
+                        This text is injected as &quot;Override Rules&quot; in the AI prompt. Include category names, apology scripts, compensation ranges, and positive review templates.
+                    </p>
                 </div>
             )}
 

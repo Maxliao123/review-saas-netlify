@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the most important metric to track in review analytics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While the overall star rating is crucial, the most actionable metric is the trend in sentiment score for specific aspects of your business (e.g., service speed, food quality). A stable 4-star rating can mask a growing problem with a particular menu item or shift. Tracking aspect-based sentiment helps you identify and fix issues before they impact your overall score. Volume of reviews is also a key health indicator and local SEO factor."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there any free sentiment analysis tools for customer reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, but with limitations. Google Business Profile's native insights show you frequent keyword mentions from your reviews, which is a basic form of topic analysis. For a more robust free analysis, you can export your review text and use a free tier of a general-purpose NLP platform like MonkeyLearn or MeaningCloud, though this requires technical setup. Most dedicated, business-friendly sentiment analysis tools are paid services, as they offer automated collection, dashboards, and competitive insights."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate is AI sentiment analysis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Modern AI sentiment analysis is highly accurate for clear positive and negative language, often exceeding 90% accuracy. Its main challenges are with sarcasm, complex negations, and mixed reviews (e.g., 'The food was great but the service was so bad I might not return'). Higher-quality tools use context-aware models and aspect-based analysis to improve accuracy on these nuanced texts. No tool is perfect, so it is wise to spot-check its classifications periodically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can review analytics tools help with Google ranking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Indirectly, yes. Google does not use sentiment as a direct ranking factor. However, analytics tools help you increase your review volume and quality, which are important ranking signals. They also help you maintain a high response rate to reviews, which Google views favorably. By improving your service based on feedback, you generate more positive reviews, creating a virtuous cycle that supports better local SEO performance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between a keyword cloud and topic modeling?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A keyword cloud simply lists the most frequent words, which can be obvious (e.g., 'food,' 'good,' 'place'). Topic modeling is an advanced AI technique that groups reviews into coherent themes based on word patterns and context. For example, it might identify a topic like 'Kids Birthday Party Experience' from reviews mentioning 'birthday,' 'cake,' 'noisy,' 'kids menu,' and 'party room,' providing much deeper insight than individual keywords."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check my review analytics dashboard?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For most active local businesses, a weekly check is recommended to spot emerging trends or urgent complaints. A more thorough monthly analysis is useful for tracking progress against goals, observing competitor movements, and reporting to stakeholders. Setting up email alerts for new 1-star or 2-star reviews ensures you can respond to critical feedback promptly, often within 24 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it worth paying for a tool if I only get a few reviews a month?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on your growth goals. If you are receiving fewer than 5 reviews per month, your primary focus should be on generating more reviews using simple, ethical methods. A tool that combines review generation (like QR code systems) with basic analytics can be valuable even at low volume, as it helps you build the habit and understand early feedback. As volume grows, the analytics become indispensable."
+      }
+    }
+  ]
+}

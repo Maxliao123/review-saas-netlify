@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How many Google reviews do I need to be seen as trustworthy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no magic number, but data shows a tipping point. Shops with less than 50 reviews are often viewed with more skepticism than those with 100+. More important than the raw count is the recency and quality. Aim for a steady stream of 5-10 new, detailed reviews per month. A shop with 75 reviews that gets 8 new ones each month will outperform a shop with 200 stale reviews that haven't been updated in a year. Google's local search algorithm also favors consistent review velocity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I offer a discount or incentive for a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, you should not offer any financial incentive specifically for a Google review. This violates Google's Review Policy and can lead to the removal of reviews or penalization of your Business Profile. You can offer a general discount or entry into a monthly drawing for all customers who complete a service feedback survey sent to their own email. If that survey includes an option to 'Share your feedback publicly on Google,' that is generally acceptable, as the incentive is for the private feedback, not the public review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A customer posted a 1-star review claiming we caused damage we didn't. What do we do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, do not accuse the customer of lying publicly. Respond professionally on Google: 'We are very concerned to see this claim and have reviewed our internal documentation and photos from your service. We do not see any evidence that this damage occurred at our facility. We invite you to contact the owner directly at [phone] to review our documentation together so we can understand your perspective and resolve this.' If the review is clearly false, you can flag it to Google for removal, but do not rely on this. Your professional public response is what most future customers will see and judge you by."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it worth responding to every positive review, or just the negative ones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Respond to every review. Responding to positive reviews shows you appreciate all feedback and engages your happy customers, making them more likely to return. It also adds fresh, positive keywords to your Business Profile. A simple 'Thank you, [Name]! We're so glad we could get your [Vehicle] back on the road safely. It was a pleasure serving you!' is sufficient. This practice, scaled across hundreds of reviews, significantly enhances your profile's activity and appeal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the best way to get more reviews mentioning specific services like brake repair or AC service?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tailor your review request to the service performed. Use a system that allows for service-based tagging. For example, after an AC repair, your SMS could say: 'Hope you're enjoying the cold air again! Let others know about your AC repair experience with a quick review: [Link].' When the customer clicks, they could select tags like 'Fast AC Repair' or 'Fixed Blowing Hot Air.' This guides their review content. Over time, this will naturally build a corpus of reviews rich in keywords potential customers are searching for."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I ask customers to remove or change a negative review if we fix the problem?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can ask, but you must be careful. After you have fully resolved the customer's issue to their satisfaction, you can say: 'We're glad we could make this right for you. If you feel your experience is now better reflected, you are welcome to update your Google review.' Do not pressure them, offer an incentive for removal, or phrase it as a demand. Many satisfied customers will update their review to 4 or 5 stars with a comment about the great resolution, which is often more powerful than a review that was never negative at all."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I handle reviews for a service my shop no longer offers (e.g., tire sales)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Respond to them. This is an opportunity to clarify your current services. For a positive review: 'Thanks for the kind words from a few years back! While we no longer sell tires, we're still here for all your mechanical repair and maintenance needs.' For a negative review: 'We apologize for your past experience with our former tire service. We have since specialized our business on mechanical repairs to provide better focus and quality. We hope you'll consider us for your future repair needs.'"
+      }
+    }
+  ]
+}

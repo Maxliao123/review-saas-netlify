@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is it okay to offer a small discount or incentive for leaving a Google review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You must be very careful. Google's policies strictly prohibit offering incentives in exchange for reviews, especially if you try to bias them to be positive. A safer practice is to run a store-wide promotion where anyone who makes a purchase is entered into a prize draw, without requiring a review. You can also offer a discount on a future purchase to all customers, regardless of whether they leave a review. Never directly tie an incentive to a 5-star review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I deal with a fake or malicious review from a competitor or someone who was never a customer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First, check your records. If you're confident it's fake, flag it for removal via your Google Business Profile using 'Flag as inappropriate.' Google assesses these against its policy guidelines. If it's not removed, post a professional public response: 'We have no record of this transaction. We invite the reviewer to contact us directly to resolve any concerns.' This shows other customers you're attentive without escalating a public argument."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between replying to a review and messaging the reviewer privately on Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Replying is public and appears below the review for everyone to see. Use this for thank-yous or initial apologies. Private messaging is a one-on-one conversation within Google Business Profile. Use this to resolve specific issues, offer a refund, or get details after a public apology. Always move sensitive resolution talks to private messages or a phone call to protect customer privacy."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many reviews do I need to be seen as 'trustworthy'?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There's no single number, but data shows a tipping point. A business with 0-10 reviews can seem new or unengaged. Aiming for 50+ quality reviews establishes a baseline of credibility. More important than sheer count is your overall rating (aim for 4.0+ stars) and recency. A profile with 100 reviews but none in the past year can seem abandoned. Consistency in receiving new reviews is key."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I focus on getting reviews on Google, Yelp, Facebook, or my website?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Google is the absolute priority. It dominates local search and its reviews are integrated into Maps and Search results. Focus most of your effort here. Facebook reviews are secondary but valuable for your social community. Yelp is industry-dependent. You can use tools that let customers choose where to post. Have a system on your own website for product feedback, but know that Google reviews have the biggest direct impact on new customer acquisition."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "A customer left a 1-star review because an item they wanted was out of stock. How should I respond?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Acknowledge the disappointment and turn it into a service opportunity. Respond publicly: 'Hi [Name], we're sorry we didn't have the [item] in stock. We know that's frustrating. We can check other locations or notify you when it's back. Please call the store at [number] and ask for [Manager] so we can help you personally.' This shows you're proactive and care about their specific need, which looks good to other readers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I check my Google reviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You should check them daily. Reviews are a real-time feedback channel. A negative review left unanswered for days signals neglect to potential customers. Set a daily reminder or, better yet, use a review management tool that sends an instant alert when a new review is posted. This allows you to respond within hours, demonstrating excellent customer service."
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the most important first step for GEO for a small business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The absolute first step is ensuring your Name, Address, and Phone number (NAP) are 100% consistent across every online directory and platform. This includes Google Business Profile, Yelp, Facebook, Apple Maps, and industry-specific sites. Inconsistency here confuses AI models and prevents them from confidently aggregating data about your business. Use a free tool like BrightLocal's Citation Checker to audit your listings."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many reviews do I need for AI to start noticing my business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no magic number, but data suggests a strong correlation. Businesses with fewer than 25 reviews are rarely cited in comprehensive AI answers for competitive queries. Aiming for 50+ detailed, authentic reviews is a solid benchmark. More important than raw count is the detail within the reviews. Reviews that mention specific services, staff names, and unique attributes provide the rich data AI uses to build its summaries."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does GEO mean I should stop doing traditional SEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, you should not stop traditional SEO. Think of them as complementary layers. Traditional SEO ensures your website ranks well in the classic 'blue link' results, which are still displayed alongside AI answers. GEO ensures you are also represented within the AI answer itself. A balanced strategy covers both outcomes. Core on-page SEO best practices also contribute to GEO by creating a clear, well-structured website."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best schema markup for a local service business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start with the `LocalBusiness` schema type, specifying more precise types like `HomeAndConstructionBusiness` for a contractor or `AutomotiveBusiness` for a mechanic. Within this, include your NAP, price range, service areas, and opening hours. Then, implement `FAQPage` schema on your key service pages to answer common customer questions. Finally, aggregate `Review` schema if you display reviews on your site. Use Google's Rich Results Test to validate your markup."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I get my business mentioned in local news or blogs for authority?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Create a newsworthy story. This could be hosting a community event, winning an award, launching a unique service, or providing expert commentary on a local issue. Compile a targeted media list of local journalists and bloggers, and send a concise, personalized press pitch. You can also use a service like Help a Reporter Out (HARO) to respond to journalist queries relevant to your expertise."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there specific tools to help with GEO?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, several tools assist with components of GEO. For citation management and audit, use BrightLocal or Whitespark. For monitoring online mentions and sentiment, use Mention or Brand24. For implementing and testing schema markup, use Merkle's Schema Markup Generator and Google's Rich Results Test. For managing the review generation process that feeds AI, a tool like Reputation Monitor streamlines collection and provides analytics."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to see results from GEO efforts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unlike SEO, which can take months for ranking shifts, GEO citations can appear relatively quickly if you fix major data inconsistencies. However, building a robust entity through authority mentions and rich review data is a continuous process. You may see your business cited for very specific, long-tail queries within a few weeks of implementing strong FAQ schema, while becoming the go-to source for broad category queries requires sustained authority building over several months."
+      }
+    }
+  ]
+}

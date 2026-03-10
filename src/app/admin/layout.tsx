@@ -20,10 +20,11 @@ export default async function AdminLayout({
   const pathname = headersList.get('x-next-pathname') || headersList.get('x-invoke-path') || '';
   const isOnboarding = pathname.startsWith('/admin/onboarding');
 
-  // User exists but no tenant — needs onboarding
-  if (!ctx.tenant) {
+  // User exists but no tenant, or tenant hasn't completed onboarding
+  const needsOnboarding = !ctx.tenant || !ctx.tenant.onboarding_completed_at;
+
+  if (needsOnboarding) {
     if (isOnboarding) {
-      // Render onboarding without sidebar
       return (
         <div className="min-h-screen bg-gray-50">
           {children}
@@ -41,7 +42,7 @@ export default async function AdminLayout({
         role={ctx.role!}
         stores={ctx.stores || []}
       />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pt-14 lg:pt-0">
         <ErrorBoundary>
           {children}
         </ErrorBoundary>

@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Will AI Overviews kill my website traffic from Google?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not if you adapt. Traffic patterns will change. You may see less direct 'map pack' clicks but more qualified clicks from users who have already seen your business validated in an AI answer. The traffic that comes may be higher intent. The risk is being absent from the AI Overview entirely, which could significantly reduce visibility for complex searches. Focus on being the source the AI cites."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many reviews do I need to be considered for an AI Overview?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There is no magic number, but quality and specificity matter more than a raw count. A business with 50 detailed reviews mentioning specific services is more likely to be cited than one with 200 vague 'great!' reviews. However, a baseline of recent, positive reviews (e.g., 30+ with a 4.3+ star average) is typically necessary to establish basic trust signals for the AI system."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay to get my business into an AI Overview?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Google has stated that inclusion in AI Overviews is not influenced by advertising or any paid means. It is purely based on algorithmic assessment of relevance, authority, and the quality of information from your GBP, reviews, and website. Investing in a strong organic local SEO foundation is the only way to influence it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I change how I write my website content for AI search?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Write content that directly answers customer questions in a clear, concise manner. Use header tags (H2, H3) for questions, and provide straightforward answers below. Implement schema markup to give search engines explicit data about your services, prices, and FAQs. Think 'answer engine optimization' rather than just 'search engine optimization.'"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the most important thing to fix on my Google Business Profile right now?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Immediately ensure all attributes are accurately selected and fully complete your Services or Products menu. These fields provide the specific, structured data that AI Overviews use to match businesses with detailed query modifiers. Next, audit and respond to all reviews to demonstrate active engagement."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I know if my business is appearing in AI Overviews?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You need to perform manual searches. Use incognito mode and search for the complex, long-tail queries your best customers would use. Look for the 'AI Overview' box at the top of the results. Some advanced SEO platforms are beginning to offer tracking for these SERP features, so inquire with your tool provider."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does responding to negative reviews affect AI Overview visibility?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, it can. Professional, thoughtful responses to negative reviews demonstrate good business practices and customer care, which can positively influence perceived trustworthiness. More importantly, it can help mitigate the impact of negative keywords or sentiments that might otherwise cause the AI to exclude you from positive recommendation summaries."
+      }
+    }
+  ]
+}
