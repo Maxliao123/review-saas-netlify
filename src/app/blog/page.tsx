@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Star,
   ArrowRight,
@@ -112,16 +113,28 @@ export default function BlogListPage() {
                   idx === 0 ? 'md:col-span-2' : ''
                 }`}
               >
-                {/* Colored header bar */}
-                <div className={`h-2 w-full ${
-                  post.category === 'guides'
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                    : post.category === 'strategies'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                    : post.category === 'industry'
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                }`} />
+                {/* Hero Image or Colored header bar */}
+                {post.heroImage ? (
+                  <div className={`relative w-full ${idx === 0 ? 'h-64 md:h-72' : 'h-44'} overflow-hidden`}>
+                    <Image
+                      src={post.heroImage}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes={idx === 0 ? '(max-width: 768px) 100vw, 960px' : '(max-width: 768px) 100vw, 480px'}
+                    />
+                  </div>
+                ) : (
+                  <div className={`h-2 w-full ${
+                    post.category === 'guides'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      : post.category === 'strategies'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                      : post.category === 'industry'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                  }`} />
+                )}
 
                 <div className={`p-6 flex flex-col flex-1 ${idx === 0 ? 'md:p-8' : ''}`}>
                   <div className="flex items-center gap-3 mb-3">

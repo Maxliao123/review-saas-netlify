@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import {
   Star,
@@ -29,6 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
 
+  const ogImage = post.heroImage
+    ? `${BASE_URL}${post.heroImage}`
+    : undefined;
+
   return {
     title: post.title,
     description: post.excerpt,
@@ -41,11 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [post.author],
       tags: post.tags,
       siteName: 'Reputation Monitor',
+      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.excerpt,
+      ...(ogImage && { images: [ogImage] }),
     },
     alternates: {
       canonical: `/blog/${post.slug}`,
@@ -91,6 +98,14 @@ export default async function BlogPostPage({ params }: Props) {
         url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}/favicon.ico`,
       },
     },
+    ...(post.heroImage && {
+      image: {
+        '@type': 'ImageObject',
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}${post.heroImage}`,
+        width: 1200,
+        height: 630,
+      },
+    }),
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}/blog/${post.slug}`,
@@ -203,6 +218,20 @@ export default async function BlogPostPage({ params }: Props) {
               )}
             </div>
           </div>
+
+          {/* Hero Image */}
+          {post.heroImage && (
+            <div className="mb-10 relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
+              <Image
+                src={post.heroImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
+          )}
 
           {/* Table of Contents */}
           <div className="mb-10 rounded-xl bg-gray-50 p-6">

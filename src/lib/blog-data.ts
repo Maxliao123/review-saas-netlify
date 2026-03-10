@@ -21,6 +21,8 @@ export interface BlogPost {
   updatedAt?: string;
   readTime: number;
   tags: string[];
+  /** Hero image path (e.g., /blog/{slug}/hero.webp) */
+  heroImage?: string;
   /** Full article content sections */
   sections: Array<{
     heading: string;
@@ -271,8 +273,14 @@ export const BLOG_POSTS: BlogPost[] = [
 // Import generated articles (30 SEO/GEO articles)
 import { GENERATED_BLOG_POSTS } from './blog-data-generated';
 
+/** Add hero images to generated posts that have them in public/blog/{slug}/hero.webp */
+const GENERATED_WITH_IMAGES = GENERATED_BLOG_POSTS.map((post) => ({
+  ...post,
+  heroImage: `/blog/${post.slug}/hero.webp`,
+}));
+
 /** All blog posts: hand-crafted + generated */
-export const ALL_BLOG_POSTS: BlogPost[] = [...BLOG_POSTS, ...GENERATED_BLOG_POSTS];
+export const ALL_BLOG_POSTS: BlogPost[] = [...BLOG_POSTS, ...GENERATED_WITH_IMAGES];
 
 export function getBlogPost(slug: string): BlogPost | undefined {
   return ALL_BLOG_POSTS.find((p) => p.slug === slug);
