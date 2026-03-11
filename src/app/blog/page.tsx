@@ -28,7 +28,11 @@ export const metadata: Metadata = {
       'Expert guides on Google review management and AI-powered reputation growth.',
   },
   alternates: {
-    canonical: '/blog',
+    canonical: 'https://reputationmonitor.ai/blog',
+    languages: {
+      'en': 'https://reputationmonitor.ai/blog',
+      'zh-TW': 'https://reputationmonitor.ai/blog?lang=zh',
+    },
   },
 };
 

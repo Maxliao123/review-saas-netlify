@@ -8,12 +8,19 @@ import {
   ArrowLeft,
   Clock,
   Tag,
-  Share2,
   BookOpen,
 } from 'lucide-react';
 import { ALL_BLOG_POSTS, getBlogPost } from '@/lib/blog-data';
 import { getArticleGuide } from '@/config/article-guide-map';
 import { getCrossDomainCta } from '@/config/cross-domain-cta';
+import {
+  MarkdownRenderer,
+  FaqSection,
+  InternalLinkCallout,
+} from '@/components/MarkdownRenderer';
+import { ArticleChart } from '@/components/ArticleChart';
+import { CHART_DATA } from '@/lib/chart-data';
+import { selectVerifiedReferences } from '@/config/verified-references';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -55,7 +62,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...(ogImage && { images: [ogImage] }),
     },
     alternates: {
-      canonical: `/blog/${post.slug}`,
+      canonical: `${BASE_URL}/blog/${post.slug}`,
+      languages: {
+        'en': `${BASE_URL}/blog/${post.slug}`,
+        'zh-TW': `${BASE_URL}/blog/${post.slug}?lang=zh`,
+      },
     },
     other: {
       'article:published_time': post.publishedAt,
@@ -69,14 +80,73 @@ export default async function BlogPostPage({ params }: Props) {
   const post = getBlogPost(slug);
   if (!post) notFound();
 
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
+
   // Boss page CTA (DarkSEOKing semantic clustering)
   const guide = getArticleGuide(slug);
   const crossDomainCta = getCrossDomainCta(slug);
 
-  // Related posts (same category, exclude current)
+  // Related posts (same category, exclude current) — 3 articles
   const relatedPosts = ALL_BLOG_POSTS.filter(
     (p) => p.category === post.category && p.slug !== post.slug
-  ).slice(0, 2);
+  ).slice(0, 3);
+
+  // Chart data for this article
+  const chartSpec = CHART_DATA[slug] || null;
+
+  // Internal link posts (different category for cross-cluster linking) — 3 articles
+  const internalLinkPosts = ALL_BLOG_POSTS.filter(
+    (p) => p.category !== post.category && p.slug !== post.slug
+  )
+    .slice(0, 3)
+    .map((p) => ({ slug: p.slug, title: p.title, category: p.category }));
+
+  // Insert internal links mid-article (after section 2)
+  const midArticleIndex = Math.min(2, post.sections.length - 1);
+
+  // FAQ JSON-LD (if FAQ data exists)
+  const faqJsonLd = post.faq && post.faq.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  } : null;
+
+  // Generate verified references for this article (matched by slug keywords)
+  const slugKeyword = slug.replace(/-/g, ' ');
+  const articleRefs = selectVerifiedReferences(slugKeyword, 6);
+
+  // BreadcrumbList JSON-LD
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: BASE_URL,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blog',
+        item: `${BASE_URL}/blog`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: post.title,
+        item: `${BASE_URL}/blog/${post.slug}`,
+      },
+    ],
+  };
 
   // JSON-LD for Article
   const jsonLd = {
@@ -114,11 +184,23 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Structured Data */}
+      {/* Structured Data — Article */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* Structured Data — BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {/* Structured Data — FAQ */}
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
 
       {/* Navbar */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -151,13 +233,13 @@ export default async function BlogPostPage({ params }: Props) {
       </header>
 
       {/* Article */}
-      <article className="py-12">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <article className="pt-12 pb-16">
+        <div className="mx-auto max-w-[680px] px-4 sm:px-6">
           {/* Breadcrumb */}
-          <nav className="mb-8">
+          <nav className="mb-10">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to Blog
@@ -165,8 +247,8 @@ export default async function BlogPostPage({ params }: Props) {
           </nav>
 
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
+          <header className="mb-10">
+            <div className="flex items-center gap-3 mb-5">
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 post.category === 'guides'
                   ? 'bg-blue-50 text-blue-700'
@@ -179,23 +261,23 @@ export default async function BlogPostPage({ params }: Props) {
                 <Tag className="h-3 w-3" />
                 {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
               </span>
-              <span className="flex items-center gap-1 text-xs text-gray-500">
+              <span className="flex items-center gap-1 text-xs text-gray-400">
                 <Clock className="h-3 w-3" />
                 {post.readTime} min read
               </span>
             </div>
 
-            <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl leading-tight">
+            <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl leading-[1.2] tracking-tight">
               {post.title}
             </h1>
 
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="mt-5 text-lg text-gray-500 leading-relaxed">
               {post.excerpt}
             </p>
 
-            <div className="mt-6 flex items-center gap-4 text-sm text-gray-500">
-              <span>By {post.author}</span>
-              <span>•</span>
+            <div className="mt-6 flex items-center gap-3 text-sm text-gray-400">
+              <span>{post.author}</span>
+              <span className="text-gray-300">/</span>
               <time dateTime={post.publishedAt}>
                 {new Date(post.publishedAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -205,46 +287,46 @@ export default async function BlogPostPage({ params }: Props) {
               </time>
               {post.updatedAt && post.updatedAt !== post.publishedAt && (
                 <>
-                  <span>•</span>
+                  <span className="text-gray-300">/</span>
                   <span>
                     Updated{' '}
                     {new Date(post.updatedAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
+                      month: 'short',
                       day: 'numeric',
+                      year: 'numeric',
                     })}
                   </span>
                 </>
               )}
             </div>
-          </div>
+          </header>
 
           {/* Hero Image */}
           {post.heroImage && (
-            <div className="mb-10 relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
+            <div className="mb-12 relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
               <Image
                 src={post.heroImage}
                 alt={post.title}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
+                sizes="(max-width: 768px) 100vw, 680px"
                 priority
               />
             </div>
           )}
 
           {/* Table of Contents */}
-          <div className="mb-10 rounded-xl bg-gray-50 p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
+          <div className="mb-12 rounded-xl bg-gray-50 border border-gray-100 p-6">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <BookOpen className="h-3.5 w-3.5" />
               Table of Contents
             </h2>
-            <ol className="space-y-1.5">
+            <ol className="space-y-2">
               {post.sections.map((section, i) => (
                 <li key={i}>
                   <a
                     href={`#section-${i}`}
-                    className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                   >
                     {i + 1}. {section.heading}
                   </a>
@@ -254,27 +336,81 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
 
           {/* Content Sections */}
-          <div className="prose prose-gray max-w-none">
+          <div className="space-y-0">
             {post.sections.map((section, i) => (
-              <section key={i} id={`section-${i}`} className="mb-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  {section.heading}
-                </h2>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-line text-[15px]">
-                  {section.body}
-                </div>
-              </section>
+              <div key={i}>
+                {/* Section divider (not on first section) */}
+                {i > 0 && (
+                  <hr className="border-t border-gray-200/60 my-14" />
+                )}
+                <section id={`section-${i}`}>
+                  {/* Section number + heading */}
+                  <div className="mb-6">
+                    <span className="text-xs font-semibold text-blue-600/60 uppercase tracking-widest">
+                      Section {i + 1}
+                    </span>
+                    <h2 className="mt-2 text-[22px] sm:text-2xl font-extrabold text-gray-900 leading-snug tracking-tight">
+                      {section.heading}
+                    </h2>
+                  </div>
+                  <MarkdownRenderer content={section.body} />
+                </section>
+
+                {/* SVG chart after first section */}
+                {i === 0 && chartSpec && (
+                  <div className="mt-8 mb-4">
+                    <ArticleChart spec={chartSpec} />
+                  </div>
+                )}
+
+                {/* Internal links callout after section 2 */}
+                {i === midArticleIndex && internalLinkPosts.length > 0 && (
+                  <InternalLinkCallout posts={internalLinkPosts} />
+                )}
+              </div>
             ))}
           </div>
 
+          {/* References — from verified references pool */}
+          {articleRefs.length > 0 && (
+            <section className="mt-14 rounded-xl bg-gray-50 border border-gray-200 p-6">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                References
+              </h3>
+              <ol className="space-y-2 text-xs text-gray-500 leading-relaxed">
+                {articleRefs.map((ref, i) => (
+                  <li key={i} id={`ref-${i + 1}`} className="flex gap-2">
+                    <span className="font-medium text-gray-400 min-w-[1.5rem]">[{i + 1}]</span>
+                    <span>
+                      <a
+                        href={ref.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        {ref.title}
+                      </a>
+                      {' '}&mdash; {ref.publisher}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
+          {/* FAQ */}
+          {post.faq && post.faq.length > 0 && (
+            <FaqSection items={post.faq} />
+          )}
+
           {/* Tags */}
-          <div className="mt-10 pt-6 border-t border-gray-100">
+          <div className="mt-14 pt-6 border-t border-gray-100">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-gray-500">Tags:</span>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider mr-1">Tags</span>
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600"
+                  className="inline-flex items-center rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-xs text-gray-500"
                 >
                   {tag}
                 </span>
@@ -284,7 +420,7 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* CTA Box — Dynamic based on DarkSEOKing semantic clustering */}
           {crossDomainCta === 'signup' ? (
-            <div className="mt-10 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
               <h3 className="text-xl font-bold">
                 Ready to automate your review management?
               </h3>
@@ -299,7 +435,7 @@ export default async function BlogPostPage({ params }: Props) {
               </Link>
             </div>
           ) : crossDomainCta === 'demo' ? (
-            <div className="mt-10 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 p-8 text-white text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 p-8 text-white text-center">
               <h3 className="text-xl font-bold">
                 Managing reviews across multiple locations?
               </h3>
@@ -314,7 +450,7 @@ export default async function BlogPostPage({ params }: Props) {
               </Link>
             </div>
           ) : guide ? (
-            <div className="mt-10 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 ring-1 ring-blue-200 p-8 text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 ring-1 ring-blue-200 p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900">
                 {guide.title}
               </h3>
@@ -329,7 +465,7 @@ export default async function BlogPostPage({ params }: Props) {
               </Link>
             </div>
           ) : (
-            <div className="mt-10 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
               <h3 className="text-xl font-bold">
                 Ready to automate your review management?
               </h3>
@@ -347,27 +483,40 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </article>
 
-      {/* Related Posts */}
+      {/* Related Posts — 3 articles */}
       {relatedPosts.length > 0 && (
-        <section className="py-12 bg-gray-50 border-t border-gray-100">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Related Articles</h2>
-            <div className="grid gap-6 sm:grid-cols-2">
+        <section className="py-14 bg-gray-50 border-t border-gray-100">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-8">Related Articles</h2>
+            <div className="grid gap-6 sm:grid-cols-3">
               {relatedPosts.map((related) => (
                 <Link
                   key={related.slug}
                   href={`/blog/${related.slug}`}
-                  className="group flex flex-col rounded-xl bg-white ring-1 ring-gray-200 p-5 hover:shadow-md hover:ring-blue-200 transition-all"
+                  className="group flex flex-col rounded-xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-md hover:ring-blue-200 transition-all"
                 >
-                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm">
-                    {related.title}
-                  </h3>
-                  <p className="mt-2 text-xs text-gray-500 line-clamp-2 flex-1">
-                    {related.excerpt}
-                  </p>
-                  <span className="mt-3 text-xs font-medium text-blue-600 flex items-center gap-1">
-                    Read more <ArrowRight className="h-3 w-3" />
-                  </span>
+                  {related.heroImage && (
+                    <div className="relative w-full h-36 overflow-hidden">
+                      <Image
+                        src={related.heroImage}
+                        alt={related.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, 320px"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm leading-snug">
+                      {related.title}
+                    </h3>
+                    <p className="mt-2 text-xs text-gray-500 line-clamp-2 flex-1">
+                      {related.excerpt}
+                    </p>
+                    <span className="mt-3 text-xs font-medium text-blue-600 flex items-center gap-1">
+                      Read more <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -377,7 +526,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Footer */}
       <footer className="py-8 bg-gray-900 text-center text-sm text-gray-500">
-        <p>© {new Date().getFullYear()} Reputation Monitor. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Reputation Monitor. All rights reserved.</p>
         <div className="mt-2 flex justify-center gap-4">
           <Link href="/" className="hover:text-gray-300">Home</Link>
           <Link href="/pricing" className="hover:text-gray-300">Pricing</Link>

@@ -50,6 +50,9 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
             <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Pricing
             </a>
+            <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              Blog
+            </Link>
           </nav>
 
           {/* Desktop CTA */}
@@ -96,6 +99,9 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
             <a href="#pricing" className="block px-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
               Pricing
             </a>
+            <Link href="/blog" className="block px-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
+              Blog
+            </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
               <button
                 onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
@@ -676,6 +682,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
               <li><a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '功能' : 'Features'}</a></li>
               <li><a href="#pricing" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '定價' : 'Pricing'}</a></li>
               <li><a href="#how-it-works" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '運作方式' : 'How It Works'}</a></li>
+              <li><Link href="/blog" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '部落格' : 'Blog'}</Link></li>
             </ul>
           </div>
 
