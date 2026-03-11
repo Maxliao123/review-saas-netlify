@@ -20,20 +20,16 @@ marked.setOptions({
 function preprocessMarkdown(md: string): string {
   let result = md;
 
-  // 0. Handle tables on the SAME LINE as preceding text (no newline at all)
-  //    "...some text. | Header1 | Header2 |\n| :--- |" → "...some text.\n\n| Header1 |..."
+  // 0. Ensure blank line BEFORE markdown table blocks.
+  //    Match: a non-empty line ending, then a newline (but NOT double-newline),
+  //    then a line that STARTS with | (table header), followed by a separator line.
+  //    Key: the table header line must START with | to avoid matching mid-row pipes.
   result = result.replace(
-    /([^|\n])\s(\|[^|\n]+\|[^\n]*\|\s*\n\|[\s:|-]+\|)/g,
+    /([^\n])\n((?:^|\n)\|[^\n]+\|\s*\n\|[\s:|-]+\|)/gm,
     '$1\n\n$2'
   );
 
-  // 1. Ensure blank line BEFORE markdown table blocks (has \n but not \n\n)
-  result = result.replace(
-    /([^\n])\n(\|[^\n]+\|\s*\n\|[\s:|-]+\|)/g,
-    '$1\n\n$2'
-  );
-
-  // 2. Ensure blank line AFTER table blocks (last row of pipes → next paragraph)
+  // 1. Ensure blank line AFTER table blocks (last row of pipes → next paragraph)
   result = result.replace(
     /(\|[^\n]+\|)\n([^\n|])/g,
     '$1\n\n$2'
