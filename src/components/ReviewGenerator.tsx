@@ -348,10 +348,15 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
 
                     {generatedReview && (
                         <div className="animate-in slide-in-from-bottom-2 fade-in">
+                            <p className="text-xs text-gray-500 mb-1.5 px-1">
+                                {lang === 'zh'
+                                    ? '✏️ 以下文字根據您的體驗生成，請確認或修改後再發布'
+                                    : '✏️ This draft is based on your experience. Feel free to edit before posting.'}
+                            </p>
                             <textarea
-                                readOnly
                                 value={generatedReview}
-                                className="w-full p-4 border border-blue-200 rounded-2xl text-slate-700 text-base shadow-sm focus:outline-none bg-white mb-4 min-h-[120px]"
+                                onChange={(e) => setGeneratedReview(e.target.value)}
+                                className="w-full p-4 border border-blue-200 rounded-2xl text-slate-700 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white mb-4 min-h-[120px]"
                             />
                             <button
                                 onClick={handleCopyAndOpen}
