@@ -108,6 +108,12 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: 'Sales',
+    items: [
+      { href: '/admin/demo-prep', label: 'Demo Prep', icon: Zap, ownerOnly: true },
+    ],
+  },
+  {
     title: 'Settings',
     items: [
       { href: '/admin/settings/platforms', label: 'Platforms', icon: Globe, ownerOnly: true },
