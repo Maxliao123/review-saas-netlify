@@ -236,8 +236,11 @@ export default function DemoPrepPage() {
   const [storeName, setStoreName] = useState('');
   const [vertical, setVertical] = useState('restaurant');
   const [placeId, setPlaceId] = useState('');
+  const [placeRating, setPlaceRating] = useState<number | null>(null);
+  const [placeReviewCount, setPlaceReviewCount] = useState<number>(0);
   const [reviews, setReviews] = useState<ReviewInput[]>([]);
   const [creating, setCreating] = useState(false);
+  const [generatingReviews, setGeneratingReviews] = useState(false);
   const [progress, setProgress] = useState('');
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
@@ -246,6 +249,32 @@ export default function DemoPrepPage() {
   const [newAuthor, setNewAuthor] = useState('');
   const [newRating, setNewRating] = useState(5);
   const [newContent, setNewContent] = useState('');
+
+  const generateAIReviews = async () => {
+    setGeneratingReviews(true);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/generate-reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeName,
+          vertical,
+          rating: placeRating,
+          reviewCount: placeReviewCount,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate');
+      setReviews(data.reviews || []);
+    } catch (err: any) {
+      setError(err.message);
+      // Fallback to hardcoded samples
+      const samples = SAMPLE_REVIEWS[vertical] || SAMPLE_REVIEWS.restaurant;
+      setReviews([...samples]);
+    }
+    setGeneratingReviews(false);
+  };
 
   const loadSampleReviews = () => {
     const samples = SAMPLE_REVIEWS[vertical] || SAMPLE_REVIEWS.restaurant;
@@ -362,6 +391,8 @@ export default function DemoPrepPage() {
               onSelect={(place) => {
                 setStoreName(place.name);
                 setPlaceId(place.placeId);
+                setPlaceRating(place.rating);
+                setPlaceReviewCount(place.reviewCount);
                 // Auto-detect vertical from Google types
                 const types = place.types || [];
                 if (types.some((t: string) => ['restaurant', 'food', 'cafe', 'bakery', 'bar', 'meal_delivery', 'meal_takeaway'].includes(t))) {
@@ -417,15 +448,18 @@ export default function DemoPrepPage() {
           </div>
 
           <button
-            onClick={() => {
-              if (!storeName.trim()) { setError('Please enter a store name'); return; }
+            onClick={async () => {
+              if (!storeName.trim()) { setError('請輸入店名'); return; }
               setError('');
               setStep('reviews');
-              if (reviews.length === 0) loadSampleReviews();
+              if (reviews.length === 0) {
+                await generateAIReviews();
+              }
             }}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={generatingReviews}
+            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            Next: Import Reviews
+            {generatingReviews ? '正在用 AI 生成模擬評論...' : '下一步：生成模擬評論'}
           </button>
         </div>
       )}
@@ -466,10 +500,11 @@ export default function DemoPrepPage() {
                   Back
                 </button>
                 <button
-                  onClick={loadSampleReviews}
-                  className="px-4 py-2 text-sm text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50"
+                  onClick={generateAIReviews}
+                  disabled={generatingReviews}
+                  className="px-4 py-2 text-sm text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 disabled:opacity-50"
                 >
-                  Load Samples
+                  {generatingReviews ? '生成中...' : '🔄 重新生成'}
                 </button>
               </div>
             </div>
