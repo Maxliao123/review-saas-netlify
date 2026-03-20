@@ -39,12 +39,16 @@ export async function POST(request: NextRequest) {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
-    await supabaseAdmin.from('line_verifications').insert({
+    const { error: insertErr } = await supabaseAdmin.from('line_verifications').insert({
       store_id: storeId,
       tenant_id: ctx.tenant.id,
       code,
       expires_at: expiresAt,
     });
+    console.log('[LineBind] Insert code:', code, 'storeId:', storeId, 'tenantId:', ctx.tenant.id, 'error:', insertErr);
+    if (insertErr) {
+      return NextResponse.json({ error: `Failed to create code: ${insertErr.message}` }, { status: 500 });
+    }
 
     // LINE Bot ID for the QR code / friend add URL
     const botId = process.env.LINE_CHANNEL_ID || '';
