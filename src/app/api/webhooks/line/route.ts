@@ -154,6 +154,96 @@ export async function POST(request: NextRequest) {
           break;
         }
 
+        case 'postback': {
+          // Handle button taps from Flex Message cards
+          const postbackData = event.postback?.data || '';
+          const params = new URLSearchParams(postbackData);
+          const action = params.get('action');
+          const reviewId = params.get('reviewId');
+
+          if (action === 'approve' && reviewId) {
+            // Look up the review
+            const { data: review } = await supabaseAdmin
+              .from('reviews_raw')
+              .select('id, reply_draft, reply_status, author_name, google_review_id, full_json, stores!inner(tenant_id, name)')
+              .eq('id', reviewId)
+              .single();
+
+            if (!review) {
+              await sendReply(event.replyToken, [{
+                type: 'text',
+                text: '❌ 找不到此評論。',
+              }]);
+              break;
+            }
+
+            if (review.reply_status === 'published' || review.reply_status === 'approved') {
+              await sendReply(event.replyToken, [{
+                type: 'text',
+                text: '✅ 此評論回覆已經處理過了。',
+              }]);
+              break;
+            }
+
+            if (!review.reply_draft) {
+              await sendReply(event.replyToken, [{
+                type: 'text',
+                text: '❌ 此評論尚無 AI 回覆草稿。',
+              }]);
+              break;
+            }
+
+            // Extract draft text
+            let replyBody = review.reply_draft;
+            try {
+              const parsed = JSON.parse(replyBody);
+              if (parsed.draft) replyBody = parsed.draft;
+            } catch { /* use as-is */ }
+
+            // Try publishing to Google
+            let publishedToGoogle = false;
+            const resourceName = review.full_json?.name;
+            const store = review.stores as any;
+
+            if (resourceName && store?.tenant_id) {
+              try {
+                const { getGoogleClientForTenant } = await import('@/lib/google-business');
+                const client = await getGoogleClientForTenant(store.tenant_id);
+                if (client) {
+                  await client.oauth2Client.request({
+                    method: 'PUT',
+                    url: `https://mybusiness.googleapis.com/v4/${resourceName}/reply`,
+                    data: { comment: replyBody },
+                  });
+                  publishedToGoogle = true;
+                }
+              } catch (e: any) {
+                console.error('[LINE Postback] Google publish failed:', e.message);
+              }
+            }
+
+            // Update review status
+            const newStatus = publishedToGoogle ? 'published' : 'approved';
+            await supabaseAdmin
+              .from('reviews_raw')
+              .update({
+                reply_status: newStatus,
+                ...(publishedToGoogle ? { published_at: new Date().toISOString() } : {}),
+              })
+              .eq('id', review.id);
+
+            const statusMsg = publishedToGoogle
+              ? `✅ 回覆已發布到 Google！\n\n📝 "${replyBody.substring(0, 100)}${replyBody.length > 100 ? '...' : ''}"`
+              : `✅ 回覆已批准！\n\n將在下次同步時發布到 Google。\n\n📝 "${replyBody.substring(0, 100)}${replyBody.length > 100 ? '...' : ''}"`;
+
+            await sendReply(event.replyToken, [{
+              type: 'text',
+              text: statusMsg,
+            }]);
+          }
+          break;
+        }
+
         case 'unfollow': {
           // User blocked bot — deactivate their notification channel
           const { data: channels } = await supabaseAdmin

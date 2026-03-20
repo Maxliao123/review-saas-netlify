@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail } from './channels/email';
-import { sendLine } from './channels/line';
+import { sendLine, buildReviewCarousel } from './channels/line';
 import { sendSlack } from './channels/slack';
 import { sendWhatsApp } from './channels/whatsapp';
 import { buildEmailHtml, buildPlainText, buildSlackBlocks } from './templates';
@@ -109,8 +109,17 @@ export async function notifyNewReview(storeId: number, review: ReviewNotificatio
         case 'line': {
           const config = channel.config as { channel_access_token?: string; target_user_id?: string };
           if (!config.channel_access_token || !config.target_user_id) return;
-          const text = buildPlainText(reviewData, 'zh');
-          result = await sendLine(config as any, { text });
+          const flexMessage = buildReviewCarousel([{
+            authorName: reviewData.authorName,
+            rating: reviewData.rating,
+            content: reviewData.content,
+            aiDraft: reviewData.aiDraft,
+            approveUrl: reviewData.approveUrl,
+            editUrl: reviewData.editUrl,
+            reviewId: review.reviewId,
+            storeName: reviewData.storeName,
+          }]);
+          result = await sendLine(config as any, { flexMessage });
           break;
         }
 
@@ -213,8 +222,17 @@ export async function notifyUrgentReview(storeId: number, review: UrgentReviewNo
         case 'line': {
           const config = channel.config as { channel_access_token?: string; target_user_id?: string };
           if (!config.channel_access_token || !config.target_user_id) return;
-          const text = buildPlainText(reviewData, 'zh');
-          result = await sendLine(config as any, { text });
+          const flexMessage = buildReviewCarousel([{
+            authorName: reviewData.authorName,
+            rating: reviewData.rating,
+            content: reviewData.content,
+            aiDraft: reviewData.aiDraft,
+            approveUrl: reviewData.approveUrl,
+            editUrl: reviewData.editUrl,
+            reviewId: review.reviewId,
+            storeName: reviewData.storeName,
+          }]);
+          result = await sendLine(config as any, { flexMessage });
           break;
         }
 
