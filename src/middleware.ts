@@ -20,6 +20,8 @@ const PUBLIC_API_PREFIXES = [
   '/api/scan',
   '/api/auth/google-business', // OAuth flow endpoints
   '/api/billing/webhook', // Stripe webhook (verified by signature)
+  '/api/webhooks/', // LINE and other webhooks (verified by signature)
+  '/api/review/action', // Token-based review action page
 ];
 
 function isPublicRoute(pathname: string): boolean {
