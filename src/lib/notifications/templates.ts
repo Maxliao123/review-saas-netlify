@@ -8,6 +8,8 @@ interface ReviewData {
   aiDraft?: string;
   /** One-click approve URL (token-based, no login required) */
   approveUrl?: string;
+  /** Edit & publish URL (token-based, no login required) */
+  editUrl?: string;
 }
 
 const STAR_EMOJI = '⭐';
@@ -35,6 +37,7 @@ export function buildPlainText(data: ReviewData, lang = 'en'): string {
       `內容: ${data.content || '(無文字)'}`,
       data.aiDraft ? `\n🤖 AI建議回覆:\n${data.aiDraft}` : '',
       data.approveUrl ? `\n✅ 一鍵批准: ${data.approveUrl}` : '',
+      data.editUrl ? `✏️ 編輯後發布: ${data.editUrl}` : '',
       data.dashboardUrl ? `管理後台: ${data.dashboardUrl}` : '',
     ].filter(Boolean).join('\n');
   }
@@ -47,6 +50,7 @@ export function buildPlainText(data: ReviewData, lang = 'en'): string {
     `Review: ${data.content || '(No text)'}`,
     data.aiDraft ? `\n🤖 AI Suggested Reply:\n${data.aiDraft}` : '',
     data.approveUrl ? `\n✅ Approve & Publish: ${data.approveUrl}` : '',
+    data.editUrl ? `✏️ Edit & Publish: ${data.editUrl}` : '',
     data.dashboardUrl ? `Dashboard: ${data.dashboardUrl}` : '',
   ].filter(Boolean).join('\n');
 }
@@ -114,7 +118,11 @@ export function buildEmailHtml(data: ReviewData, lang = 'en'): { subject: string
         ${aiDraftSection}
         <div style="margin-top: 16px;">
           ${approveButton}
-          ${data.dashboardUrl ? `
+          ${data.editUrl ? `
+          <a href="${data.editUrl}" style="display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500;">
+            ${lang === 'zh' ? '✏️ 編輯後發布' : '✏️ Edit & Publish'}
+          </a>
+          ` : data.dashboardUrl ? `
           <a href="${data.dashboardUrl}" style="display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500;">
             ${lang === 'zh' ? '編輯回覆' : 'Edit Reply'} →
           </a>
@@ -186,12 +194,18 @@ export function buildSlackBlocks(data: ReviewData): { text: string; blocks: any[
       style: 'primary',
     });
   }
+  if (data.editUrl) {
+    buttons.push({
+      type: 'button',
+      text: { type: 'plain_text', text: '✏️ Edit & Publish' },
+      url: data.editUrl,
+    });
+  }
   if (data.dashboardUrl) {
     buttons.push({
       type: 'button',
-      text: { type: 'plain_text', text: isUrgent ? '✏️ Edit Reply' : '📋 View Dashboard' },
+      text: { type: 'plain_text', text: '📋 View Dashboard' },
       url: data.dashboardUrl,
-      style: isUrgent && !data.approveUrl ? 'danger' : undefined,
     });
   }
   if (buttons.length > 0) {

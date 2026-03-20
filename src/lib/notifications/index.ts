@@ -10,6 +10,10 @@ interface ReviewNotification {
   author_name: string;
   rating: number;
   content: string;
+  /** Optional: review ID to generate action links */
+  reviewId?: string;
+  /** Optional: AI draft to include in notification */
+  aiDraft?: string;
 }
 
 interface UrgentReviewNotification extends ReviewNotification {
@@ -61,7 +65,21 @@ export async function notifyNewReview(storeId: number, review: ReviewNotificatio
 
   const isNegative = review.rating <= 3;
   const eventType = isNegative ? 'negative_review' : 'new_review';
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_DOMAIN || 'http://localhost:3000'}/admin/reviews`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_DOMAIN || 'http://localhost:3000';
+  const dashboardUrl = `${baseUrl}/admin/reviews`;
+
+  // Generate action links if review ID available
+  let approveUrl: string | undefined;
+  let editUrl: string | undefined;
+  if (review.reviewId) {
+    try {
+      const token = await generateApproveToken(review.reviewId, storeId);
+      approveUrl = `${baseUrl}/api/reviews/approve?token=${token}`;
+      editUrl = `${baseUrl}/review/action?token=${token}`;
+    } catch {
+      // Continue without action URLs
+    }
+  }
 
   const reviewData = {
     storeName: store.name,
@@ -69,6 +87,9 @@ export async function notifyNewReview(storeId: number, review: ReviewNotificatio
     rating: review.rating,
     content: review.content,
     dashboardUrl,
+    aiDraft: review.aiDraft,
+    approveUrl,
+    editUrl,
   };
 
   // Dispatch to each active channel
@@ -156,12 +177,13 @@ export async function notifyUrgentReview(storeId: number, review: UrgentReviewNo
   const dashboardUrl = `${baseUrl}/admin/reviews`;
 
   let approveUrl: string | undefined;
+  let editUrl: string | undefined;
   try {
     const token = await generateApproveToken(review.reviewId, storeId);
     approveUrl = `${baseUrl}/api/reviews/approve?token=${token}`;
+    editUrl = `${baseUrl}/review/action?token=${token}`;
   } catch (err) {
     console.error('Failed to generate approve token:', err);
-    // Continue without approve URL — dashboard link still works
   }
 
   const reviewData = {
@@ -172,6 +194,7 @@ export async function notifyUrgentReview(storeId: number, review: UrgentReviewNo
     dashboardUrl,
     aiDraft: review.aiDraft,
     approveUrl,
+    editUrl,
   };
 
   const results = await Promise.allSettled(
