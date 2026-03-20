@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { getStores, updateStoreSettings, uploadStoreImage, removeStoreImage, getTenantPlan } from '../actions';
+import { getStores, updateStoreSettings, uploadStoreImage, removeStoreImage, getTenantPlan, createStoreManual } from '../actions';
 import TagEditor from '../TagEditor';
 import { hasFeature } from '@/lib/plan-limits';
 import { getVerticalOptions } from '@/lib/verticals';
@@ -149,9 +149,42 @@ export default function StoreSetupPage() {
                 <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
                     <div className="text-5xl mb-4">🏪</div>
                     <h3 className="text-lg font-bold text-gray-700 mb-2">No stores found</h3>
-                    <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        Complete the <a href="/admin/onboarding" className="text-blue-600 underline">Onboarding Wizard</a> to connect your Google Business Profile and import store locations.
+                    <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">
+                        Connect your Google Business Profile via the <a href="/admin/onboarding" className="text-blue-600 underline">Onboarding Wizard</a>, or create a store manually below.
                     </p>
+                    <div className="max-w-sm mx-auto space-y-3">
+                        <input
+                            type="text"
+                            placeholder="Store name (e.g. My Restaurant)"
+                            className="w-full border rounded-lg px-4 py-2 text-sm"
+                            id="new-store-name"
+                        />
+                        <select
+                            className="w-full border rounded-lg px-4 py-2 text-sm"
+                            id="new-store-vertical"
+                        >
+                            {VERTICAL_OPTIONS.map(v => (
+                                <option key={v.id} value={v.id}>{v.icon} {v.labelZh}</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={async () => {
+                                const nameInput = document.getElementById('new-store-name') as HTMLInputElement;
+                                const verticalSelect = document.getElementById('new-store-vertical') as HTMLSelectElement;
+                                const name = nameInput?.value?.trim();
+                                if (!name) { alert('Please enter a store name'); return; }
+                                try {
+                                    await createStoreManual(name, '', verticalSelect?.value || 'restaurant');
+                                    loadStores();
+                                } catch (err: any) {
+                                    alert('Failed to create store: ' + err.message);
+                                }
+                            }}
+                            className="w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Create Store
+                        </button>
+                    </div>
                 </div>
             </div>
         );

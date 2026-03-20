@@ -23,6 +23,28 @@ export async function getStores() {
   return data;
 }
 
+// ── Create Store (Manual) ────────────────────────────────────────────
+
+export async function createStoreManual(name: string, slug: string, vertical: string = 'restaurant') {
+  const ctx = await getUserTenantContext();
+  if (!ctx?.tenant) throw new Error('Not authenticated');
+
+  const { data, error } = await supabaseAdmin
+    .from('stores')
+    .insert({
+      tenant_id: ctx.tenant.id,
+      name,
+      slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      business_vertical: vertical,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath('/admin/stores/setup');
+  return data;
+}
+
 // ── Tag Management ──────────────────────────────────────────────────
 
 export interface TagRow {

@@ -194,14 +194,28 @@ export default function TemplatesManager() {
   const addStarterTemplates = async () => {
     setSaving(true);
     try {
+      let added = 0;
       for (const starter of STARTER_TEMPLATES) {
-        await fetch('/api/admin/templates', {
+        const res = await fetch('/api/admin/templates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(starter),
         });
+        if (res.status === 403) {
+          alert('Reply Templates require Pro plan or above. Please upgrade.');
+          break;
+        }
+        if (res.status === 429) {
+          alert('Template limit reached for your plan.');
+          break;
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Failed to add template (${res.status})`);
+        }
+        added++;
       }
-      fetchTemplates();
+      if (added > 0) fetchTemplates();
     } catch (err: any) {
       alert(err.message);
     } finally {
