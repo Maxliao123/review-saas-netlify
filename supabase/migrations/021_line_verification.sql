@@ -1,7 +1,7 @@
 -- LINE notification binding verification codes
 CREATE TABLE IF NOT EXISTS public.line_verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
+  store_id BIGINT NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
   tenant_id UUID NOT NULL,
   code TEXT NOT NULL,
   line_user_id TEXT,

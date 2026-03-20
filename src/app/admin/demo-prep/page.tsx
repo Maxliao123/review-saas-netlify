@@ -267,15 +267,46 @@ export default function DemoPrepPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Google Place ID (optional)</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-4 py-2.5 font-mono text-sm"
-              placeholder="ChIJ... (from Google Maps URL)"
-              value={placeId}
-              onChange={(e) => setPlaceId(e.target.value)}
-            />
-            <p className="text-xs text-gray-400 mt-1">If provided, the customer QR page will link directly to their Google review page.</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps 連結（選填）</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 border rounded-lg px-4 py-2.5 text-sm"
+                placeholder="貼上 Google Maps 網址，例如 https://www.google.com/maps/place/..."
+                value={placeId}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  // Extract CID from Google Maps URL: !1s0x...:0x...
+                  const cidMatch = val.match(/!1s(0x[0-9a-f]+:0x[0-9a-f]+)/i);
+                  // Extract Place ID (ChIJ format)
+                  const chIJMatch = val.match(/(ChIJ[A-Za-z0-9_-]+)/);
+                  // Extract from place_id parameter
+                  const paramMatch = val.match(/place_id[=:]([A-Za-z0-9_-]+)/);
+                  if (paramMatch) setPlaceId(paramMatch[1]);
+                  else if (chIJMatch) setPlaceId(chIJMatch[1]);
+                  else if (cidMatch) setPlaceId(cidMatch[1]);
+                  else setPlaceId(val);
+                }}
+              />
+              {storeName && (
+                <a
+                  href={`https://www.google.com/maps/search/${encodeURIComponent(storeName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2.5 bg-blue-50 text-blue-600 text-sm font-medium border border-blue-200 rounded-lg hover:bg-blue-100 whitespace-nowrap flex items-center gap-1"
+                >
+                  🔍 用店名搜尋
+                </a>
+              )}
+            </div>
+            {placeId && placeId !== '' && !placeId.startsWith('http') && (
+              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                <span>✓</span> 已擷取 ID：<code className="font-mono bg-white px-1 rounded">{placeId}</code>
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              步驟：輸入店名 → 點「用店名搜尋」→ 在 Google Maps 找到店家 → 複製網址貼回這裡
+            </p>
           </div>
 
           <button
