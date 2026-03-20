@@ -22,11 +22,18 @@ const PUBLIC_API_PREFIXES = [
   '/api/billing/webhook', // Stripe webhook (verified by signature)
   '/api/webhooks/', // LINE and other webhooks (verified by signature)
   '/api/review/action', // Token-based review action page
+  '/api/reviews/approve', // One-click approve from notification links
+];
+
+// Pages that don't require auth (token-secured)
+const PUBLIC_PAGE_PREFIXES = [
+  '/review/action', // Edit & publish page from notification links
 ];
 
 function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname)) return true;
   if (PUBLIC_API_PREFIXES.some(prefix => pathname.startsWith(prefix))) return true;
+  if (PUBLIC_PAGE_PREFIXES.some(prefix => pathname.startsWith(prefix))) return true;
   // Static assets and Next.js internals
   if (pathname.startsWith('/_next/') || pathname.startsWith('/favicon') || pathname.includes('.')) return true;
   return false;

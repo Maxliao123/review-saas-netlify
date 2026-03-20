@@ -38,15 +38,15 @@ export async function GET(request: Request) {
 
     // 3. Check if already used
     if (tokenRecord.used_at) {
-      return htmlResponse('info', 'Already Approved', 'This review has already been approved and published.');
+      return htmlResponse('info', 'Already Approved', 'This review has already been approved and published. You can close this page.');
     }
 
     const review = tokenRecord.reviews_raw;
     const store = review.stores;
 
     // 4. Check if review is still in approvable state
-    if (review.reply_status === 'published') {
-      return htmlResponse('info', 'Already Published', 'This reply has already been published.');
+    if (review.reply_status === 'published' || review.reply_status === 'approved') {
+      return htmlResponse('info', 'Already Processed', 'This reply has already been processed.');
     }
 
     if (!review.reply_draft) {
