@@ -64,14 +64,22 @@ export async function POST(request: NextRequest) {
 
           // Check if it's a verification code (6 digits)
           if (/^\d{6}$/.test(text)) {
+            // Debug: check all records for this code
+            const { data: allCodes, error: debugErr } = await supabaseAdmin
+              .from('line_verifications')
+              .select('*')
+              .eq('code', text);
+            console.log('[LINE Webhook] Code lookup:', text, 'found:', JSON.stringify(allCodes), 'error:', debugErr, 'now:', new Date().toISOString());
+
             // Look up pending verification
-            const { data: pending } = await supabaseAdmin
+            const { data: pending, error: lookupErr } = await supabaseAdmin
               .from('line_verifications')
               .select('*')
               .eq('code', text)
               .eq('status', 'pending')
               .gte('expires_at', new Date().toISOString())
               .maybeSingle();
+            console.log('[LINE Webhook] Filtered result:', JSON.stringify(pending), 'error:', lookupErr);
 
             if (pending) {
               // Mark as verified and save LINE user ID
