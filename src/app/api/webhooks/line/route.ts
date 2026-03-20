@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import crypto from 'crypto';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 const CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || '';
 const CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
+
+// Rate limit: 30 requests per minute per IP
+const WEBHOOK_RATE_LIMIT = { limit: 30, windowSeconds: 60 };
 
 /**
  * LINE Messaging API Webhook
@@ -18,6 +22,13 @@ const CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIP(request);
+    const rateCheck = checkRateLimit(`line-webhook:${ip}`, WEBHOOK_RATE_LIMIT);
+    if (!rateCheck.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     // Verify LINE signature
     const body = await request.text();
     const signature = request.headers.get('x-line-signature');

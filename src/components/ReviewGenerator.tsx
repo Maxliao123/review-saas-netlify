@@ -350,8 +350,8 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                         <div className="animate-in slide-in-from-bottom-2 fade-in">
                             <p className="text-xs text-gray-500 mb-1.5 px-1">
                                 {lang === 'zh'
-                                    ? '✏️ 以下文字根據您的體驗生成，請確認或修改後再發布'
-                                    : '✏️ This draft is based on your experience. Feel free to edit before posting.'}
+                                    ? '✏️ 以下文字根據您選擇的體驗標籤生成，僅供參考。請確認內容符合您的真實感受，並自由修改後再發布。'
+                                    : '✏️ This draft was generated based on the tags you selected. Please review, edit as needed, and ensure it reflects your genuine experience before posting.'}
                             </p>
                             <textarea
                                 value={generatedReview}
