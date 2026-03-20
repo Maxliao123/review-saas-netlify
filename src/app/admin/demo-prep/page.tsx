@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getVerticalOptions } from '@/lib/verticals';
 
 const VERTICAL_OPTIONS = getVerticalOptions();
@@ -41,6 +41,126 @@ const SAMPLE_REVIEWS: Record<string, ReviewInput[]> = {
     { author: 'Tom K.', rating: 3, content: 'Clinic is clean and modern. Treatment was effective but felt a bit rushed during consultation.', date: daysAgo(24) },
   ],
 };
+
+interface PlaceResult {
+  placeId: string;
+  name: string;
+  address: string;
+  rating: number | null;
+  reviewCount: number;
+  mapsUrl: string;
+  types: string[];
+}
+
+function PlaceSearchInput({
+  onSelect,
+  initialValue,
+}: {
+  onSelect: (place: PlaceResult) => void;
+  initialValue?: string;
+}) {
+  const [query, setQuery] = useState(initialValue || '');
+  const [results, setResults] = useState<PlaceResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selected, setSelected] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const search = useCallback(async (q: string) => {
+    if (q.length < 2) { setResults([]); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/places-search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      setResults(data.results || []);
+      setShowDropdown(true);
+    } catch {
+      setResults([]);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (selected) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => search(query), 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, search, selected]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <input
+          type="text"
+          className="w-full border rounded-lg px-4 py-2.5 pr-10"
+          placeholder="輸入店名搜尋，例如「有香拉麵」「晶華酒店」..."
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setSelected(false);
+          }}
+          onFocus={() => results.length > 0 && setShowDropdown(true)}
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+      </div>
+
+      {showDropdown && results.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-y-auto">
+          {results.map((place) => (
+            <button
+              key={place.placeId}
+              onClick={() => {
+                setQuery(place.name);
+                setSelected(true);
+                setShowDropdown(false);
+                onSelect(place);
+              }}
+              className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-medium text-gray-900 text-sm">{place.name}</div>
+                  <div className="text-xs text-gray-500 mt-0.5 truncate">{place.address}</div>
+                </div>
+                {place.rating && (
+                  <div className="shrink-0 text-right">
+                    <div className="flex items-center gap-1 text-sm">
+                      <span className="text-yellow-400">★</span>
+                      <span className="font-medium text-gray-700">{place.rating}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-400">{place.reviewCount} 則評論</div>
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showDropdown && !loading && query.length >= 2 && results.length === 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-sm text-gray-500">
+          找不到相關店家，請嘗試其他關鍵字
+        </div>
+      )}
+    </div>
+  );
+}
 
 function daysAgo(n: number): string {
   const d = new Date();
@@ -236,18 +356,48 @@ export default function DemoPrepPage() {
           <p className="text-sm text-gray-500">Enter your prospect&apos;s business details. This will personalize the entire demo.</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store Name *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">搜尋 Google 上的店家 *</label>
+            <PlaceSearchInput
+              initialValue={storeName}
+              onSelect={(place) => {
+                setStoreName(place.name);
+                setPlaceId(place.placeId);
+                // Auto-detect vertical from Google types
+                const types = place.types || [];
+                if (types.some((t: string) => ['restaurant', 'food', 'cafe', 'bakery', 'bar', 'meal_delivery', 'meal_takeaway'].includes(t))) {
+                  setVertical('restaurant');
+                } else if (types.some((t: string) => ['lodging', 'hotel'].includes(t))) {
+                  setVertical('hotel');
+                } else if (types.some((t: string) => ['doctor', 'dentist', 'hospital', 'health', 'physiotherapist', 'veterinary_care'].includes(t))) {
+                  setVertical('clinic');
+                }
+              }}
+            />
+            {placeId && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                <span>✅</span>
+                <span>已選擇：<strong>{storeName}</strong></span>
+                <code className="ml-auto font-mono text-[10px] text-green-600 bg-white px-1.5 py-0.5 rounded">{placeId}</code>
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              輸入店名後從下拉選單選擇對應的店家，系統會自動帶入 Google Place ID
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">或手動輸入店名</label>
             <input
               type="text"
-              className="w-full border rounded-lg px-4 py-2.5"
-              placeholder="e.g. Wang's Beef Noodle, Sunrise Hotel"
+              className="w-full border rounded-lg px-4 py-2.5 text-sm"
+              placeholder="如果 Google 搜尋不到，可以直接輸入店名"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">業態類型</label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {VERTICAL_OPTIONS.map((v) => (
                 <button
@@ -264,49 +414,6 @@ export default function DemoPrepPage() {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps 連結（選填）</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="flex-1 border rounded-lg px-4 py-2.5 text-sm"
-                placeholder="貼上 Google Maps 網址，例如 https://www.google.com/maps/place/..."
-                value={placeId}
-                onChange={(e) => {
-                  const val = e.target.value.trim();
-                  // Extract CID from Google Maps URL: !1s0x...:0x...
-                  const cidMatch = val.match(/!1s(0x[0-9a-f]+:0x[0-9a-f]+)/i);
-                  // Extract Place ID (ChIJ format)
-                  const chIJMatch = val.match(/(ChIJ[A-Za-z0-9_-]+)/);
-                  // Extract from place_id parameter
-                  const paramMatch = val.match(/place_id[=:]([A-Za-z0-9_-]+)/);
-                  if (paramMatch) setPlaceId(paramMatch[1]);
-                  else if (chIJMatch) setPlaceId(chIJMatch[1]);
-                  else if (cidMatch) setPlaceId(cidMatch[1]);
-                  else setPlaceId(val);
-                }}
-              />
-              {storeName && (
-                <a
-                  href={`https://www.google.com/maps/search/${encodeURIComponent(storeName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-2.5 bg-blue-50 text-blue-600 text-sm font-medium border border-blue-200 rounded-lg hover:bg-blue-100 whitespace-nowrap flex items-center gap-1"
-                >
-                  🔍 用店名搜尋
-                </a>
-              )}
-            </div>
-            {placeId && placeId !== '' && !placeId.startsWith('http') && (
-              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-                <span>✓</span> 已擷取 ID：<code className="font-mono bg-white px-1 rounded">{placeId}</code>
-              </div>
-            )}
-            <p className="text-xs text-gray-400 mt-1">
-              步驟：輸入店名 → 點「用店名搜尋」→ 在 Google Maps 找到店家 → 複製網址貼回這裡
-            </p>
           </div>
 
           <button
