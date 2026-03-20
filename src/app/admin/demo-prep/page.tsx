@@ -48,6 +48,69 @@ function daysAgo(n: number): string {
   return d.toISOString();
 }
 
+function DemoNotifyButton({ storeId }: { storeId: number }) {
+  const [sending, setSending] = useState(false);
+  const [notifyResult, setNotifyResult] = useState<{ success?: boolean; message?: string; error?: string; channelsNeeded?: boolean } | null>(null);
+
+  async function triggerNotification() {
+    setSending(true);
+    setNotifyResult(null);
+    try {
+      const res = await fetch('/api/admin/demo-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storeId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setNotifyResult({ error: data.error, channelsNeeded: data.channelsNeeded });
+      } else {
+        setNotifyResult({ success: true, message: data.message });
+      }
+    } catch (err: any) {
+      setNotifyResult({ error: err.message });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-200 mb-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-bold text-orange-800 text-sm flex items-center gap-1.5">
+            &#128276; Demo Notification
+          </h3>
+          <p className="text-xs text-orange-600 mt-0.5">
+            Send a test notification to your LINE/Email/Slack right now
+          </p>
+        </div>
+        <button
+          onClick={triggerNotification}
+          disabled={sending}
+          className="px-4 py-2 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors shadow-sm"
+        >
+          {sending ? 'Sending...' : 'Trigger Now'}
+        </button>
+      </div>
+      {notifyResult && (
+        <div className={`mt-2 text-xs p-2 rounded ${
+          notifyResult.success ? 'bg-green-100 text-green-700' :
+          notifyResult.channelsNeeded ? 'bg-amber-100 text-amber-700' :
+          'bg-red-100 text-red-700'
+        }`}>
+          {notifyResult.success ? notifyResult.message : notifyResult.error}
+          {notifyResult.channelsNeeded && (
+            <a href="/admin/settings/notifications" className="underline ml-1 font-medium">
+              Go to Settings
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DemoPrepPage() {
   const [step, setStep] = useState<'input' | 'reviews' | 'creating' | 'done'>('input');
   const [storeName, setStoreName] = useState('');
@@ -414,13 +477,17 @@ export default function DemoPrepPage() {
             </a>
           </div>
 
+          {/* Demo Notification Trigger */}
+          <DemoNotifyButton storeId={result.store.id} />
+
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
             <h3 className="font-bold text-blue-800 text-sm mb-2">Demo Script Tips</h3>
             <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
               <li>Open <strong>Dashboard</strong> first — &quot;This is your store&apos;s current review situation&quot;</li>
               <li>Go to <strong>Reviews</strong> — show a negative review with AI draft reply, approve it live</li>
+              <li><strong>Trigger Notification</strong> above — show LINE/Email notification arriving on your phone</li>
+              <li>Open notification link on phone — edit AI reply and publish in 30 seconds</li>
               <li>Open <strong>Customer QR Page</strong> on your phone — walk through the review generation flow</li>
-              <li>Back to Dashboard — &quot;Imagine 10 customers doing this every day&quot;</li>
               <li>Close: &quot;Setup takes 2 minutes. Free to start, upgrade when you&apos;re ready.&quot;</li>
             </ol>
           </div>
