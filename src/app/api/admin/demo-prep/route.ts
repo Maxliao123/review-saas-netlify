@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { storeName, vertical, placeId, reviews, logoUrl } = body;
+    const { storeName, vertical, placeId, reviews } = body;
 
     if (!storeName?.trim()) {
       return NextResponse.json({ error: 'Store name is required' }, { status: 400 });
@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
           slug,
           business_vertical: vertical || 'restaurant',
           place_id: placeId || null,
-          logo_url: logoUrl || null,
         })
         .select()
         .single();
