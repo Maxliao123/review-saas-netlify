@@ -118,7 +118,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Also create some scan_events for funnel data
+    // 3. Copy notification channels from existing stores to demo store
+    const otherStoreIds = ctx.stores.map(s => s.id).filter(id => id !== storeId);
+    if (otherStoreIds.length > 0) {
+      const { data: existingChannels } = await supabaseAdmin
+        .from('notification_channels')
+        .select('channel_type, config, is_active')
+        .in('store_id', otherStoreIds)
+        .eq('is_active', true);
+
+      if (existingChannels && existingChannels.length > 0) {
+        // Deduplicate by channel_type (take first active one found)
+        const seen = new Set<string>();
+        for (const ch of existingChannels) {
+          if (seen.has(ch.channel_type)) continue;
+          seen.add(ch.channel_type);
+          await supabaseAdmin.from('notification_channels').upsert(
+            { store_id: storeId, channel_type: ch.channel_type, config: ch.config, is_active: true },
+            { onConflict: 'store_id,channel_type' }
+          );
+        }
+      }
+    }
+
+    // 4. Also create some scan_events for funnel data
     const scanPromises = [];
     const now = new Date();
     for (let i = 0; i < 30; i++) {
