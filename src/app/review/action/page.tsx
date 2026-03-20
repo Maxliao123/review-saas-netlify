@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface ReviewData {
@@ -15,6 +15,18 @@ interface ReviewData {
 }
 
 export default function ReviewActionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    }>
+      <ReviewActionContent />
+    </Suspense>
+  );
+}
+
+function ReviewActionContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
