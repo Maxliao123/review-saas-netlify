@@ -15,23 +15,23 @@ export const metadata: Metadata = {
   description:
     'Expert guides on Google review management, AI-powered review replies, and reputation growth strategies for restaurants, hotels, clinics, and local businesses.',
   openGraph: {
-    title: 'Reputation Monitor Blog — Review Management Guides & Tips',
+    title: 'ReplyWise AI Blog — Review Management Guides & Tips',
     description:
       'Expert guides on Google review management, AI replies, and reputation growth for local businesses.',
     type: 'website',
-    siteName: 'Reputation Monitor',
+    siteName: 'ReplyWise AI',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reputation Monitor Blog',
+    title: 'ReplyWise AI Blog',
     description:
       'Expert guides on Google review management and AI-powered reputation growth.',
   },
   alternates: {
-    canonical: 'https://reputationmonitor.ai/blog',
+    canonical: 'https://www.replywiseai.com/blog',
     languages: {
-      'en': 'https://reputationmonitor.ai/blog',
-      'zh-TW': 'https://reputationmonitor.ai/blog?lang=zh',
+      'en': 'https://www.replywiseai.com/blog',
+      'zh-TW': 'https://www.replywiseai.com/blog?lang=zh',
     },
   },
 };

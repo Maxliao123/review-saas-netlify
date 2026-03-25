@@ -629,7 +629,7 @@ export function ROICalculator() {
           <div className="rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 p-6 sm:p-8 text-white">
             <h3 className="text-lg font-bold mb-5 flex items-center gap-2">
               <Zap className="h-5 w-5 text-blue-400" />
-              How Reputation Monitor Fixes This
+              How ReplyWise AI Fixes This
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-start gap-3 rounded-xl bg-white/5 p-4">

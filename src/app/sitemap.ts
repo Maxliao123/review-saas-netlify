@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { ALL_BLOG_POSTS } from '@/lib/blog-data';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();

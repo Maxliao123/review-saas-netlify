@@ -22,7 +22,7 @@ export interface WhiteLabelConfig {
 }
 
 export const DEFAULT_CONFIG: WhiteLabelConfig = {
-  brandName: 'Reputation Monitor',
+  brandName: 'ReplyWise AI',
   logoUrl: null,
   faviconUrl: null,
   primaryColor: '#2563eb',
@@ -85,7 +85,7 @@ export function generateDnsVerification(tenantId: number, domain: string): {
   return {
     type: 'CNAME',
     name: domain,
-    value: `tenant-${tenantId}.reputation-monitor.app`,
+    value: `tenant-${tenantId}.replywiseai.com`,
   };
 }
 
@@ -100,8 +100,8 @@ export function getEmailFrom(config: WhiteLabelConfig): { email: string; name: s
     };
   }
   return {
-    email: 'noreply@reputation-monitor.app',
-    name: 'Reputation Monitor',
+    email: 'noreply@replywiseai.com',
+    name: 'ReplyWise AI',
   };
 }
 

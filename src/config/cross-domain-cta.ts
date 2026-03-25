@@ -1,5 +1,5 @@
 /**
- * Cross-domain CTA configuration for reputationmonitor.ai blog articles.
+ * Cross-domain CTA configuration for replywiseai.com blog articles.
  *
  * Only articles with a natural content-to-product connection get a cross-domain CTA.
  * This prevents the site from looking like a link farm / PBN to Google.
@@ -11,7 +11,7 @@
  * - Pure informational/educational articles get NO cross-domain CTA
  * - Industry vertical articles may get a soft product mention (not a hard CTA)
  *
- * Current strategy for Reputation Monitor:
+ * Current strategy for ReplyWise AI:
  * - Most articles funnel to internal Boss pages (see article-guide-map.ts)
  * - Only a select few articles get a direct product signup CTA
  * - This avoids over-optimization and keeps content feeling editorial

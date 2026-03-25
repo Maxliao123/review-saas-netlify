@@ -523,7 +523,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
 
         <p className="mt-10 text-center text-sm text-gray-500">
           {lang === 'zh' ? '需要超過 10 個據點？' : 'Need more than 10 locations?'}{' '}
-          <a href="mailto:hello@reputationmonitor.ai" className="text-blue-600 font-medium hover:underline">
+          <a href="mailto:hello@replywiseai.com" className="text-blue-600 font-medium hover:underline">
             {lang === 'zh' ? '聯繫我們取得企業方案' : 'Contact us for Enterprise pricing'}
           </a>
         </p>
@@ -570,7 +570,7 @@ function Testimonials({ lang }: { lang: 'en' | 'zh' }) {
             {lang === 'zh' ? '深受商家信賴' : 'Loved by Business Owners'}
           </h2>
           <p className="mt-4 text-lg text-gray-500">
-            {lang === 'zh' ? '看看為什麼數百家企業選擇 Reputation Monitor' : 'See why hundreds of businesses trust Reputation Monitor.'}
+            {lang === 'zh' ? '看看為什麼數百家企業選擇 ReplyWise AI' : 'See why hundreds of businesses trust ReplyWise AI.'}
           </p>
         </div>
         <div className="grid gap-8 md:grid-cols-3">
@@ -690,7 +690,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
           <div>
             <h4 className="text-sm font-semibold text-white">{lang === 'zh' ? '公司' : 'Company'}</h4>
             <ul className="mt-3 space-y-2">
-              <li><a href="mailto:hello@reputationmonitor.ai" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '聯絡我們' : 'Contact'}</a></li>
+              <li><a href="mailto:hello@replywiseai.com" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '聯絡我們' : 'Contact'}</a></li>
             </ul>
           </div>
 
@@ -706,7 +706,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
 
         <div className="mt-10 pt-6 border-t border-gray-800">
           <p className="text-sm text-gray-500 text-center">
-            &copy; {new Date().getFullYear()} Reputation Monitor. All rights reserved.
+            &copy; {new Date().getFullYear()} ReplyWise AI. All rights reserved.
           </p>
         </div>
       </div>
@@ -725,7 +725,7 @@ export function LandingPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Reputation Monitor',
+    name: 'ReplyWise AI',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description:

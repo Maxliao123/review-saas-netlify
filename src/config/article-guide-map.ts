@@ -1,5 +1,5 @@
 /**
- * Maps reputationmonitor.ai blog article slugs to their parent Guide ("Boss page").
+ * Maps replywiseai.com blog article slugs to their parent Guide ("Boss page").
  *
  * Purpose: Every blog article should funnel authority back to its parent guide
  * via an internal CTA. This is the core of the "semantic cluster → Boss page"
@@ -52,8 +52,8 @@ export const GUIDES: Record<string, GuideInfo> = {
   },
   'industry-solutions': {
     slug: 'industry-solutions',
-    title: 'Reputation Monitor Plans & Pricing',
-    titleZh: 'Reputation Monitor 方案與定價',
+    title: 'ReplyWise AI Plans & Pricing',
+    titleZh: 'ReplyWise AI 方案與定價',
     description: 'Find the right plan for your business size and industry',
     path: '/pricing',
     ctaText: 'View Plans & Pricing',

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
           await sendReply(event.replyToken, [
             {
               type: 'text',
-              text: '🎉 歡迎使用 Reputation Monitor！\n\n請到系統的「設定 → 通知」頁面，輸入以下綁定碼來啟用 LINE 通知：',
+              text: '🎉 歡迎使用 ReplyWise AI！\n\n請到系統的「設定 → 通知」頁面，輸入以下綁定碼來啟用 LINE 通知：',
             },
             {
               type: 'text',
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
             await sendReply(event.replyToken, [
               {
                 type: 'text',
-                text: '👋 我是 Reputation Monitor 通知機器人。\n\n如需綁定通知，請到系統的「設定 → 通知」頁面操作。\n\n如需協助，請聯繫客服。',
+                text: '👋 我是 ReplyWise AI 通知機器人。\n\n如需綁定通知，請到系統的「設定 → 通知」頁面操作。\n\n如需協助，請聯繫客服。',
                 },
             ]);
           }

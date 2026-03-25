@@ -13,7 +13,7 @@ import {
 
 describe('DEFAULT_CONFIG', () => {
   it('should have sensible defaults', () => {
-    expect(DEFAULT_CONFIG.brandName).toBe('Reputation Monitor');
+    expect(DEFAULT_CONFIG.brandName).toBe('ReplyWise AI');
     expect(DEFAULT_CONFIG.isActive).toBe(false);
     expect(DEFAULT_CONFIG.hidePoweredBy).toBe(false);
     expect(DEFAULT_CONFIG.primaryColor).toMatch(/^#[0-9a-fA-F]{6}$/);
@@ -146,7 +146,7 @@ describe('getEmailFrom', () => {
   it('should return default email when not active', () => {
     const result = getEmailFrom(DEFAULT_CONFIG);
     expect(result.email).toBe('noreply@reputation-monitor.app');
-    expect(result.name).toBe('Reputation Monitor');
+    expect(result.name).toBe('ReplyWise AI');
   });
 
   it('should return custom email when active with custom email', () => {
@@ -181,6 +181,6 @@ describe('getEmailFrom', () => {
     };
     const result = getEmailFrom(config);
     expect(result.email).toBe('noreply@reputation-monitor.app');
-    expect(result.name).toBe('Reputation Monitor');
+    expect(result.name).toBe('ReplyWise AI');
   });
 });

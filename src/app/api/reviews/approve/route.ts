@@ -141,7 +141,7 @@ function htmlResponse(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - Reputation Monitor</title>
+  <title>${title} - ReplyWise AI</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -178,7 +178,7 @@ function htmlResponse(
       <a href="${dashboardUrl}/admin/reviews" class="btn">Go to Dashboard</a>
     </div>
     <div class="footer">
-      <a href="${dashboardUrl}">Reputation Monitor</a>
+      <a href="${dashboardUrl}">ReplyWise AI</a>
     </div>
   </div>
 </body>

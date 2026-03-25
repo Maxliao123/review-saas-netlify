@@ -13,7 +13,7 @@ import {
 import { ManageSubscriptionButton, CheckoutButton } from './BillingActions';
 
 export const metadata = {
-  title: 'Billing — Reputation Monitor',
+  title: 'Billing — ReplyWise AI',
 };
 
 export default async function BillingPage() {

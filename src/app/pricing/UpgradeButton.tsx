@@ -23,7 +23,7 @@ export default function UpgradeButton({ planId, label, highlighted, isAuthentica
       return;
     }
     if (planId === 'enterprise') {
-      window.location.href = 'mailto:hello@reputationmonitor.ai?subject=Enterprise%20Inquiry';
+      window.location.href = 'mailto:hello@replywiseai.com?subject=Enterprise%20Inquiry';
       return;
     }
     if (!isAuthenticated) {

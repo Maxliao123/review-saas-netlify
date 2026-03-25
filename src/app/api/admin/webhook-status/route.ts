@@ -16,7 +16,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-app.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.replywiseai.com';
     const secret = process.env.CRON_SECRET || 'default-secret';
     const webhookEnabled = process.env.PUBSUB_VERIFICATION_TOKEN ? true : false;
 

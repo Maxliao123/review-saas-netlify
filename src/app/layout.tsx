@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Reputation Monitor — AI-Powered Google Review Management",
-    template: "%s | Reputation Monitor",
+    default: "ReplyWise AI — AI-Powered Google Review Management",
+    template: "%s | ReplyWise AI",
   },
   description:
     "Turn every customer visit into a 5-star Google review. AI generates reviews, auto-drafts replies, and grows your reputation on autopilot. Trusted by 500+ businesses.",
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     "AI 評論生成",
     "聲譽管理",
   ],
-  authors: [{ name: "Reputation Monitor" }],
-  creator: "Reputation Monitor",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://reputationmonitor.ai"),
+  authors: [{ name: "ReplyWise AI" }],
+  creator: "ReplyWise AI",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.replywiseai.com"),
   alternates: {
     canonical: "/",
     languages: {
@@ -46,17 +46,17 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     alternateLocale: ["zh_TW"],
-    siteName: "Reputation Monitor",
-    title: "Reputation Monitor — AI-Powered Google Review Management",
+    siteName: "ReplyWise AI",
+    title: "ReplyWise AI — AI-Powered Google Review Management",
     description:
       "Turn every customer visit into a 5-star Google review with AI. Trusted by 500+ businesses.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Reputation Monitor — AI-Powered Review Management",
+    title: "ReplyWise AI — AI-Powered Review Management",
     description:
       "Turn every customer visit into a 5-star Google review with AI.",
-    creator: "@repmonitor",
+    creator: "@replywiseai",
   },
   robots: {
     index: true,

@@ -3,18 +3,18 @@ import Link from 'next/link';
 import { Star, ArrowRight } from 'lucide-react';
 import { ROICalculator } from './ROICalculator';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com';
 
 export const metadata: Metadata = {
   title: 'Google Review ROI Calculator — See Your Revenue Impact',
   description:
     'Calculate how much revenue you could gain by increasing your Google reviews. Free interactive tool for restaurants, hotels, clinics, and local businesses.',
   openGraph: {
-    title: 'Google Review ROI Calculator — Reputation Monitor',
+    title: 'Google Review ROI Calculator — ReplyWise AI',
     description:
       'See how more Google reviews translate into real revenue. Free interactive calculator for local businesses.',
     type: 'website',
-    siteName: 'Reputation Monitor',
+    siteName: 'ReplyWise AI',
   },
   twitter: {
     card: 'summary_large_image',
@@ -45,7 +45,7 @@ export default function ROICalculatorPage() {
     },
     creator: {
       '@type': 'Organization',
-      name: 'Reputation Monitor',
+      name: 'ReplyWise AI',
       url: BASE_URL,
     },
   };

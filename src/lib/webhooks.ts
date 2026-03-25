@@ -114,7 +114,7 @@ export async function deliverWebhook(
   const body = JSON.stringify(payload);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'User-Agent': 'ReputationMonitor-Webhook/1.0',
+    'User-Agent': 'ReplyWiseAI-Webhook/1.0',
     'X-Webhook-Event': payload.event,
     'X-Webhook-Delivery': payload.id,
   };

@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getBlogPost(slug);
   if (!post) return { title: 'Post Not Found' };
 
-  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com';
 
   const ogImage = post.heroImage
     ? `${BASE_URL}${post.heroImage}`
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updatedAt || post.publishedAt,
       authors: [post.author],
       tags: post.tags,
-      siteName: 'Reputation Monitor',
+      siteName: 'ReplyWise AI',
       ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
     },
     twitter: {
@@ -80,7 +80,7 @@ export default async function BlogPostPage({ params }: Props) {
   const post = getBlogPost(slug);
   if (!post) notFound();
 
-  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai';
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com';
 
   // Boss page CTA (DarkSEOKing semantic clustering)
   const guide = getArticleGuide(slug);
@@ -162,23 +162,23 @@ export default async function BlogPostPage({ params }: Props) {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Reputation Monitor',
+      name: 'ReplyWise AI',
       logo: {
         '@type': 'ImageObject',
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}/favicon.ico`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com'}/favicon.ico`,
       },
     },
     ...(post.heroImage && {
       image: {
         '@type': 'ImageObject',
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}${post.heroImage}`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com'}${post.heroImage}`,
         width: 1200,
         height: 630,
       },
     }),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://reputationmonitor.ai'}/blog/${post.slug}`,
+      '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.replywiseai.com'}/blog/${post.slug}`,
     },
   };
 
@@ -440,7 +440,7 @@ export default async function BlogPostPage({ params }: Props) {
                 Managing reviews across multiple locations?
               </h3>
               <p className="mt-2 text-gray-300 text-sm">
-                Reputation Monitor Enterprise gives you centralized control with per-location analytics.
+                ReplyWise AI Enterprise gives you centralized control with per-location analytics.
               </p>
               <Link
                 href="/pricing"
@@ -526,7 +526,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Footer */}
       <footer className="py-8 bg-gray-900 text-center text-sm text-gray-500">
-        <p>&copy; {new Date().getFullYear()} Reputation Monitor. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} ReplyWise AI. All rights reserved.</p>
         <div className="mt-2 flex justify-center gap-4">
           <Link href="/" className="hover:text-gray-300">Home</Link>
           <Link href="/pricing" className="hover:text-gray-300">Pricing</Link>

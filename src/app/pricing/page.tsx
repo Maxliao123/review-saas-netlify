@@ -15,15 +15,15 @@ export const metadata: Metadata = {
   description:
     'Simple, transparent pricing for AI-powered Google review management. Free plan with 50 AI reviews/month. Starter $29/mo. Pro $79/mo. No credit card required.',
   openGraph: {
-    title: 'Pricing — Reputation Monitor',
+    title: 'Pricing — ReplyWise AI',
     description:
       'Start free with 50 AI reviews/month. Upgrade to Starter ($29/mo) or Pro ($79/mo) as you grow.',
     type: 'website',
-    siteName: 'Reputation Monitor',
+    siteName: 'ReplyWise AI',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reputation Monitor Pricing',
+    title: 'ReplyWise AI Pricing',
     description:
       'Start free. Upgrade as you grow. AI-powered Google review management plans.',
   },
@@ -129,7 +129,7 @@ const FAQ = [
   },
   {
     q: 'Can I use this for non-restaurant businesses?',
-    a: 'Absolutely. While we started with restaurants, Reputation Monitor works for any business with a Google Business listing — clinics, hotels, salons, auto shops, and more.',
+    a: 'Absolutely. While we started with restaurants, ReplyWise AI works for any business with a Google Business listing — clinics, hotels, salons, auto shops, and more.',
   },
 ];
 
@@ -263,7 +263,7 @@ export default async function PricingPage() {
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-12">
-            Why Businesses Choose Reputation Monitor
+            Why Businesses Choose ReplyWise AI
           </h2>
           <div className="grid gap-8 sm:grid-cols-3">
             <div className="text-center">

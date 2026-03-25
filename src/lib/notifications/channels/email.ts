@@ -22,7 +22,7 @@ export async function sendEmail({ recipients, subject, html }: EmailNotification
 
   try {
     const { data, error } = await getResend().emails.send({
-      from: 'Reputation Monitor <notifications@resend.dev>',
+      from: 'ReplyWise AI <notifications@resend.dev>',
       to: recipients,
       subject,
       html,

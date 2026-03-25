@@ -15,7 +15,7 @@ import DashboardInsights from './DashboardInsights';
 import ReviewAnalytics from './ReviewAnalytics';
 
 export const metadata = {
-  title: 'Dashboard — Reputation Monitor',
+  title: 'Dashboard — ReplyWise AI',
 };
 
 async function getDashboardData(tenantId: number, storeIds: number[]) {

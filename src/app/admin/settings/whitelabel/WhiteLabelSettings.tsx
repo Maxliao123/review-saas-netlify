@@ -102,7 +102,7 @@ export default function WhiteLabelSettings() {
             checked={config.hidePoweredBy}
             onChange={e => setConfig(prev => ({ ...prev, hidePoweredBy: e.target.checked }))}
           />
-          <span className="text-sm text-gray-600">Hide &quot;Powered by Reputation Monitor&quot; badge</span>
+          <span className="text-sm text-gray-600">Hide &quot;Powered by ReplyWise AI&quot; badge</span>
         </div>
       </div>
 

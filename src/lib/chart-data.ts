@@ -85,7 +85,7 @@ export const CHART_DATA: Record<string, ChartSpec> = {
         "value": 88
       },
       {
-        "label": "Reputation Monitor",
+        "label": "ReplyWise AI",
         "value": 85
       },
       {

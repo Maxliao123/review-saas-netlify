@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan or priceId' }, { status: 400 });
     }
 
-    const origin = request.headers.get('origin') || 'https://review-saas-netlify.vercel.app';
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'https://www.replywiseai.com';
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });

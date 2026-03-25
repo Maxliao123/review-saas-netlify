@@ -52,7 +52,7 @@ function LoginForm() {
   return (
     <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Reputation Monitor</h1>
+        <h1 className="text-2xl font-bold text-gray-900">ReplyWise AI</h1>
         <p className="text-gray-500 mt-2">Sign in to manage your reviews</p>
       </div>
 
