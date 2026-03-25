@@ -41,6 +41,7 @@ import {
   Menu,
   X,
   Star,
+  MapPin,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -88,6 +89,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: 'Analytics',
     items: [
       { href: '/admin/analytics/insights', label: 'Review Insights', icon: Lightbulb },
+      { href: '/admin/analytics/google-maps', label: 'Google Maps', icon: MapPin },
       { href: '/admin/analytics/competitors', label: 'Competitors', icon: BarChart3 },
       { href: '/admin/reports', label: 'Weekly Reports', icon: FileText },
     ],
