@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     const PLAN_TO_PRICE: Record<string, string | undefined> = {
       starter: process.env.STRIPE_STARTER_PRICE_ID,
       pro: process.env.STRIPE_PRO_PRICE_ID,
+      enterprise: process.env.STRIPE_ENTERPRISE_PRICE_ID,
     };
 
     const priceId = (body.priceId || PLAN_TO_PRICE[body.planId] || '').trim();

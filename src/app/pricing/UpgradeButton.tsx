@@ -22,8 +22,8 @@ export default function UpgradeButton({ planId, label, highlighted, isAuthentica
       router.push('/auth/signup');
       return;
     }
-    if (planId === 'enterprise') {
-      window.location.href = 'mailto:hello@replywiseai.com?subject=Enterprise%20Inquiry';
+    if (planId === 'enterprise' && !isAuthenticated) {
+      router.push('/auth/signup?plan=enterprise');
       return;
     }
     if (!isAuthenticated) {

@@ -121,9 +121,11 @@ function mapPriceToPlan(priceId: string | undefined): PlanId {
 
   const starterPriceId = process.env.STRIPE_STARTER_PRICE_ID?.trim();
   const proPriceId = process.env.STRIPE_PRO_PRICE_ID?.trim();
+  const enterprisePriceId = process.env.STRIPE_ENTERPRISE_PRICE_ID?.trim();
 
   if (priceId === starterPriceId) return 'starter';
   if (priceId === proPriceId) return 'pro';
+  if (priceId === enterprisePriceId) return 'enterprise';
 
   return 'free';
 }

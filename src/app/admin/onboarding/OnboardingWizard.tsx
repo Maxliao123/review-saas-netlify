@@ -10,10 +10,10 @@ import {
 } from 'lucide-react';
 
 const STEPS = [
-  { icon: MapPin, title: 'Connect & Select', desc: 'Link Google and choose your stores' },
-  { icon: Scan, title: 'Scan Reviews', desc: 'Import reviews & generate AI drafts' },
-  { icon: MessageSquare, title: 'Review & Publish', desc: 'Check AI drafts and publish replies' },
-  { icon: QrCode, title: 'QR Setup', desc: 'Set up customer review collection' },
+  { icon: MapPin, title: 'Connect & Select', desc: 'Link Google and choose your stores', est: '~1 min' },
+  { icon: Scan, title: 'Scan Reviews', desc: 'Import reviews & generate AI drafts', est: '~2 min' },
+  { icon: MessageSquare, title: 'Review & Publish', desc: 'Check AI drafts and publish replies', est: '~1 min' },
+  { icon: QrCode, title: 'QR Setup', desc: 'Set up customer review collection', est: '~1 min' },
 ];
 
 interface GoogleLocation {
@@ -481,6 +481,15 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
         {(() => { const Icon = STEPS[step].icon; return <Icon className="w-10 h-10 mx-auto text-blue-600 mb-3" />; })()}
         <h2 className="text-xl font-bold text-gray-900">{STEPS[step].title}</h2>
         <p className="text-gray-500 text-sm mt-1">{STEPS[step].desc}</p>
+        <p className="text-xs text-blue-500 mt-1">{STEPS[step].est}</p>
+        {step === 0 && (
+          <button
+            onClick={() => setStep(3)}
+            className="mt-2 text-xs text-gray-400 hover:text-blue-600 underline transition-colors"
+          >
+            Skip to QR Setup →
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -991,8 +1000,18 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
       </div>
 
       {/* Step indicator */}
-      <p className="text-center text-xs text-gray-400 mt-4">
-        Step {step + 1} of {STEPS.length}
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {STEPS.map((_, i) => (
+          <div
+            key={i}
+            className={`h-1.5 rounded-full transition-all ${
+              i <= step ? 'w-8 bg-blue-600' : 'w-4 bg-gray-200'
+            }`}
+          />
+        ))}
+      </div>
+      <p className="text-center text-xs text-gray-400 mt-2">
+        Step {step + 1} of {STEPS.length} — {STEPS[step].est}
       </p>
     </div>
   );

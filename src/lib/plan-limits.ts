@@ -10,6 +10,7 @@ export interface PlanLimits {
   maxStores: number;
   maxReviewsPerMonth: number;
   maxInvitesPerMonth: number;
+  maxCompetitorsPerStore: number;
   features: {
     aiReplyDrafts: boolean;
     autoPublishReplies: boolean;
@@ -74,9 +75,9 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
 
   starter: {
     name: 'Starter',
-    maxStores: 1,
+    maxStores: 3,
     maxReviewsPerMonth: 500,
-    maxInvitesPerMonth: 0,
+    maxInvitesPerMonth: 100,
     features: {
       aiReplyDrafts: true,
       autoPublishReplies: false,
@@ -107,9 +108,9 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
 
   pro: {
     name: 'Pro',
-    maxStores: 3,
+    maxStores: 10,
     maxReviewsPerMonth: Infinity,
-    maxInvitesPerMonth: 500,
+    maxInvitesPerMonth: 1000,
     features: {
       aiReplyDrafts: true,
       autoPublishReplies: true,
@@ -120,7 +121,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       apiAccess: false,
       sso: false,
       prioritySupport: true,
-      whiteLabel: false,
+      whiteLabel: true,
       multiPlatformReviews: true,
       sentimentAnalysis: true,
       reviewInvites: true,
@@ -153,7 +154,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       apiAccess: true,
       sso: true,
       prioritySupport: true,
-      whiteLabel: false,
+      whiteLabel: true,
       multiPlatformReviews: true,
       sentimentAnalysis: true,
       reviewInvites: true,
@@ -218,33 +219,35 @@ export const PRICING_DISPLAY = [
   {
     id: 'starter' as PlanId,
     name: 'Starter',
-    price: 29,
+    price: 49,
     period: '/month',
-    tagline: 'For growing restaurants',
+    tagline: 'For growing businesses',
     highlights: [
-      '1 store location',
+      'Up to 3 store locations',
       '500 AI reviews / month',
       'AI reply drafts',
-      'Daily monitoring & notifications',
-      'Sentiment analysis & Insights',
+      'Review monitoring & alerts',
+      'Sentiment analysis & insights',
       'Weekly reports',
+      'Email + Slack notifications',
     ],
     stripePriceId: process.env.STRIPE_STARTER_PRICE_ID || null,
   },
   {
     id: 'pro' as PlanId,
     name: 'Pro',
-    price: 79,
+    price: 149,
     period: '/month',
-    tagline: 'For multi-location businesses',
+    tagline: 'For serious reputation growth',
     highlights: [
-      'Up to 3 store locations',
+      'Up to 10 store locations',
       'Unlimited AI reviews',
       'AI auto-reply',
-      'Competitor analysis',
-      'Full analytics & reports',
+      'Google Maps analytics',
+      'Competitor tracking',
       'All notification channels',
       'Custom AI tone & handbook',
+      'White-label branding',
     ],
     stripePriceId: process.env.STRIPE_PRO_PRICE_ID || null,
     popular: true,
@@ -252,8 +255,8 @@ export const PRICING_DISPLAY = [
   {
     id: 'enterprise' as PlanId,
     name: 'Enterprise',
-    price: null,
-    period: 'custom',
+    price: 499,
+    period: '/month',
     tagline: 'For chains & franchises',
     highlights: [
       'Unlimited store locations',
@@ -262,7 +265,8 @@ export const PRICING_DISPLAY = [
       'API access',
       'SSO / SAML',
       'Dedicated account manager',
+      'Priority support',
     ],
-    stripePriceId: null,
+    stripePriceId: process.env.STRIPE_ENTERPRISE_PRICE_ID || null,
   },
 ];
