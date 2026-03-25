@@ -1,0 +1,81 @@
+name: Scheduled Cron Jobs
+
+on:
+  schedule:
+    # fetch-reviews: daily 8am UTC
+    - cron: '0 8 * * *'
+    # publish-replies: daily 9am UTC
+    - cron: '0 9 * * *'
+    # fetch-google-maps-metrics: daily 6am UTC
+    - cron: '0 6 * * *'
+    # fetch-competitor-snapshots: daily 7am UTC
+    - cron: '0 7 * * *'
+    # weekly-report: Monday 5pm UTC
+    - cron: '0 17 * * 1'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Which cron job to run'
+        required: true
+        type: choice
+        options:
+          - fetch-reviews
+          - publish-replies
+          - fetch-google-maps-metrics
+          - fetch-competitor-snapshots
+          - weekly-report
+
+env:
+  DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+jobs:
+  fetch-reviews:
+    if: github.event.schedule == '0 8 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'fetch-reviews')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger fetch-reviews
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/fetch-reviews" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 120
+
+  publish-replies:
+    if: github.event.schedule == '0 9 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'publish-replies')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger publish-replies
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/publish-replies" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 120
+
+  fetch-google-maps-metrics:
+    if: github.event.schedule == '0 6 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'fetch-google-maps-metrics')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger fetch-google-maps-metrics
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/fetch-google-maps-metrics" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300
+
+  fetch-competitor-snapshots:
+    if: github.event.schedule == '0 7 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'fetch-competitor-snapshots')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger fetch-competitor-snapshots
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/fetch-competitor-snapshots" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300
+
+  weekly-report:
+    if: github.event.schedule == '0 17 * * 1' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'weekly-report')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly-report
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/weekly-report" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 120
