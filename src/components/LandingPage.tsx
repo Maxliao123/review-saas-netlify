@@ -35,7 +35,7 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
               <Star className="h-4 w-4 text-white fill-white" />
             </div>
             <span className="text-lg font-bold text-gray-900">
-              Reputation<span className="text-blue-600">Monitor</span>
+              Reply<span className="text-blue-600">Wise AI</span>
             </span>
           </Link>
 
@@ -668,7 +668,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500">
                 <Star className="h-3.5 w-3.5 text-white fill-white" />
               </div>
-              <span className="text-base font-bold text-white">ReputationMonitor</span>
+              <span className="text-base font-bold text-white">ReplyWise AI</span>
             </div>
             <p className="mt-3 text-sm text-gray-400 leading-relaxed">
               {lang === 'zh' ? 'AI 驅動的評論管理平台，幫助企業自動提升 Google 聲譽。' : 'AI-powered review management platform that helps businesses grow their Google reputation on autopilot.'}
