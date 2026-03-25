@@ -602,22 +602,38 @@ function TrustSection({ lang }: { lang: 'en' | 'zh' }) {
   return (
     <section className="py-16 bg-gray-50/50 border-y border-gray-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-3 text-center">
+        <div className="grid gap-8 sm:grid-cols-4 text-center">
           <div className="flex flex-col items-center gap-2">
             <Shield className="h-8 w-8 text-blue-600" />
-            <h3 className="font-bold text-gray-900">{lang === 'zh' ? 'SOC 2 合規' : 'SOC 2 Compliant'}</h3>
-            <p className="text-sm text-gray-500">{lang === 'zh' ? '企業級資料安全防護' : 'Enterprise-grade security for your data'}</p>
+            <h3 className="font-bold text-gray-900">{lang === 'zh' ? '資料安全' : 'Secure & Private'}</h3>
+            <p className="text-sm text-gray-500">{lang === 'zh' ? '端到端加密，HTTPS 傳輸' : 'End-to-end encryption, HTTPS only'}</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <Zap className="h-8 w-8 text-blue-600" />
-            <h3 className="font-bold text-gray-900">{lang === 'zh' ? '2 分鐘設定' : '2-Minute Setup'}</h3>
-            <p className="text-sm text-gray-500">{lang === 'zh' ? '連結 Google 商家，幾分鐘即可開始' : 'Connect Google Business and start in minutes'}</p>
+            <h3 className="font-bold text-gray-900">{lang === 'zh' ? '5 分鐘啟用' : '5-Min Setup'}</h3>
+            <p className="text-sm text-gray-500">{lang === 'zh' ? '連結 Google 商家即可開始' : 'Connect Google Business and go'}</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <Globe className="h-8 w-8 text-blue-600" />
             <h3 className="font-bold text-gray-900">{lang === 'zh' ? '支援 6 種語言' : '6 Languages'}</h3>
             <p className="text-sm text-gray-500">{lang === 'zh' ? '用顧客的語言生成評論' : 'Generate reviews in your customers\' language'}</p>
           </div>
+          <div className="flex flex-col items-center gap-2">
+            <Star className="h-8 w-8 text-blue-600" />
+            <h3 className="font-bold text-gray-900">{lang === 'zh' ? 'Google 整合' : 'Google Integrated'}</h3>
+            <p className="text-sm text-gray-500">{lang === 'zh' ? '官方 API 直連，即時同步' : 'Official API, real-time sync'}</p>
+          </div>
+        </div>
+
+        {/* Industry badges */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400">
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '餐廳' : 'Restaurants'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '飯店' : 'Hotels'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '診所' : 'Clinics'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '美容院' : 'Salons'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '汽修廠' : 'Auto Repair'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '健身房' : 'Gyms'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '零售' : 'Retail'}</span>
         </div>
       </div>
     </section>
@@ -733,9 +749,9 @@ export function LandingPage() {
     offers: {
       '@type': 'AggregateOffer',
       lowPrice: '0',
-      highPrice: '79',
+      highPrice: '499',
       priceCurrency: 'USD',
-      offerCount: '3',
+      offerCount: '4',
     },
     aggregateRating: {
       '@type': 'AggregateRating',
