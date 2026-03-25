@@ -45,6 +45,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxStores: 1,
     maxReviewsPerMonth: 50,
     maxInvitesPerMonth: 0,
+    maxCompetitorsPerStore: 0,
     features: {
       aiReplyDrafts: false,
       autoPublishReplies: false,
@@ -78,6 +79,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxStores: 3,
     maxReviewsPerMonth: 500,
     maxInvitesPerMonth: 100,
+    maxCompetitorsPerStore: 0,
     features: {
       aiReplyDrafts: true,
       autoPublishReplies: false,
@@ -111,6 +113,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxStores: 10,
     maxReviewsPerMonth: Infinity,
     maxInvitesPerMonth: 1000,
+    maxCompetitorsPerStore: 3,
     features: {
       aiReplyDrafts: true,
       autoPublishReplies: true,
@@ -144,6 +147,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxStores: Infinity,
     maxReviewsPerMonth: Infinity,
     maxInvitesPerMonth: Infinity,
+    maxCompetitorsPerStore: 10,
     features: {
       aiReplyDrafts: true,
       autoPublishReplies: true,

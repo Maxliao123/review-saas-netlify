@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient, getUserTenantContext } from '@/lib/supabase/server';
+import { getPlanLimits } from '@/lib/plan-limits';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +9,7 @@ export const dynamic = 'force-dynamic';
  *
  * Returns comparison data: your stores vs nearby competitors.
  * Uses Google Places API to find nearby competitors and fetch their ratings.
+ * Also returns tracked competitors with snapshot history.
  */
 export async function GET() {
   try {
@@ -26,7 +28,7 @@ export async function GET() {
       .order('name');
 
     if (!stores || stores.length === 0) {
-      return NextResponse.json({ stores: [], competitors: [] });
+      return NextResponse.json({ stores: [], competitors: [], tracked: [], planLimit: 0 });
     }
 
     // 2. Get our review stats per store
@@ -133,7 +135,46 @@ export async function GET() {
       }
     }
 
-    // 6. Compose response
+    // 6. Fetch tracked competitors with snapshot history
+    const { data: trackedRaw } = await supabase
+      .from('competitor_tracking')
+      .select(`
+        id,
+        store_id,
+        competitor_name,
+        competitor_place_id,
+        current_rating,
+        current_review_count,
+        last_fetched_at,
+        created_at,
+        competitor_snapshots (
+          snapshot_date,
+          rating,
+          review_count
+        )
+      `)
+      .in('store_id', storeIds)
+      .order('competitor_name');
+
+    // Shape tracked competitors with snapshot data sorted by date
+    const tracked = (trackedRaw || []).map(t => ({
+      id: t.id,
+      storeId: t.store_id,
+      competitorName: t.competitor_name,
+      competitorPlaceId: t.competitor_place_id,
+      currentRating: t.current_rating,
+      currentReviewCount: t.current_review_count,
+      lastFetchedAt: t.last_fetched_at,
+      createdAt: t.created_at,
+      snapshots: ((t as any).competitor_snapshots || [])
+        .sort((a: any, b: any) => a.snapshot_date.localeCompare(b.snapshot_date))
+        .slice(-30), // last 30 days
+    }));
+
+    // Plan limit info
+    const planLimits = getPlanLimits(ctx.tenant.plan || 'free');
+
+    // 7. Compose response
     const result = storeMetrics.map(store => ({
       ...store,
       responseRate: replyMetrics[store.storeId]
@@ -145,11 +186,120 @@ export async function GET() {
     return NextResponse.json({
       stores: result,
       competitors,
+      tracked,
+      trackedCount: tracked.length,
+      maxCompetitorsPerStore: planLimits.maxCompetitorsPerStore,
       generatedAt: new Date().toISOString(),
     });
 
   } catch (error: any) {
     console.error('Competitor analytics error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/admin/analytics/competitors
+ *
+ * Track or untrack a competitor for persistent monitoring.
+ * Body: { action: 'track' | 'untrack', storeId, competitorName, competitorPlaceId }
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const ctx = await getUserTenantContext();
+    if (!ctx?.tenant) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only owners/managers can manage tracked competitors
+    if (!ctx.role || !['owner', 'manager'].includes(ctx.role)) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { action, storeId, competitorName, competitorPlaceId } = body;
+
+    if (!action || !storeId || !competitorPlaceId) {
+      return NextResponse.json(
+        { error: 'Missing required fields: action, storeId, competitorPlaceId' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createSupabaseServerClient();
+
+    // Verify this store belongs to the tenant
+    const { data: store } = await supabase
+      .from('stores')
+      .select('id')
+      .eq('id', storeId)
+      .eq('tenant_id', ctx.tenant.id)
+      .single();
+
+    if (!store) {
+      return NextResponse.json({ error: 'Store not found' }, { status: 404 });
+    }
+
+    if (action === 'track') {
+      // Enforce plan limit
+      const planLimits = getPlanLimits(ctx.tenant.plan || 'free');
+      const { count } = await supabase
+        .from('competitor_tracking')
+        .select('id', { count: 'exact', head: true })
+        .eq('store_id', storeId);
+
+      if ((count || 0) >= planLimits.maxCompetitorsPerStore) {
+        return NextResponse.json(
+          {
+            error: `Plan limit reached. Your ${planLimits.name} plan allows tracking up to ${planLimits.maxCompetitorsPerStore} competitors per store.`,
+            limitReached: true,
+          },
+          { status: 403 }
+        );
+      }
+
+      // Insert tracked competitor
+      const { data: inserted, error: insertErr } = await supabase
+        .from('competitor_tracking')
+        .upsert(
+          {
+            tenant_id: ctx.tenant.id,
+            store_id: storeId,
+            competitor_name: competitorName,
+            competitor_place_id: competitorPlaceId,
+          },
+          { onConflict: 'store_id,competitor_place_id' }
+        )
+        .select()
+        .single();
+
+      if (insertErr) {
+        console.error('Failed to track competitor:', insertErr);
+        return NextResponse.json({ error: insertErr.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, tracked: inserted });
+    }
+
+    if (action === 'untrack') {
+      const { error: deleteErr } = await supabase
+        .from('competitor_tracking')
+        .delete()
+        .eq('store_id', storeId)
+        .eq('competitor_place_id', competitorPlaceId);
+
+      if (deleteErr) {
+        console.error('Failed to untrack competitor:', deleteErr);
+        return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, untracked: competitorPlaceId });
+    }
+
+    return NextResponse.json({ error: 'Invalid action. Use "track" or "untrack".' }, { status: 400 });
+
+  } catch (error: any) {
+    console.error('Competitor tracking error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
