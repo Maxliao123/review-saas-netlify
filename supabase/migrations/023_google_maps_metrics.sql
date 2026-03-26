@@ -1,8 +1,8 @@
 -- Google Maps performance metrics (Pro/Enterprise feature)
 CREATE TABLE google_maps_metrics (
   id SERIAL PRIMARY KEY,
-  tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  store_id INTEGER NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  store_id BIGINT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   direction_requests INTEGER DEFAULT 0,
   phone_calls INTEGER DEFAULT 0,

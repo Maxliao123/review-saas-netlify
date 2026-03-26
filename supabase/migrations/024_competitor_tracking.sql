@@ -1,8 +1,8 @@
 -- Persistent competitor tracking
 CREATE TABLE competitor_tracking (
   id SERIAL PRIMARY KEY,
-  tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  store_id INTEGER NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  store_id BIGINT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
   competitor_name TEXT NOT NULL,
   competitor_place_id TEXT NOT NULL,
   current_rating NUMERIC(2,1),
