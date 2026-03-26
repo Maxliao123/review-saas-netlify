@@ -42,6 +42,7 @@ import {
   X,
   Star,
   MapPin,
+  Gift,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -83,6 +84,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: '/admin/team/inbox', label: 'Team Inbox', icon: Inbox },
       { href: '/admin/invites', label: 'Invites', icon: Send },
       { href: '/admin/settings/notifications', label: 'Notifications', icon: Bell },
+      { href: '/admin/referrals', label: 'Referrals', icon: Gift },
     ],
   },
   {

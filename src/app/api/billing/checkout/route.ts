@@ -31,6 +31,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
     }
 
+    // Check if tenant was referred — offer 50% off first month
+    let isReferred = false;
+    if (ctx.tenant.referred_by_tenant_id) {
+      isReferred = true;
+    }
+
     // Use fetch directly — Stripe SDK has connection issues on Vercel serverless
     const params = new URLSearchParams();
     params.append('mode', 'subscription');
@@ -42,6 +48,17 @@ export async function POST(request: NextRequest) {
     params.append('cancel_url', `${origin}/admin?billing=cancelled`);
     params.append('metadata[tenant_id]', String(ctx.tenant.id));
     params.append('subscription_data[metadata][tenant_id]', String(ctx.tenant.id));
+
+    // Enable promotion codes for all users + auto-apply referral coupon
+    params.append('allow_promotion_codes', 'true');
+
+    // If referred, apply the REFERRED50 coupon (50% off first month)
+    // This coupon should be pre-created in Stripe Dashboard
+    if (isReferred && process.env.STRIPE_REFERRED_COUPON_ID) {
+      params.append('discounts[0][coupon]', process.env.STRIPE_REFERRED_COUPON_ID);
+      // When using discounts, allow_promotion_codes must be removed
+      params.delete('allow_promotion_codes');
+    }
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',

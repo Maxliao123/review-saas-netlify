@@ -48,7 +48,7 @@ export async function getUserTenantContext() {
       tenant_id,
       role,
       store_ids,
-      tenants (id, name, slug, plan, owner_id, onboarding_completed_at)
+      tenants (id, name, slug, plan, owner_id, onboarding_completed_at, referred_by_tenant_id)
     `)
     .eq('user_id', user.id);
 

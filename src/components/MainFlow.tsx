@@ -174,9 +174,23 @@ function StoreLoader() {
                     </div>
                 </div>
 
-                <div className="mt-8 text-center text-xs text-slate-400">
-                    Powered by Smart Google Review
-                </div>
+                {!storeData.hidePoweredBy && (
+                    <div className="mt-8 flex justify-center">
+                        <a
+                            href={
+                                storeData.referralCode
+                                    ? `https://www.replywiseai.com?ref=${storeData.referralCode}`
+                                    : 'https://www.replywiseai.com'
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-xs text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+                        >
+                            <span>⭐ Powered by ReplyWise AI</span>
+                            <span className="text-blue-500 font-medium">Get yours free →</span>
+                        </a>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -123,7 +123,17 @@ function ReviewActionContent() {
             <p className="text-xs text-gray-400 mb-1">Your reply:</p>
             <p className="text-sm text-gray-700 italic">&quot;{draft.substring(0, 200)}{draft.length > 200 ? '...' : ''}&quot;</p>
           </div>
-          <p className="text-xs text-gray-400 mt-6">Powered by ReplyWise AI</p>
+          <p className="text-xs text-gray-400 mt-6">
+            Powered by{' '}
+            <a
+              href="https://www.replywiseai.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-600 underline"
+            >
+              ReplyWise AI
+            </a>
+          </p>
         </div>
       </div>
     );

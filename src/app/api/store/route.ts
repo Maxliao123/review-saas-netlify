@@ -218,7 +218,36 @@ export async function GET(request: NextRequest) {
             console.error('Supabase tag overlay failed:', e);
         }
 
-        // 4. Place Photo Fallback
+        // 4. Tenant-level referral code + white-label config
+        const tenantId = storeData.tenant_id;
+        if (tenantId) {
+            try {
+                const { data: tenant } = await supabase
+                    .from('tenants')
+                    .select('referral_code, plan')
+                    .eq('id', tenantId)
+                    .single();
+
+                if (tenant?.referral_code) {
+                    payload.referralCode = tenant.referral_code;
+                }
+                payload.tenantPlan = tenant?.plan || 'free';
+
+                const { data: wlConfig } = await supabase
+                    .from('whitelabel_config')
+                    .select('hide_powered_by, is_active')
+                    .eq('tenant_id', tenantId)
+                    .single();
+
+                if (wlConfig?.is_active && wlConfig?.hide_powered_by) {
+                    payload.hidePoweredBy = true;
+                }
+            } catch (e) {
+                // Tenant info is non-critical, continue without it
+            }
+        }
+
+        // 5. Place Photo Fallback
         if (!payload.placePhotoUrl && placeId && GMAPS_KEY) {
             const ref = await fetchFirstPhotoRefByPlaceId(placeId);
             if (ref) {

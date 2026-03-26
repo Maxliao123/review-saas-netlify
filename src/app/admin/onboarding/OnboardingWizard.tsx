@@ -8,6 +8,7 @@ import {
   ArrowRight, ArrowLeft, Check, Loader2, Star,
   Pencil, ChevronDown, ChevronUp,
 } from 'lucide-react';
+import { generateReferralCode } from '@/lib/referral';
 
 const STEPS = [
   { icon: MapPin, title: 'Connect & Select', desc: 'Link Google and choose your stores', est: '~1 min' },
@@ -175,6 +176,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
   async function handleCreateOrg() {
     setLoading(true);
     try {
+      const newReferralCode = generateReferralCode();
       const { data: tenant, error: tErr } = await supabase
         .from('tenants')
         .insert({
@@ -182,6 +184,7 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
           slug: slug || generateSlug(businessName),
           owner_id: userId,
           preferred_language: language,
+          referral_code: newReferralCode,
         })
         .select()
         .single();
@@ -197,6 +200,40 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
       });
 
       if (mErr) throw mErr;
+
+      // Handle referral tracking if this user was referred
+      const storedRefCode = localStorage.getItem('referral_code');
+      if (storedRefCode) {
+        try {
+          // Look up the referrer's tenant by their referral code
+          const { data: referrer } = await supabase
+            .from('tenants')
+            .select('id')
+            .eq('referral_code', storedRefCode)
+            .maybeSingle();
+
+          if (referrer) {
+            // Link this tenant to the referrer
+            await supabase
+              .from('tenants')
+              .update({ referred_by_tenant_id: referrer.id })
+              .eq('id', tenant.id);
+
+            // Insert referral record
+            await supabase.from('referrals').insert({
+              referrer_tenant_id: referrer.id,
+              referred_tenant_id: tenant.id,
+              referral_code: storedRefCode,
+              status: 'signed_up',
+            });
+          }
+        } catch (refErr) {
+          // Non-blocking: don't fail onboarding if referral tracking fails
+          console.error('Referral tracking error:', refErr);
+        }
+        localStorage.removeItem('referral_code');
+      }
+
       setOrgCreated(true);
     } catch (err: any) {
       alert('Error: ' + err.message);

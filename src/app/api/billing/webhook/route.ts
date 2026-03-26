@@ -58,6 +58,32 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', tenantId);
 
+        // Track referral conversion: signed_up → paid
+        try {
+          const { data: referral } = await supabase
+            .from('referrals')
+            .select('id, referrer_tenant_id')
+            .eq('referee_tenant_id', tenantId)
+            .eq('status', 'signed_up')
+            .single();
+
+          if (referral) {
+            await supabase
+              .from('referrals')
+              .update({
+                status: 'paid',
+                reward_type: 'free_month',
+                converted_at: new Date().toISOString(),
+              })
+              .eq('id', referral.id);
+
+            console.log(`[webhook] Referral converted: referrer=${referral.referrer_tenant_id} referee=${tenantId}`);
+          }
+        } catch (e) {
+          // Non-critical: referral tracking should not break billing
+          console.error('[webhook] Referral tracking error:', e);
+        }
+
         console.log(`[webhook] checkout.session.completed: tenant=${tenantId} plan=${plan}`);
         break;
       }

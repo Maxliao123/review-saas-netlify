@@ -1,9 +1,10 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, ArrowRight } from 'lucide-react';
+import { Building2, ArrowRight, Gift } from 'lucide-react';
 
 export default function SignupPage() {
   const [step, setStep] = useState<'account' | 'business'>('account');
@@ -11,6 +12,15 @@ export default function SignupPage() {
   const [businessName, setBusinessName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  // Persist referral code in localStorage so it survives the signup flow
+  useEffect(() => {
+    if (refCode) {
+      localStorage.setItem('referral_code', refCode);
+    }
+  }, [refCode]);
 
   const supabase = createSupabaseBrowserClient();
 
@@ -59,6 +69,15 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
           <p className="text-gray-500 mt-2">Start managing your online reputation</p>
         </div>
+
+        {refCode && (
+          <div className="mb-6 flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 px-4 py-3">
+            <Gift className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <p className="text-sm text-emerald-800 font-medium">
+              Your friend referred you! Get <strong>50% off</strong> your first month.
+            </p>
+          </div>
+        )}
 
         {step === 'account' && (
           <>
