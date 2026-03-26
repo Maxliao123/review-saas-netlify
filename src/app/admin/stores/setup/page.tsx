@@ -29,6 +29,10 @@ interface Store {
     auto_reply_mode: string;
     auto_reply_min_rating: number;
     custom_handbook_overrides: any;
+    reward_enabled: boolean;
+    reward_text_en: string;
+    reward_text_zh: string;
+    reward_valid_days: number;
 }
 
 export default function StoreSetupPage() {
@@ -99,6 +103,10 @@ export default function StoreSetupPage() {
             auto_reply_mode: formData.auto_reply_mode || 'manual',
             auto_reply_min_rating: formData.auto_reply_min_rating || 4,
             custom_handbook_overrides: formData.custom_handbook_overrides || null,
+            reward_enabled: formData.reward_enabled || false,
+            reward_text_en: formData.reward_text_en || '',
+            reward_text_zh: formData.reward_text_zh || '',
+            reward_valid_days: formData.reward_valid_days || 30,
         });
 
         if (result.success) {
@@ -625,6 +633,94 @@ export default function StoreSetupPage() {
                                         ? `Auto-reply active: ${formData.auto_reply_min_rating || 4}-5 star reviews auto-published, others need approval.`
                                         : 'Auto-reply active: ALL reviews auto-published immediately.'
                                 }
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ── Review Reward ──────────────────── */}
+            {selectedStoreId && (
+                <div className="bg-white rounded-2xl shadow-sm border p-6 mt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        🎁 {' '}Review Reward
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Show a reward message to customers after they complete a review. They can screenshot it and show to staff on their next visit.
+                    </p>
+
+                    {/* Enable Toggle */}
+                    <label className="flex items-center gap-3 mb-6 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={formData.reward_enabled || false}
+                            onChange={(e) => setFormData({ ...formData, reward_enabled: e.target.checked })}
+                            className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Enable review reward</span>
+                    </label>
+
+                    {formData.reward_enabled && (
+                        <div className="space-y-4 pl-1">
+                            {/* English reward text */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">
+                                    Reward Message (English)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.reward_text_en || ''}
+                                    onChange={(e) => setFormData({ ...formData, reward_text_en: e.target.value })}
+                                    placeholder="e.g. Show this screen for 10% off your next visit"
+                                    className="w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                />
+                            </div>
+
+                            {/* Chinese reward text */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">
+                                    Reward Message (中文)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.reward_text_zh || ''}
+                                    onChange={(e) => setFormData({ ...formData, reward_text_zh: e.target.value })}
+                                    placeholder="例如：出示此畫面享 9 折優惠"
+                                    className="w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                />
+                            </div>
+
+                            {/* Valid days */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">
+                                    Valid for (days)
+                                </label>
+                                <select
+                                    value={formData.reward_valid_days || 30}
+                                    onChange={(e) => setFormData({ ...formData, reward_valid_days: parseInt(e.target.value) })}
+                                    className="px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                >
+                                    <option value={7}>7 days</option>
+                                    <option value={14}>14 days</option>
+                                    <option value={30}>30 days</option>
+                                    <option value={60}>60 days</option>
+                                    <option value={90}>90 days</option>
+                                </select>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                                <p className="text-xs text-gray-500 mb-2">Preview:</p>
+                                <div className="text-center">
+                                    <div className="text-xl mb-1">🎉</div>
+                                    <p className="font-bold text-amber-800 text-sm">Thank you for your review!</p>
+                                    <p className="text-amber-700 text-xs mt-1">
+                                        {formData.reward_text_en || 'Show this screen to staff for 10% off your next visit'}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Valid until: {new Date(Date.now() + (formData.reward_valid_days || 30) * 86400000).toLocaleDateString('en-US')}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}

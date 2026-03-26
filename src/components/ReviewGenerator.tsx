@@ -365,9 +365,36 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                                 {currentStrings.ui.open}
                             </button>
 
-                            <div className="mt-4 p-4 bg-gray-100 rounded-xl text-center text-sm text-gray-500">
-                                {lang === 'zh' ? '請出示此畫面給店員' : 'Please show this screen to staff'}
-                            </div>
+                            {/* Review Reward */}
+                            {storeData?.rewardEnabled && (
+                                <div className="mt-4 p-5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl text-center">
+                                    <div className="text-2xl mb-2">🎉</div>
+                                    <p className="font-bold text-amber-800 text-base mb-1">
+                                        {lang === 'zh' ? '感謝您的好評！' : 'Thank you for your review!'}
+                                    </p>
+                                    <p className="text-amber-700 text-sm mb-3">
+                                        {lang === 'zh'
+                                            ? (storeData.rewardTextZh || '出示此畫面給店員，下次消費享 9 折優惠')
+                                            : (storeData.rewardTextEn || 'Show this screen to staff for 10% off your next visit')}
+                                    </p>
+                                    <div className="inline-block bg-white px-4 py-2 rounded-xl border border-amber-200">
+                                        <p className="text-xs text-gray-500">
+                                            {lang === 'zh' ? '有效期限' : 'Valid until'}: {
+                                                new Date(Date.now() + (storeData.rewardValidDays || 30) * 86400000)
+                                                    .toLocaleDateString(lang === 'zh' ? 'zh-TW' : 'en-US')
+                                            }
+                                        </p>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        {lang === 'zh' ? '📱 請截圖保存' : '📱 Please screenshot to save'}
+                                    </p>
+                                </div>
+                            )}
+                            {!storeData?.rewardEnabled && (
+                                <div className="mt-4 p-4 bg-gray-100 rounded-xl text-center text-sm text-gray-500">
+                                    {lang === 'zh' ? '請出示此畫面給店員' : 'Please show this screen to staff'}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

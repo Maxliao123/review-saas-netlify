@@ -247,6 +247,12 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        // 4b. Review Reward settings
+        payload.rewardEnabled = storeData.reward_enabled ?? false;
+        payload.rewardTextEn = storeData.reward_text_en || 'Show this screen to staff for 10% off your next visit';
+        payload.rewardTextZh = storeData.reward_text_zh || '出示此畫面給店員，下次消費享 9 折優惠';
+        payload.rewardValidDays = storeData.reward_valid_days ?? 30;
+
         // 5. Place Photo Fallback
         if (!payload.placePhotoUrl && placeId && GMAPS_KEY) {
             const ref = await fetchFirstPhotoRefByPlaceId(placeId);
