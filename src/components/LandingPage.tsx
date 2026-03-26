@@ -749,7 +749,7 @@ export function LandingPage() {
     offers: {
       '@type': 'AggregateOffer',
       lowPrice: '0',
-      highPrice: '499',
+      highPrice: '199',
       priceCurrency: 'USD',
       offerCount: '4',
     },

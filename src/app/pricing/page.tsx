@@ -13,11 +13,11 @@ import UpgradeButton from './UpgradeButton';
 export const metadata: Metadata = {
   title: 'Pricing — AI-Powered Google Review Management Plans',
   description:
-    'Simple, transparent pricing for AI-powered Google review management. Free plan with 50 AI reviews/month. Starter $49/mo. Pro $149/mo. No credit card required.',
+    'Simple, transparent pricing for AI-powered Google review management. Free plan with 50 AI reviews/month. Starter $29/mo. Pro $79/mo. No credit card required.',
   openGraph: {
     title: 'Pricing — ReplyWise AI',
     description:
-      'Start free with 50 AI reviews/month. Upgrade to Starter ($49/mo) or Pro ($149/mo) as you grow.',
+      'Start free with 50 AI reviews/month. Upgrade to Starter ($29/mo) or Pro ($79/mo) as you grow.',
     type: 'website',
     siteName: 'ReplyWise AI',
   },
@@ -53,7 +53,7 @@ const PLANS = [
   {
     id: 'starter',
     name: 'Starter',
-    price: '$49',
+    price: '$29',
     period: '/month',
     description: 'For growing businesses',
     features: [
@@ -72,7 +72,7 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Pro',
-    price: '$149',
+    price: '$79',
     period: '/month',
     description: 'For serious reputation growth',
     features: [
@@ -92,7 +92,7 @@ const PLANS = [
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: '$499',
+    price: '$199',
     period: '/month',
     description: 'For chains & franchises',
     features: [
