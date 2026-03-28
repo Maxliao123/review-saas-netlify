@@ -12,6 +12,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@next/swc-darwin-arm64": "^16.2.0",
+    "@sentry/nextjs": "^10.46.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.1",
     "@tailwindcss/typography": "^0.5.19",
