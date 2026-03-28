@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import DashboardInsights from './DashboardInsights';
 import ReviewAnalytics from './ReviewAnalytics';
+import SetupChecklist from '@/components/SetupChecklist';
 
 export const metadata = {
   title: 'Dashboard — ReplyWise AI',
@@ -245,6 +246,9 @@ export default async function AdminDashboard() {
           Overview for {ctx.tenant.name} &middot; {ctx.stores.length} store{ctx.stores.length !== 1 ? 's' : ''}
         </p>
       </div>
+
+      {/* Setup Checklist — guides new users through onboarding steps */}
+      <SetupChecklist />
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
