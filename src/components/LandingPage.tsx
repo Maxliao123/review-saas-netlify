@@ -714,8 +714,8 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
           <div>
             <h4 className="text-sm font-semibold text-white">{lang === 'zh' ? '法律' : 'Legal'}</h4>
             <ul className="mt-3 space-y-2">
-              <li><a href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '隱私政策' : 'Privacy Policy'}</a></li>
-              <li><a href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '服務條款' : 'Terms of Service'}</a></li>
+              <li><Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '隱私政策' : 'Privacy Policy'}</Link></li>
+              <li><Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">{lang === 'zh' ? '服務條款' : 'Terms of Service'}</Link></li>
             </ul>
           </div>
         </div>
