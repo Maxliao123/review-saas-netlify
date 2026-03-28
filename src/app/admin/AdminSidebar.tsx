@@ -30,12 +30,9 @@ import {
   Key,
   Webhook,
   GraduationCap,
-  MonitorSpeaker,
   Palette,
   ScanSearch,
   Zap,
-  HardDrive,
-  ShoppingBag,
   Lightbulb,
   User,
   Menu,
@@ -43,6 +40,7 @@ import {
   Star,
   MapPin,
   Gift,
+  Code,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -108,7 +106,6 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: '/admin/experiments', label: 'A/B Tests', icon: FlaskConical },
       { href: '/admin/settings/ai-training', label: 'AI Training', icon: GraduationCap, ownerOnly: true },
       { href: '/admin/settings/realtime', label: 'Real-Time Reviews', icon: Zap, ownerOnly: true },
-      { href: '/admin/marketplace', label: 'Specialist Market', icon: ShoppingBag },
     ],
   },
   {
@@ -123,9 +120,8 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: '/admin/settings/platforms', label: 'Platforms', icon: Globe, ownerOnly: true },
       { href: '/admin/settings/api', label: 'API Keys', icon: Key, ownerOnly: true },
       { href: '/admin/settings/webhooks', label: 'Webhooks', icon: Webhook, ownerOnly: true },
-      { href: '/admin/settings/pos', label: 'POS Integrations', icon: MonitorSpeaker, ownerOnly: true },
       { href: '/admin/settings/whitelabel', label: 'White Label', icon: Palette, ownerOnly: true },
-      { href: '/admin/settings/hardware', label: 'Hardware & Devices', icon: HardDrive, ownerOnly: true },
+      { href: '/admin/settings/widget', label: 'Review Widget', icon: Code, ownerOnly: true },
       { href: '/admin/settings/profile', label: 'Profile & Language', icon: User },
       { href: '/admin/settings/billing', label: 'Billing', icon: CreditCard, ownerOnly: true },
     ],

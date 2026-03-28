@@ -18,6 +18,7 @@ import { createHmac } from 'crypto';
 export type WebhookEventType =
   | 'review.created'
   | 'review.replied'
+  | 'review.negative_alert'
   | 'review.flagged'
   | 'alert.triggered'
   | 'invite.completed'
@@ -26,6 +27,7 @@ export type WebhookEventType =
 export const WEBHOOK_EVENT_TYPES: Record<WebhookEventType, { label: string; description: string }> = {
   'review.created': { label: 'Review Created', description: 'Fired when a new review is received from any platform' },
   'review.replied': { label: 'Reply Published', description: 'Fired when a reply is published to Google/Yelp/etc.' },
+  'review.negative_alert': { label: 'Negative Review Alert', description: 'Fired when a negative review (1-2 stars) is detected' },
   'review.flagged': { label: 'Review Flagged', description: 'Fired when a review is flagged for manual attention' },
   'alert.triggered': { label: 'Alert Triggered', description: 'Fired when a predictive analytics alert is generated' },
   'invite.completed': { label: 'Invite Completed', description: 'Fired when a customer completes a review invite' },
