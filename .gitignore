@@ -39,6 +39,12 @@ yarn-error.log*
 # npm cache
 npm-cache/
 
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
