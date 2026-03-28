@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { scheduleThankYouEmail } from '@/lib/drip-campaigns';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,11 +27,20 @@ export async function GET(request: NextRequest) {
         .eq('invite_token', token)
         .in('status', ['sent', 'delivered']);
     } else if (event === 'completed') {
-      await supabaseAdmin
+      const { data: updated } = await supabaseAdmin
         .from('review_invites')
         .update({ status: 'completed', completed_at: now })
         .eq('invite_token', token)
-        .in('status', ['sent', 'delivered', 'opened']);
+        .in('status', ['sent', 'delivered', 'opened'])
+        .select('id')
+        .maybeSingle();
+
+      // Schedule a thank-you drip email
+      if (updated?.id) {
+        scheduleThankYouEmail(updated.id).catch((err) =>
+          console.error('Failed to schedule thank-you email:', err)
+        );
+      }
     }
 
     // Return 1x1 transparent pixel for email tracking

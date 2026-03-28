@@ -10,6 +10,8 @@ on:
     - cron: '0 6 * * *'
     # fetch-competitor-snapshots: daily 7am UTC
     - cron: '0 7 * * *'
+    # drip-campaigns: hourly at :17
+    - cron: '17 * * * *'
     # weekly-report: Monday 5pm UTC
     - cron: '0 17 * * 1'
   workflow_dispatch:
@@ -23,6 +25,7 @@ on:
           - publish-replies
           - fetch-google-maps-metrics
           - fetch-competitor-snapshots
+          - drip-campaigns
           - weekly-report
 
 env:
@@ -69,6 +72,16 @@ jobs:
           curl -sf -X GET "$DEPLOY_URL/api/cron/fetch-competitor-snapshots" \
             -H "Authorization: Bearer $CRON_SECRET" \
             --max-time 300
+
+  drip-campaigns:
+    if: github.event.schedule == '17 * * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'drip-campaigns')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger drip-campaigns
+        run: |
+          curl -sf -X GET "$DEPLOY_URL/api/cron/drip-campaigns?cron_secret=$CRON_SECRET" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 120
 
   weekly-report:
     if: github.event.schedule == '0 17 * * 1' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'weekly-report')

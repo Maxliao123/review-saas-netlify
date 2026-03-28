@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createSupabaseServerClient, getUserTenantContext } from '@/lib/supabase/server';
 import { sendReviewInvite, type InviteInput } from '@/lib/invites';
 import { getPlanLimits } from '@/lib/plan-limits';
+import { scheduleReminderEmail } from '@/lib/drip-campaigns';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,6 +85,13 @@ export async function POST(request: NextRequest) {
       };
       const result = await sendReviewInvite(input);
       results.push(result);
+
+      // Schedule a 24h reminder drip email for successful invites
+      if (result.success && result.inviteId) {
+        scheduleReminderEmail(result.inviteId).catch((err) =>
+          console.error('Failed to schedule reminder email:', err)
+        );
+      }
     }
 
     const sent = results.filter(r => r.success).length;
