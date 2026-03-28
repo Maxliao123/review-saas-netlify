@@ -1,7 +1,8 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { CheckCircle, AlertCircle, ExternalLink, Star } from 'lucide-react';
+import { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { CheckCircle, AlertCircle, ExternalLink, Star, Search, Loader2, X } from 'lucide-react';
 
 interface PlatformCred {
   platform: string;
@@ -50,20 +51,83 @@ const PLATFORM_CONFIG = [
   {
     key: 'tripadvisor',
     name: 'TripAdvisor',
-    description: 'View rating summary (API access restricted)',
+    description: 'View rating summary and ranking from TripAdvisor Content API',
     connectUrl: null,
     color: 'bg-green-600',
-    type: 'api_key' as const,
+    type: 'search' as const,
   },
 ];
 
 export default function PlatformConnectionManager({ platforms, summaries, stores, isOwner }: Props) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const fbConnected = searchParams.get('facebook_connected');
   const error = searchParams.get('error');
 
+  // TripAdvisor search state
+  const [taSearchName, setTaSearchName] = useState('');
+  const [taSearchLocation, setTaSearchLocation] = useState('');
+  const [taSearching, setTaSearching] = useState(false);
+  const [taConnecting, setTaConnecting] = useState(false);
+  const [taDisconnecting, setTaDisconnecting] = useState(false);
+  const [taError, setTaError] = useState<string | null>(null);
+
   const getCredFor = (platform: string) => platforms.find(p => p.platform === platform);
   const getSummariesFor = (platform: string) => summaries.filter(s => s.platform === platform);
+
+  const handleTripAdvisorSearch = async () => {
+    if (!taSearchName.trim()) return;
+    setTaSearching(true);
+    setTaError(null);
+
+    try {
+      const resp = await fetch('/api/admin/platforms/tripadvisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: taSearchName.trim(), location: taSearchLocation.trim() }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        setTaError(data.error || 'Search failed');
+        return;
+      }
+
+      // Success — refresh the page to show updated summaries
+      router.refresh();
+      setTaSearchName('');
+      setTaSearchLocation('');
+    } catch (err: any) {
+      setTaError(err.message || 'Network error');
+    } finally {
+      setTaSearching(false);
+    }
+  };
+
+  const handleTripAdvisorDisconnect = async () => {
+    setTaDisconnecting(true);
+    setTaError(null);
+
+    try {
+      const resp = await fetch('/api/admin/platforms/tripadvisor', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        setTaError(data.error || 'Disconnect failed');
+        return;
+      }
+
+      router.refresh();
+    } catch (err: any) {
+      setTaError(err.message || 'Network error');
+    } finally {
+      setTaDisconnecting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -88,7 +152,7 @@ export default function PlatformConnectionManager({ platforms, summaries, stores
       {PLATFORM_CONFIG.map(platform => {
         const cred = getCredFor(platform.key);
         const platSummaries = getSummariesFor(platform.key);
-        const isConnected = !!cred;
+        const isConnected = !!cred || (platform.key === 'tripadvisor' && platSummaries.length > 0);
 
         return (
           <div key={platform.key} className="bg-white border border-gray-200 rounded-xl p-6">
@@ -108,7 +172,7 @@ export default function PlatformConnectionManager({ platforms, summaries, stores
                 <p className="text-sm text-gray-500 mt-1">{platform.description}</p>
 
                 {/* Connected info */}
-                {isConnected && cred.meta && (
+                {isConnected && cred?.meta && (
                   <div className="mt-2 text-xs text-gray-400">
                     {(cred.meta as Record<string, string>).page_name && (
                       <span>Page: <strong className="text-gray-600">{(cred.meta as Record<string, string>).page_name}</strong></span>
@@ -142,7 +206,7 @@ export default function PlatformConnectionManager({ platforms, summaries, stores
               </div>
             </div>
 
-            {/* Connect button */}
+            {/* Connect / action section */}
             <div className="mt-4">
               {platform.type === 'oauth' && isOwner ? (
                 <a
@@ -154,10 +218,73 @@ export default function PlatformConnectionManager({ platforms, summaries, stores
                 </a>
               ) : platform.type === 'api_key' ? (
                 <p className="text-xs text-gray-400">
-                  {platform.key === 'yelp'
-                    ? 'Configured via YELP_API_KEY environment variable. Summary data syncs automatically.'
-                    : 'TripAdvisor Content API requires a partnership agreement. Contact TripAdvisor for access.'}
+                  Configured via {platform.key === 'yelp' ? 'YELP_API_KEY' : ''} environment variable. Summary data syncs automatically.
                 </p>
+              ) : platform.type === 'search' && platform.key === 'tripadvisor' ? (
+                <div className="space-y-3">
+                  {/* TripAdvisor error */}
+                  {taError && (
+                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-2 rounded-lg">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{taError}</span>
+                      <button onClick={() => setTaError(null)} className="ml-auto">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+
+                  {isOwner && !isConnected && (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        placeholder="Restaurant name"
+                        value={taSearchName}
+                        onChange={(e) => setTaSearchName(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <input
+                        type="text"
+                        placeholder="City or address"
+                        value={taSearchLocation}
+                        onChange={(e) => setTaSearchLocation(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <button
+                        onClick={handleTripAdvisorSearch}
+                        disabled={taSearching || !taSearchName.trim()}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {taSearching ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Search className="w-4 h-4" />
+                        )}
+                        {taSearching ? 'Searching...' : 'Search & Connect'}
+                      </button>
+                    </div>
+                  )}
+
+                  {isOwner && isConnected && (
+                    <button
+                      onClick={handleTripAdvisorDisconnect}
+                      disabled={taDisconnecting}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
+                    >
+                      {taDisconnecting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <X className="w-4 h-4" />
+                      )}
+                      {taDisconnecting ? 'Disconnecting...' : 'Disconnect TripAdvisor'}
+                    </button>
+                  )}
+
+                  {!isOwner && (
+                    <p className="text-sm text-gray-500 italic">
+                      Only the account owner can connect platforms.
+                    </p>
+                  )}
+                </div>
               ) : (
                 <p className="text-sm text-gray-500 italic">
                   Only the account owner can connect platforms.

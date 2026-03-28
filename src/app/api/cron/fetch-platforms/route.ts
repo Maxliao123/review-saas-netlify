@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { fetchFacebookReviews, normalizeFacebookRating } from '@/lib/facebook';
 import { syncYelpSummary } from '@/lib/yelp';
+import { syncTripAdvisorSummary } from '@/lib/tripadvisor';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,6 +125,29 @@ export async function GET(request: Request) {
         }
       } else {
         log.push('No Yelp stores configured.');
+      }
+    }
+
+    // ── C. TripAdvisor Summary Sync ──
+    if (process.env.TRIPADVISOR_API_KEY) {
+      const { data: taStores } = await supabaseAdmin
+        .from('platform_summaries')
+        .select('store_id, meta')
+        .eq('platform', 'tripadvisor');
+
+      if (taStores && taStores.length > 0) {
+        for (const store of taStores) {
+          try {
+            const locationId = (store.meta as Record<string, string>)?.location_id;
+            if (!locationId) continue;
+            await syncTripAdvisorSummary(store.store_id, locationId);
+            log.push(`[TripAdvisor] Synced summary for store ${store.store_id}.`);
+          } catch (err: any) {
+            log.push(`[TripAdvisor] Error store ${store.store_id}: ${err.message}`);
+          }
+        }
+      } else {
+        log.push('No TripAdvisor stores configured.');
       }
     }
 
