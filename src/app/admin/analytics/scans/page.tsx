@@ -15,7 +15,7 @@ export default async function ScanAnalyticsPage() {
         Track QR code and NFC scan activity across your stores.
       </p>
 
-      <ScanDashboard stores={ctx.stores || []} />
+      <ScanDashboard stores={ctx.stores || []} plan={ctx.tenant.plan || 'free'} />
     </div>
   );
 }

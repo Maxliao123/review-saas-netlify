@@ -30,6 +30,7 @@ export interface PlanLimits {
     webhooks: boolean;
     aiTraining: boolean;
     hardwareManagement: boolean;
+    csvExport: boolean;
   };
   notifications: {
     email: boolean;
@@ -65,6 +66,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       webhooks: false,
       aiTraining: false,
       hardwareManagement: false,
+      csvExport: false,
     },
     notifications: {
       email: true,
@@ -99,6 +101,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       webhooks: false,
       aiTraining: false,
       hardwareManagement: false,
+      csvExport: true,
     },
     notifications: {
       email: true,
@@ -133,6 +136,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       webhooks: true,
       aiTraining: true,
       hardwareManagement: true,
+      csvExport: true,
     },
     notifications: {
       email: true,
@@ -167,6 +171,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
       webhooks: true,
       aiTraining: true,
       hardwareManagement: true,
+      csvExport: true,
     },
     notifications: {
       email: true,

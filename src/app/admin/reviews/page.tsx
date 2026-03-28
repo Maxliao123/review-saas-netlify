@@ -39,6 +39,7 @@ export default async function AdminReviewsPage() {
         reviews={enrichedReviews}
         stores={ctx.stores}
         role={ctx.role!}
+        plan={ctx.tenant.plan || 'free'}
       />
     </div>
   );

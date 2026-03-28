@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { QrCode, Smartphone, MapPin, TrendingUp, ArrowRight } from 'lucide-react';
+import ExportButton from '@/components/ExportButton';
 
 interface Store {
   id: number;
@@ -17,7 +18,7 @@ interface ScanData {
   topCities: Array<{ city: string; count: number }>;
 }
 
-export default function ScanDashboard({ stores }: { stores: Store[] }) {
+export default function ScanDashboard({ stores, plan }: { stores: Store[]; plan?: string }) {
   const [selectedStore, setSelectedStore] = useState<number | 'all'>('all');
   const [days, setDays] = useState(30);
   const [data, setData] = useState<ScanData | null>(null);
@@ -103,6 +104,15 @@ export default function ScanDashboard({ stores }: { stores: Store[] }) {
             </button>
           ))}
         </div>
+        <ExportButton
+          type="scans"
+          storeId={selectedStore !== 'all' ? selectedStore : undefined}
+          dateRange={{
+            from: new Date(Date.now() - days * 86400000).toISOString().split('T')[0],
+            to: new Date().toISOString().split('T')[0],
+          }}
+          plan={plan}
+        />
       </div>
 
       {/* Summary Cards */}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { updateReviewStatus, updateReviewDraft, approveReviews } from './actions';
 import { getStores } from '../stores/actions';
+import ExportButton from '@/components/ExportButton';
 
 interface Review {
     id: number;
@@ -26,11 +27,12 @@ interface ReviewsManagerProps {
     reviews: Review[];
     stores?: Store[];
     role?: 'owner' | 'manager' | 'staff';
+    plan?: string;
 }
 
 const PAGE_SIZE = 30;
 
-export default function ReviewsManager({ reviews, stores: propStores, role }: ReviewsManagerProps) {
+export default function ReviewsManager({ reviews, stores: propStores, role, plan }: ReviewsManagerProps) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [draftText, setDraftText] = useState('');
     const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -296,8 +298,15 @@ export default function ReviewsManager({ reviews, stores: propStores, role }: Re
                     <div className="text-sm text-gray-500 bg-blue-50 px-3 py-2 rounded border border-blue-100 max-w-md">
                         ℹ️ Approved replies are queued for daily automated publishing.</div>
                 </div>
-                <div className="text-sm text-gray-500">
-                    Showing {filteredReviews.length} reviews
+                <div className="flex items-center gap-3">
+                    <ExportButton
+                        type="reviews"
+                        storeId={selectedStoreId !== 'all' ? selectedStoreId : undefined}
+                        plan={plan}
+                    />
+                    <span className="text-sm text-gray-500">
+                        Showing {filteredReviews.length} reviews
+                    </span>
                 </div>
             </div>
 
