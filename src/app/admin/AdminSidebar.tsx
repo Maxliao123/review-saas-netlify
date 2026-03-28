@@ -35,6 +35,7 @@ import {
   Zap,
   Lightbulb,
   User,
+  Users,
   Menu,
   X,
   Star,
@@ -71,14 +72,16 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: '/admin/settings/google', label: '1. Google Business', icon: LinkIcon, ownerOnly: true },
       { href: '/admin/stores/setup', label: '2. Store Setup', icon: Store },
-      { href: '/admin/reviews', label: '3. Reviews & AI Reply', icon: MessageSquare },
-      { href: '/admin/templates', label: '4. Reply Templates', icon: BookTemplate },
-      { href: '/admin/analytics/scans', label: '5. QR Scan Analytics', icon: QrCode },
+      { href: '/admin/qr-codes', label: '3. QR Codes', icon: QrCode },
+      { href: '/admin/reviews', label: '4. Reviews & AI Reply', icon: MessageSquare },
+      { href: '/admin/templates', label: '5. Reply Templates', icon: BookTemplate },
+      { href: '/admin/analytics/scans', label: '6. QR Scan Analytics', icon: BarChart3 },
     ],
   },
   {
     title: 'Team',
     items: [
+      { href: '/admin/settings/team', label: 'Members', icon: Users },
       { href: '/admin/team/inbox', label: 'Team Inbox', icon: Inbox },
       { href: '/admin/invites', label: 'Invites', icon: Send },
       { href: '/admin/settings/notifications', label: 'Notifications', icon: Bell },

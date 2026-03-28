@@ -9,6 +9,9 @@ import {
   Pencil, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { generateReferralCode } from '@/lib/referral';
+import dynamic from 'next/dynamic';
+
+const QRCodeCard = dynamic(() => import('@/components/QRCodeCard'), { ssr: false });
 
 const STEPS = [
   { icon: MapPin, title: 'Connect & Select', desc: 'Link Google and choose your stores', est: '~1 min' },
@@ -997,19 +1000,22 @@ export default function OnboardingWizard({ userId, userEmail }: { userId: string
         {step === 3 && (
           <div className="space-y-5">
             <p className="text-sm text-gray-600">
-              Place QR codes at your stores so customers can leave reviews. Print these URLs as QR codes:
+              Download and print QR codes to place at your stores. Customers scan to leave a review.
             </p>
-            {createdStores.map((store) => (
-              <div key={store.id} className="bg-gray-50 rounded-xl p-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">{store.name}</p>
-                <code className="text-xs bg-white px-3 py-2 rounded-lg border block break-all text-gray-800">
-                  {domain}/?store={store.slug}&src=qr
-                </code>
-              </div>
-            ))}
+            <div className="space-y-4">
+              {createdStores.map((store) => (
+                <QRCodeCard
+                  key={store.id}
+                  storeSlug={store.slug}
+                  storeName={store.name}
+                  storeUrl={domain}
+                />
+              ))}
+            </div>
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <p className="text-sm text-blue-800">
-                You can customize survey tags and generate QR codes later in Store Setup.
+                You can customize and re-download QR codes anytime from the{' '}
+                <span className="font-medium">QR Codes</span> page in your dashboard.
               </p>
             </div>
 
