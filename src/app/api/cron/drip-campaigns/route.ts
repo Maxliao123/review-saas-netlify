@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { processPendingDrips } from '@/lib/drip-campaigns';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 /**
  * Cron: Process pending drip campaign emails (thank-you + 24h reminders).
