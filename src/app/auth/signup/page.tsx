@@ -1,12 +1,20 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, ArrowRight, Gift } from 'lucide-react';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const [step, setStep] = useState<'account' | 'business'>('account');
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
