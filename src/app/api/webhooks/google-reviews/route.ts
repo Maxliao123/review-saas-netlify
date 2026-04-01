@@ -193,9 +193,31 @@ export async function POST(request: Request) {
       .replaceAll('{{customer_review}}', review.comment || 'No text review')
       .replaceAll('{{rating}}', numericRating.toString());
 
+    // ── Deduplication: fetch recent replies to avoid repetitive responses ──
+    const { data: recentReplies } = await supabaseAdmin
+      .from('reviews_raw')
+      .select('reply_draft')
+      .eq('store_id', matchedStore.id)
+      .not('reply_draft', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    let dedupeInstruction = '';
+    if (recentReplies && recentReplies.length > 0) {
+      const recentTexts = recentReplies
+        .map((r: any) => {
+          try { return typeof r.reply_draft === 'string' ? JSON.parse(r.reply_draft).draft : r.reply_draft?.draft; }
+          catch { return null; }
+        })
+        .filter(Boolean);
+      if (recentTexts.length > 0) {
+        dedupeInstruction = `\n\nDEDUPLICATION: These replies were recently sent from this store. Your new reply MUST use a completely different opening, different structure, and different tone variation. DO NOT start with the same words or use similar phrasing:\n${recentTexts.map((t: string) => `- "${t.slice(0, 100)}"`).join('\n')}`;
+      }
+    }
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: finalPrompt }],
+      messages: [{ role: 'system', content: finalPrompt + dedupeInstruction }],
       temperature: 0.7,
       response_format: { type: 'json_object' },
     });

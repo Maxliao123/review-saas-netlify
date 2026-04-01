@@ -227,6 +227,18 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // ── Deduplication: fetch recent reviews to avoid repetitive output ──
+        const { data: recentReviews } = await supabase
+            .from('generated_reviews')
+            .select('review_text')
+            .eq('store_id', storeDbId)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        const dedupeContext = (recentReviews && recentReviews.length > 0)
+            ? `\n\nDEDUPLICATION REQUIREMENT: The following reviews were recently generated for this store. Your new review MUST be distinctly different — use a different opening, different specific details, and a different angle. DO NOT repeat similar sentence structures or phrases:\n${recentReviews.map((r: any) => `- "${r.review_text}"`).join('\n')}`
+            : '';
+
         const promptData = buildPrompt({
             lang: currentLang,
             storeid,
@@ -240,7 +252,7 @@ export async function POST(request: NextRequest) {
             persona
         });
 
-        const aiRes = await callOpenAI(promptData.sys, promptData.user);
+        const aiRes = await callOpenAI(promptData.sys + dedupeContext, promptData.user);
         let reviewText = aiRes.text;
 
         reviewText = await enforceNoImprovementIfNoCons(reviewText, currentLang, consTags.length > 0);
