@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { getGoogleClientForTenant } from '@/lib/google-business';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 
 // Metrics to fetch from the Business Profile Performance API
 const METRIC_KEYS = [

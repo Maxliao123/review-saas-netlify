@@ -31,8 +31,10 @@ export async function GET(
       .single();
 
     if (storeErr || !store) {
+      // Sanitize storeSlug to prevent JS comment injection via */
+      const safeSlug = storeSlug.replace(/\*\//g, '').replace(/[^\w-]/g, '');
       return new NextResponse(
-        `/* ReplyWise Widget: store "${storeSlug}" not found */`,
+        `/* ReplyWise Widget: store "${safeSlug}" not found */`,
         { status: 404, headers: { 'Content-Type': 'application/javascript; charset=utf-8' } }
       );
     }
@@ -79,8 +81,10 @@ export async function GET(
       },
     });
   } catch (err: any) {
+    console.error('Widget error:', err);
+    // Don't leak internal error details to the public response
     return new NextResponse(
-      `/* ReplyWise Widget error: ${err.message} */`,
+      `/* ReplyWise Widget: internal error */`,
       { status: 500, headers: { 'Content-Type': 'application/javascript; charset=utf-8' } }
     );
   }

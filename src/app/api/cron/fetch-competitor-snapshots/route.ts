@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 
 /**
  * GET /api/cron/fetch-competitor-snapshots?cron_secret=xxx

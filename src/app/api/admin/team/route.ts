@@ -63,7 +63,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    let body: { email?: string; role?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
     const { email, role } = body;
 
     if (!email || !email.trim()) {
@@ -193,7 +198,13 @@ export async function PUT(request: Request) {
       );
     }
 
-    const { memberId, role } = await request.json();
+    let body: { memberId?: string; role?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    const { memberId, role } = body;
 
     if (!memberId || !role || !['owner', 'manager', 'staff'].includes(role)) {
       return NextResponse.json({ error: 'Valid memberId and role required' }, { status: 400 });
@@ -234,7 +245,13 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const { memberId } = await request.json();
+    let body: { memberId?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    const { memberId } = body;
 
     if (!memberId) {
       return NextResponse.json({ error: 'memberId is required' }, { status: 400 });
