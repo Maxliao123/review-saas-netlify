@@ -90,13 +90,13 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E8654A] focus:border-transparent outline-none"
           />
         </div>
         <button
           type="submit"
           disabled={loading || !email}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#E8654A] text-white rounded-xl hover:bg-[#C94D35] transition-colors disabled:opacity-50"
         >
           <Mail className="w-5 h-5" />
           {loading ? 'Sending...' : 'Send Magic Link'}
@@ -111,7 +111,7 @@ function LoginForm() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Don&apos;t have an account?{' '}
-        <Link href="/auth/signup" className="text-blue-600 hover:underline">
+        <Link href="/auth/signup" className="text-[#E8654A] hover:underline">
           Sign up
         </Link>
       </p>
@@ -121,7 +121,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF6EC]">
       <Suspense fallback={
         <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg text-center text-gray-400">
           Loading...

@@ -153,7 +153,7 @@ export default function AdminSidebar({ user, tenant, role, stores }: SidebarProp
       {/* Tenant Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00] shrink-0">
             <Star className="h-4 w-4 text-white fill-white" />
           </div>
           <div className="min-w-0">
@@ -192,7 +192,7 @@ export default function AdminSidebar({ user, tenant, role, stores }: SidebarProp
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700'
+                        ? 'bg-[#FFF7ED] text-[#E8654A]'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     }`}
                   >

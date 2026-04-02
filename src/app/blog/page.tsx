@@ -44,11 +44,11 @@ export default function BlogListPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00]">
                 <Star className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-lg font-bold text-gray-900">
-                Reputation<span className="text-blue-600">Monitor</span>
+                Reputation<span className="text-[#E8654A]">Monitor</span>
               </span>
             </Link>
             <div className="flex items-center gap-4">
@@ -60,7 +60,7 @@ export default function BlogListPage() {
               </Link>
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-4 py-2 text-sm font-semibold text-white"
               >
                 Start Free <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -70,16 +70,16 @@ export default function BlogListPage() {
       </header>
 
       {/* Hero */}
-      <section className="pt-16 pb-8 text-center bg-gradient-to-b from-blue-50/50 to-white">
+      <section className="pt-16 pb-8 text-center bg-gradient-to-b from-[#FFF7ED]/50 to-white">
         <div className="mx-auto max-w-3xl px-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#FFF7ED] px-3 py-1 text-sm font-medium text-[#E8654A] mb-4">
             <BookOpen className="h-3.5 w-3.5" />
             Blog & Resources
           </div>
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
             Google Review Management
             <br />
-            <span className="text-blue-600">Tips & Strategies</span>
+            <span className="text-[#E8654A]">Tips & Strategies</span>
           </h1>
           <p className="mt-4 text-lg text-gray-600">
             Expert guides for restaurants, hotels, clinics, and local businesses
@@ -91,7 +91,7 @@ export default function BlogListPage() {
       {/* Category Tags */}
       <section className="py-6">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 flex flex-wrap justify-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white">
+          <span className="inline-flex items-center rounded-full bg-[#E8654A] px-4 py-1.5 text-sm font-medium text-white">
             All Posts
           </span>
           {BLOG_CATEGORIES.map((cat) => (
@@ -113,7 +113,7 @@ export default function BlogListPage() {
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className={`group flex flex-col rounded-2xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-lg hover:ring-blue-200 transition-all ${
+                className={`group flex flex-col rounded-2xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-lg hover:ring-[#FEE2D5] transition-all ${
                   idx === 0 ? 'md:col-span-2' : ''
                 }`}
               >
@@ -131,7 +131,7 @@ export default function BlogListPage() {
                 ) : (
                   <div className={`h-2 w-full ${
                     post.category === 'guides'
-                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      ? 'bg-gradient-to-r from-[#E8654A] to-[#FFBF00]'
                       : post.category === 'strategies'
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
                       : post.category === 'industry'
@@ -144,7 +144,7 @@ export default function BlogListPage() {
                   <div className="flex items-center gap-3 mb-3">
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       post.category === 'guides'
-                        ? 'bg-blue-50 text-blue-700'
+                        ? 'bg-[#FFF7ED] text-[#E8654A]'
                         : post.category === 'strategies'
                         ? 'bg-emerald-50 text-emerald-700'
                         : post.category === 'industry'
@@ -160,7 +160,7 @@ export default function BlogListPage() {
                     </span>
                   </div>
 
-                  <h2 className={`font-bold text-gray-900 group-hover:text-blue-600 transition-colors ${
+                  <h2 className={`font-bold text-gray-900 group-hover:text-[#E8654A] transition-colors ${
                     idx === 0 ? 'text-2xl' : 'text-lg'
                   }`}>
                     {post.title}
@@ -178,7 +178,7 @@ export default function BlogListPage() {
                         day: 'numeric',
                       })}
                     </span>
-                    <span className="text-sm font-medium text-blue-600 group-hover:gap-2 flex items-center gap-1 transition-all">
+                    <span className="text-sm font-medium text-[#E8654A] group-hover:gap-2 flex items-center gap-1 transition-all">
                       Read more <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </div>
@@ -199,7 +199,7 @@ export default function BlogListPage() {
         </p>
         <Link
           href="/auth/signup"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-3 text-base font-semibold text-white hover:from-blue-600 hover:to-indigo-600 transition-all"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-8 py-3 text-base font-semibold text-white hover:from-[#C94D35] hover:to-[#E8654A] transition-all"
         >
           Start Free <ArrowRight className="h-4 w-4" />
         </Link>

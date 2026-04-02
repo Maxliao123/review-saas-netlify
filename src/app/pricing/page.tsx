@@ -154,11 +154,11 @@ export default async function PricingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00]">
                 <Star className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-lg font-bold text-gray-900">
-                Reputation<span className="text-blue-600">Monitor</span>
+                Reputation<span className="text-[#E8654A]">Monitor</span>
               </span>
             </Link>
             <div className="flex items-center gap-4">
@@ -173,7 +173,7 @@ export default async function PricingPage() {
                   </Link>
                   <Link
                     href="/auth/signup"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-4 py-2 text-sm font-semibold text-white"
                   >
                     Start Free <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
@@ -203,7 +203,7 @@ export default async function PricingPage() {
                 key={plan.name}
                 className={`relative flex flex-col rounded-2xl p-8 ${
                   plan.highlighted
-                    ? 'bg-gradient-to-b from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/20 ring-2 ring-blue-600 lg:scale-105'
+                    ? 'bg-gradient-to-b from-[#E8654A] to-[#C94D35] text-white shadow-xl shadow-[#E8654A]/20 ring-2 ring-[#E8654A] lg:scale-105'
                     : 'bg-white ring-1 ring-gray-200'
                 }`}
               >
@@ -217,7 +217,7 @@ export default async function PricingPage() {
                   <h3 className={`text-lg font-bold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
                     {plan.name}
                   </h3>
-                  <p className={`mt-1 text-sm ${plan.highlighted ? 'text-blue-100' : 'text-gray-500'}`}>
+                  <p className={`mt-1 text-sm ${plan.highlighted ? 'text-[#F09A88]' : 'text-gray-500'}`}>
                     {plan.description}
                   </p>
                 </div>
@@ -225,7 +225,7 @@ export default async function PricingPage() {
                 <div className="mt-6 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">{plan.price}</span>
                   {plan.period && (
-                    <span className={`text-sm ${plan.highlighted ? 'text-blue-200' : 'text-gray-500'}`}>
+                    <span className={`text-sm ${plan.highlighted ? 'text-[#F09A88]' : 'text-gray-500'}`}>
                       {plan.period}
                     </span>
                   )}
@@ -236,10 +236,10 @@ export default async function PricingPage() {
                     <li key={feature} className="flex items-start gap-2">
                       <Check
                         className={`h-4 w-4 mt-0.5 shrink-0 ${
-                          plan.highlighted ? 'text-blue-200' : 'text-blue-600'
+                          plan.highlighted ? 'text-[#F09A88]' : 'text-[#E8654A]'
                         }`}
                       />
-                      <span className={`text-sm ${plan.highlighted ? 'text-blue-50' : 'text-gray-600'}`}>
+                      <span className={`text-sm ${plan.highlighted ? 'text-[#FEE2D5]' : 'text-gray-600'}`}>
                         {feature}
                       </span>
                     </li>
@@ -260,14 +260,14 @@ export default async function PricingPage() {
       </section>
 
       {/* Feature highlights */}
-      <section className="py-16 bg-gray-50 border-y border-gray-100">
+      <section className="py-16 bg-[#FDF6EC] border-y border-gray-100">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-12">
             Why Businesses Choose ReplyWise AI
           </h2>
           <div className="grid gap-8 sm:grid-cols-3">
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#E8654A]">
                 <Zap className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-gray-900">10x More Reviews</h3>
@@ -276,7 +276,7 @@ export default async function PricingPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#E8654A]">
                 <Shield className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-gray-900">100% Authentic</h3>
@@ -285,7 +285,7 @@ export default async function PricingPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#E8654A]">
                 <Headphones className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-gray-900">Save 10+ Hours/Week</h3>
@@ -320,7 +320,7 @@ export default async function PricingPage() {
         <p className="mt-2 text-gray-400">Start free today. No credit card required.</p>
         <Link
           href="/auth/signup"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-3 text-base font-semibold text-white hover:from-blue-600 hover:to-indigo-600 transition-all"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-8 py-3 text-base font-semibold text-white hover:from-[#C94D35] hover:to-[#E8654A] transition-all"
         >
           Start Free <ArrowRight className="h-4 w-4" />
         </Link>

@@ -146,7 +146,7 @@ export default function SetupChecklist() {
           {/* Progress bar */}
           <div className="mt-2 h-2 w-64 max-w-full rounded-full bg-gray-100">
             <div
-              className="h-2 rounded-full bg-blue-600 transition-all duration-500"
+              className="h-2 rounded-full bg-[#E8654A] transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -182,7 +182,7 @@ export default function SetupChecklist() {
               {!done && step.href !== '#' && (
                 <Link
                   href={step.href}
-                  className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-[#E8654A] hover:text-[#C94D35] transition-colors"
                 >
                   {step.actionLabel}
                   <ArrowRight className="h-3 w-3" />

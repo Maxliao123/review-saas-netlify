@@ -61,7 +61,7 @@ export default function UpgradeButton({ planId, label, highlighted, isAuthentica
         isCurrentPlan
           ? 'bg-gray-200 text-gray-500 cursor-default'
           : highlighted
-            ? 'bg-white text-blue-700 hover:bg-blue-50 shadow-lg'
+            ? 'bg-white text-[#E8654A] hover:bg-[#FFF7ED] shadow-lg'
             : 'bg-gray-900 text-white hover:bg-gray-800'
       } disabled:opacity-60`}
     >

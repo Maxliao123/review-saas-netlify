@@ -80,7 +80,7 @@ function postProcessHtml(html: string): string {
   // 1. Convert footnote references [^N] → superscript anchor links
   result = result.replace(
     /\[\^(\d+)\]/g,
-    '<sup><a href="#ref-$1" class="footnote-ref text-blue-600 hover:text-blue-800 no-underline" id="fnref-$1">[$1]</a></sup>'
+    '<sup><a href="#ref-$1" class="footnote-ref text-[#E8654A] hover:text-[#C94D35] no-underline" id="fnref-$1">[$1]</a></sup>'
   );
 
   // 2. Wrap tables in responsive container
@@ -146,7 +146,7 @@ function postProcessHtml(html: string): string {
   // 7. Style blockquotes — summary callout with blue accent
   result = result.replace(
     /<blockquote>/g,
-    '<blockquote class="not-prose border-l-4 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50/30 rounded-r-xl px-5 py-4 my-8 text-[14px] text-gray-700 leading-relaxed shadow-sm">'
+    '<blockquote class="not-prose border-l-4 border-[#E8654A]/30 bg-gradient-to-r from-[#FFF7ED] to-[#FEE2D5]/30 rounded-r-xl px-5 py-4 my-8 text-[14px] text-gray-700 leading-relaxed shadow-sm">'
   );
 
   // 8. Style h3 subheadings inside markdown content — visible distinction from body
@@ -164,7 +164,7 @@ function postProcessHtml(html: string): string {
   // 9. Convert internal markdown links that still show raw syntax
   result = result.replace(
     /\[([^\]]+)\]\(\/([^)]+)\)/g,
-    '<a href="/$2" class="text-blue-600 hover:text-blue-800 underline underline-offset-2">$1</a>'
+    '<a href="/$2" class="text-[#E8654A] hover:text-[#C94D35] underline underline-offset-2">$1</a>'
   );
 
   // 10. Reduce bold noise — strip <strong> from long phrases (>50 chars)
@@ -252,14 +252,14 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
         prose-h3:text-[17px] prose-h3:mt-10 prose-h3:mb-4 prose-h3:leading-snug prose-h3:tracking-tight
         prose-h4:text-[15px] prose-h4:font-semibold prose-h4:mt-8 prose-h4:mb-3
         prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-gray-600 prose-p:mb-5
-        prose-a:text-blue-600 prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-blue-800
+        prose-a:text-[#E8654A] prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-[#C94D35]
         prose-strong:text-gray-800 prose-strong:font-semibold
         prose-li:text-gray-600 prose-li:text-[15px] prose-li:leading-[1.85]
         prose-ol:list-decimal prose-ul:list-disc
         prose-ol:my-6 prose-ul:my-6
         prose-li:my-2
         prose-li:marker:text-gray-400
-        prose-blockquote:not-italic prose-blockquote:border-l-4 prose-blockquote:border-blue-200 prose-blockquote:bg-blue-50/50 prose-blockquote:rounded-r-lg prose-blockquote:px-5 prose-blockquote:py-4 prose-blockquote:my-8
+        prose-blockquote:not-italic prose-blockquote:border-l-4 prose-blockquote:border-[#E8654A]/20 prose-blockquote:bg-[#FFF7ED]/50 prose-blockquote:rounded-r-lg prose-blockquote:px-5 prose-blockquote:py-4 prose-blockquote:my-8
         prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono
         prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:overflow-x-auto
         prose-hr:my-12 prose-hr:border-gray-200
@@ -345,7 +345,7 @@ export function ReferencesSection({ body }: ReferencesProps) {
               dangerouslySetInnerHTML={{
                 __html: ref.text.replace(
                   /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-                  '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>'
+                  '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-[#E8654A] hover:text-[#C94D35] underline">$1</a>'
                 ),
               }}
             />
@@ -376,7 +376,7 @@ export function InternalLinkCallout({ posts }: InternalLinksProps) {
           <li key={post.slug}>
             <a
               href={`/blog/${post.slug}`}
-              className="text-[14px] text-blue-600 hover:text-blue-800 underline underline-offset-2 leading-relaxed"
+              className="text-[14px] text-[#E8654A] hover:text-[#C94D35] underline underline-offset-2 leading-relaxed"
             >
               {post.title}
             </a>

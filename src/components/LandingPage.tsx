@@ -34,11 +34,11 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00]">
               <Star className="h-4 w-4 text-white fill-white" />
             </div>
-            <span className="text-lg font-bold text-gray-900">
-              Reply<span className="text-blue-600">Wise AI</span>
+            <span className="text-lg font-bold text-[#3D3D3D]">
+              Reply<span className="text-[#E8654A]">Wise AI</span>
             </span>
           </Link>
 
@@ -74,7 +74,7 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
             </Link>
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-[#C94D35] hover:to-[#E8654A] transition-all"
             >
               {lang === 'zh' ? '免費開始' : 'Start Free'}
               <ArrowRight className="h-3.5 w-3.5" />
@@ -117,7 +117,7 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
               </Link>
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-4 py-2.5 text-sm font-semibold text-white"
               >
                 {lang === 'zh' ? '免費開始' : 'Start Free'} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -149,16 +149,16 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white pt-16 pb-20 sm:pt-24 sm:pb-28">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF7ED]/50 via-[#FDF6EC] to-white pt-16 pb-20 sm:pt-24 sm:pb-28">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-blue-100/40 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-indigo-100/40 blur-3xl" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-[#FEE2D5]/40 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-[#FFBF00]/20 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
         {/* Badge */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 ring-1 ring-blue-100">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#FFF7ED] px-4 py-1.5 text-sm font-medium text-[#E8654A] ring-1 ring-[#FEE2D5]">
           <Sparkles className="h-3.5 w-3.5" />
           {t.badge}
         </div>
@@ -166,7 +166,7 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
         {/* Headline */}
         <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
           {t.title1}{' '}
-          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#E8654A] to-[#FFBF00] bg-clip-text text-transparent">
             {t.titleHighlight}
           </span>
         </h1>
@@ -180,7 +180,7 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/auth/signup"
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-indigo-700 transition-all"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-[#E8654A]/25 hover:shadow-[#E8654A]/40 hover:from-[#C94D35] hover:to-[#E8654A] transition-all"
           >
             {t.ctaPrimary}
             <ArrowRight className="h-4 w-4" />
@@ -273,13 +273,13 @@ function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
             return (
               <div
                 key={step.step}
-                className="relative rounded-2xl bg-gray-50 p-8 hover:bg-blue-50/50 transition-colors group"
+                className="relative rounded-2xl bg-[#FDF6EC] p-8 hover:bg-[#FFF7ED] transition-colors group"
               >
-                <div className="text-5xl font-extrabold text-gray-100 group-hover:text-blue-100 transition-colors absolute top-6 right-6">
+                <div className="text-5xl font-extrabold text-gray-100 group-hover:text-[#FEE2D5] transition-colors absolute top-6 right-6">
                   {step.step}
                 </div>
                 <div className="relative">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8654A] to-[#FFBF00] text-white">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
@@ -348,7 +348,7 @@ function Features({ lang }: { lang: 'en' | 'zh' }) {
   ] : FEATURES;
 
   return (
-    <section id="features" className="py-20 sm:py-28 bg-gray-50/50">
+    <section id="features" className="py-20 sm:py-28 bg-[#FDF6EC]/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -365,9 +365,9 @@ function Features({ lang }: { lang: 'en' | 'zh' }) {
             return (
               <div
                 key={feature.title}
-                className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 hover:shadow-md hover:ring-blue-100 transition-all"
+                className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 hover:shadow-md hover:ring-[#FEE2D5] transition-all"
               >
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#FFF7ED] text-[#E8654A]">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">{feature.title}</h3>
@@ -463,7 +463,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
               key={plan.name}
               className={`relative rounded-2xl p-8 ${
                 plan.highlighted
-                  ? 'bg-gradient-to-b from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/20 ring-2 ring-blue-600 scale-105'
+                  ? 'bg-gradient-to-b from-[#E8654A] to-[#C94D35] text-white shadow-xl shadow-[#E8654A]/20 ring-2 ring-[#E8654A] scale-105'
                   : 'bg-white ring-1 ring-gray-200'
               }`}
             >
@@ -482,7 +482,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
               </h3>
               <p
                 className={`mt-1 text-sm ${
-                  plan.highlighted ? 'text-blue-100' : 'text-gray-500'
+                  plan.highlighted ? 'text-[#F09A88]' : 'text-gray-500'
                 }`}
               >
                 {plan.description}
@@ -492,7 +492,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
                 <span className="text-4xl font-extrabold">{plan.price}</span>
                 <span
                   className={`text-sm ${
-                    plan.highlighted ? 'text-blue-200' : 'text-gray-500'
+                    plan.highlighted ? 'text-[#F09A88]' : 'text-gray-500'
                   }`}
                 >
                   {plan.period}
@@ -504,12 +504,12 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
                   <li key={feature} className="flex items-start gap-2">
                     <Check
                       className={`h-4 w-4 mt-0.5 shrink-0 ${
-                        plan.highlighted ? 'text-blue-200' : 'text-blue-600'
+                        plan.highlighted ? 'text-[#F09A88]' : 'text-[#E8654A]'
                       }`}
                     />
                     <span
                       className={`text-sm ${
-                        plan.highlighted ? 'text-blue-50' : 'text-gray-600'
+                        plan.highlighted ? 'text-[#FEE2D5]' : 'text-gray-600'
                       }`}
                     >
                       {feature}
@@ -522,7 +522,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
                 href={plan.href}
                 className={`mt-8 block rounded-lg py-2.5 text-center text-sm font-semibold transition-all ${
                   plan.highlighted
-                    ? 'bg-white text-blue-700 hover:bg-blue-50'
+                    ? 'bg-white text-[#E8654A] hover:bg-[#FFF7ED]'
                     : 'bg-gray-900 text-white hover:bg-gray-800'
                 }`}
               >
@@ -534,7 +534,7 @@ function Pricing({ lang }: { lang: 'en' | 'zh' }) {
 
         <p className="mt-10 text-center text-sm text-gray-500">
           {lang === 'zh' ? '需要超過 10 個據點？' : 'Need more than 10 locations?'}{' '}
-          <a href="mailto:hello@replywiseai.com" className="text-blue-600 font-medium hover:underline">
+          <a href="mailto:hello@replywiseai.com" className="text-[#E8654A] font-medium hover:underline">
             {lang === 'zh' ? '聯繫我們取得企業方案' : 'Contact us for Enterprise pricing'}
           </a>
         </p>
@@ -574,10 +574,10 @@ function Testimonials({ lang }: { lang: 'en' | 'zh' }) {
   ] : TESTIMONIALS;
 
   return (
-    <section className="py-20 sm:py-28 bg-gray-50/50">
+    <section className="py-20 sm:py-28 bg-[#FDF6EC]/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-extrabold text-[#3D3D3D] sm:text-4xl">
             {lang === 'zh' ? '深受商家信賴' : 'Loved by Business Owners'}
           </h2>
           <p className="mt-4 text-lg text-gray-500">
@@ -670,7 +670,7 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
           <div className="grid grid-cols-3 bg-gray-50 text-sm font-semibold text-gray-500">
             <div className="px-6 py-4" />
             <div className="px-6 py-4 text-center">{t.col1}</div>
-            <div className="px-6 py-4 text-center bg-blue-50 text-blue-700">{t.col2}</div>
+            <div className="px-6 py-4 text-center bg-[#FFF7ED] text-[#E8654A]">{t.col2}</div>
           </div>
           {/* Rows */}
           {rows.map((row, i) => (
@@ -680,7 +680,7 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
             >
               <div className="px-6 py-4 font-medium text-gray-700">{row.label}</div>
               <div className="px-6 py-4 text-center text-gray-500">{row.old}</div>
-              <div className="px-6 py-4 text-center bg-blue-50/50 font-semibold text-blue-700">{row.new_}</div>
+              <div className="px-6 py-4 text-center bg-[#FFF7ED]/50 font-semibold text-[#E8654A]">{row.new_}</div>
             </div>
           ))}
         </div>
@@ -693,26 +693,26 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
 
 function TrustSection({ lang }: { lang: 'en' | 'zh' }) {
   return (
-    <section className="py-16 bg-gray-50/50 border-y border-gray-100">
+    <section className="py-16 bg-[#FDF6EC]/50 border-y border-gray-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-4 text-center">
           <div className="flex flex-col items-center gap-2">
-            <Shield className="h-8 w-8 text-blue-600" />
+            <Shield className="h-8 w-8 text-[#E8654A]" />
             <h3 className="font-bold text-gray-900">{lang === 'zh' ? '資料安全' : 'Secure & Private'}</h3>
             <p className="text-sm text-gray-500">{lang === 'zh' ? '端到端加密，HTTPS 傳輸' : 'End-to-end encryption, HTTPS only'}</p>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Zap className="h-8 w-8 text-blue-600" />
+            <Zap className="h-8 w-8 text-[#E8654A]" />
             <h3 className="font-bold text-gray-900">{lang === 'zh' ? '5 分鐘啟用' : '5-Min Setup'}</h3>
             <p className="text-sm text-gray-500">{lang === 'zh' ? '連結 Google 商家即可開始' : 'Connect Google Business and go'}</p>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Globe className="h-8 w-8 text-blue-600" />
+            <Globe className="h-8 w-8 text-[#E8654A]" />
             <h3 className="font-bold text-gray-900">{lang === 'zh' ? '支援 6 種語言' : '6 Languages'}</h3>
             <p className="text-sm text-gray-500">{lang === 'zh' ? '用顧客的語言生成評論' : 'Generate reviews in your customers\' language'}</p>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <Star className="h-8 w-8 text-blue-600" />
+            <Star className="h-8 w-8 text-[#E8654A]" />
             <h3 className="font-bold text-gray-900">{lang === 'zh' ? 'Google 整合' : 'Google Integrated'}</h3>
             <p className="text-sm text-gray-500">{lang === 'zh' ? '官方 API 直連，即時同步' : 'Official API, real-time sync'}</p>
           </div>
@@ -720,13 +720,13 @@ function TrustSection({ lang }: { lang: 'en' | 'zh' }) {
 
         {/* Industry badges */}
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400">
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '餐廳' : 'Restaurants'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '飯店' : 'Hotels'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '診所' : 'Clinics'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '美容院' : 'Salons'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '汽修廠' : 'Auto Repair'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '健身房' : 'Gyms'}</span>
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-green-500" />{lang === 'zh' ? '零售' : 'Retail'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '餐廳' : 'Restaurants'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '飯店' : 'Hotels'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '診所' : 'Clinics'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '美容院' : 'Salons'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '汽修廠' : 'Auto Repair'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '健身房' : 'Gyms'}</span>
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-[#2D6A4F]" />{lang === 'zh' ? '零售' : 'Retail'}</span>
         </div>
       </div>
     </section>
@@ -739,23 +739,23 @@ function FinalCTA({ lang }: { lang: 'en' | 'zh' }) {
   return (
     <section className="py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-16 sm:px-16 sm:py-20 text-center">
+        <div className="rounded-3xl bg-gradient-to-r from-[#E8654A] to-[#C94D35] px-8 py-16 sm:px-16 sm:py-20 text-center">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
             {lang === 'zh' ? '準備好讓每位客人都成為你的神秘客了嗎？' : 'Ready to Turn Every Customer Into Your Mystery Shopper?'}
           </h2>
-          <p className="mt-4 text-lg text-blue-100 max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-[#FEE2D5] max-w-xl mx-auto">
             {lang === 'zh' ? '加入數百家已經在用 AI 收集真實回饋、持續改善經營的企業。' : 'Join hundreds of businesses already using AI to collect real feedback and improve continuously.'}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg hover:bg-blue-50 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-[#E8654A] shadow-lg hover:bg-[#FFF7ED] transition-all"
             >
               {lang === 'zh' ? '免費開始' : 'Start Free Today'}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <p className="mt-4 text-sm text-blue-200">
+          <p className="mt-4 text-sm text-[#F09A88]">
             {lang === 'zh' ? '無需信用卡。免費方案永久可用。' : 'No credit card required. Free plan available forever.'}
           </p>
         </div>
@@ -774,7 +774,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00]">
                 <Star className="h-3.5 w-3.5 text-white fill-white" />
               </div>
               <span className="text-base font-bold text-white">ReplyWise AI</span>
@@ -854,7 +854,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FDF6EC]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

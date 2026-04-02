@@ -83,7 +83,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <meta name="theme-color" content="#2563EB" />
+        <meta name="theme-color" content="#E8654A" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

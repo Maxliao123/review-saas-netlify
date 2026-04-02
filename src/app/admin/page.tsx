@@ -153,13 +153,13 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 hover:shadow-md hover:ring-blue-100 transition-all group"
+      className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100 hover:shadow-md hover:ring-[#FEE2D5] transition-all group"
     >
       <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-100 transition-colors">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FFF7ED] text-[#E8654A] group-hover:bg-[#FEE2D5] transition-colors">
           <Icon className="h-5 w-5" />
         </div>
-        <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-blue-400 transition-colors" />
+        <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-[#E8654A] transition-colors" />
       </div>
       <div className="mt-4">
         <div className="text-2xl font-bold text-gray-900">{value}</div>
@@ -288,7 +288,7 @@ export default async function AdminDashboard() {
           <span>{data.generatedThisMonth} generated ({Math.round((data.generatedThisMonth / data.scansThisMonth) * 100)}%)</span>
           <span className="text-gray-300">&rarr;</span>
           <span>{data.postedThisMonth} posted ({data.generatedThisMonth > 0 ? Math.round((data.postedThisMonth / data.generatedThisMonth) * 100) : 0}%)</span>
-          <Link href="/admin/analytics/scans" className="text-blue-600 hover:text-blue-800 font-medium ml-auto">
+          <Link href="/admin/analytics/scans" className="text-[#E8654A] hover:text-[#C94D35] font-medium ml-auto">
             View funnel &rarr;
           </Link>
         </div>
@@ -296,14 +296,14 @@ export default async function AdminDashboard() {
 
       {/* Notification setup prompt */}
       {!data.hasNotifications && (
-        <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
-          <Bell className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+        <div className="mt-4 rounded-xl bg-[#FFF7ED] border border-[#FEE2D5] p-4 flex items-start gap-3">
+          <Bell className="h-5 w-5 text-[#E8654A] mt-0.5 shrink-0" />
           <div>
-            <h3 className="font-semibold text-blue-900 text-sm">Set up notifications</h3>
-            <p className="mt-0.5 text-xs text-blue-700">
+            <h3 className="font-semibold text-[#3D3D3D] text-sm">Set up notifications</h3>
+            <p className="mt-0.5 text-xs text-[#6D6D6D]">
               Get instant alerts when customers leave negative reviews so you can respond quickly.
             </p>
-            <Link href="/admin/settings/notifications" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-blue-800 hover:text-blue-900">
+            <Link href="/admin/settings/notifications" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#E8654A] hover:text-[#C94D35]">
               Configure now <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>

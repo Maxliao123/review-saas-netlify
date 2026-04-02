@@ -16,7 +16,7 @@ function HeroSection({ storeData }: { storeData: any }) {
     const initials = (storeData.name || 'S').slice(0, 2).toUpperCase();
 
     return (
-        <div className="relative h-[180px] md:h-[220px] w-full bg-gradient-to-br from-blue-50 to-slate-100">
+        <div className="relative h-[180px] md:h-[220px] w-full bg-gradient-to-br from-[#FFF7ED] to-[#FDF6EC]">
             {heroSrc && !heroError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -27,7 +27,7 @@ function HeroSection({ storeData }: { storeData: any }) {
                 />
             ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                    <div className="text-6xl font-bold text-blue-200/50 select-none">{initials}</div>
+                    <div className="text-6xl font-bold text-[#E8654A]/20 select-none">{initials}</div>
                 </div>
             )}
 
@@ -42,7 +42,7 @@ function HeroSection({ storeData }: { storeData: any }) {
                         onError={() => setLogoError(true)}
                     />
                 ) : (
-                    <div className="h-full w-full rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                    <div className="h-full w-full rounded-lg bg-[#E8654A] flex items-center justify-center text-white font-bold text-lg">
                         {initials}
                     </div>
                 )}
@@ -111,7 +111,7 @@ function StoreLoader() {
     if (status === 'loading') {
         return (
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#E8654A]" />
             </div>
         );
     }
@@ -187,7 +187,7 @@ function StoreLoader() {
                             className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-xs text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
                         >
                             <span>⭐ Powered by ReplyWise AI</span>
-                            <span className="text-blue-500 font-medium">Get yours free →</span>
+                            <span className="text-[#E8654A] font-medium">Get yours free →</span>
                         </a>
                     </div>
                 )}

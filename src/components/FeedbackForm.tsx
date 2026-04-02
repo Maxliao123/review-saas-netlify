@@ -74,7 +74,7 @@ export function FeedbackForm({ storeId, rating, onClose }: FeedbackFormProps) {
                 <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
+                    className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#E8654A] focus:border-transparent min-h-[120px]"
                     placeholder="Tell us about your experience... / 請分享您的體驗..."
                     required
                 />
@@ -88,7 +88,7 @@ export function FeedbackForm({ storeId, rating, onClose }: FeedbackFormProps) {
                     type="text"
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#E8654A] focus:border-transparent"
                     placeholder="Phone or Email / 電話或 Email"
                 />
             </div>
@@ -101,7 +101,7 @@ export function FeedbackForm({ storeId, rating, onClose }: FeedbackFormProps) {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    className="w-full py-3 bg-[#E8654A] text-white rounded-full font-bold hover:bg-[#C94D35] disabled:opacity-50 transition-colors"
                 >
                     {isSubmitting ? 'Sending...' : 'Send Feedback / 送出'}
                 </button>

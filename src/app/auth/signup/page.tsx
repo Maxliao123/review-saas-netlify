@@ -8,7 +8,7 @@ import { Building2, ArrowRight, Gift } from 'lucide-react';
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#FDF6EC]"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
       <SignupContent />
     </Suspense>
   );
@@ -71,7 +71,7 @@ function SignupContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF6EC]">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
@@ -79,7 +79,7 @@ function SignupContent() {
         </div>
 
         {refCode && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 px-4 py-3">
+          <div className="mb-6 flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 to-[#FFF7ED] border border-emerald-200 px-4 py-3">
             <Gift className="w-5 h-5 text-emerald-600 flex-shrink-0" />
             <p className="text-sm text-emerald-800 font-medium">
               Your friend referred you! Get <strong>50% off</strong> your first month.
@@ -121,13 +121,13 @@ function SignupContent() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E8654A] focus:border-transparent outline-none"
                 />
               </div>
               <button
                 onClick={() => email && setStep('business')}
                 disabled={!email}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#E8654A] text-white rounded-xl hover:bg-[#C94D35] transition-colors disabled:opacity-50"
               >
                 Next
                 <ArrowRight className="w-4 h-4" />
@@ -151,14 +151,14 @@ function SignupContent() {
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Your Restaurant / Shop Name"
                   required
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E8654A] focus:border-transparent outline-none"
                 />
               </div>
             </div>
 
             <p className="text-xs text-gray-500">
               Signing up as <strong>{email}</strong>.{' '}
-              <button type="button" onClick={() => setStep('account')} className="text-blue-600 hover:underline">
+              <button type="button" onClick={() => setStep('account')} className="text-[#E8654A] hover:underline">
                 Change
               </button>
             </p>
@@ -166,7 +166,7 @@ function SignupContent() {
             <button
               type="submit"
               disabled={loading || !businessName}
-              className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-3 bg-[#E8654A] text-white rounded-xl hover:bg-[#C94D35] transition-colors disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
@@ -181,7 +181,7 @@ function SignupContent() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-blue-600 hover:underline">
+          <Link href="/auth/login" className="text-[#E8654A] hover:underline">
             Sign in
           </Link>
         </p>

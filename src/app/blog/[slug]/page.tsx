@@ -207,11 +207,11 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#E8654A] to-[#FFBF00]">
                 <Star className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-lg font-bold text-gray-900">
-                Reputation<span className="text-blue-600">Monitor</span>
+                Reputation<span className="text-[#E8654A]">Monitor</span>
               </span>
             </Link>
             <div className="flex items-center gap-4">
@@ -223,7 +223,7 @@ export default async function BlogPostPage({ params }: Props) {
               </Link>
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#E8654A] to-[#FFBF00] px-4 py-2 text-sm font-semibold text-white"
               >
                 Start Free <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -251,7 +251,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="flex items-center gap-3 mb-5">
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 post.category === 'guides'
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-[#FFF7ED] text-[#E8654A]'
                   : post.category === 'strategies'
                   ? 'bg-emerald-50 text-emerald-700'
                   : post.category === 'industry'
@@ -326,7 +326,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <li key={i}>
                   <a
                     href={`#section-${i}`}
-                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                    className="text-sm text-gray-600 hover:text-[#E8654A] transition-colors"
                   >
                     {i + 1}. {section.heading}
                   </a>
@@ -346,7 +346,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <section id={`section-${i}`}>
                   {/* Section number + heading */}
                   <div className="mb-6">
-                    <span className="text-xs font-semibold text-blue-600/60 uppercase tracking-widest">
+                    <span className="text-xs font-semibold text-[#E8654A]/60 uppercase tracking-widest">
                       Section {i + 1}
                     </span>
                     <h2 className="mt-2 text-[22px] sm:text-2xl font-extrabold text-gray-900 leading-snug tracking-tight">
@@ -386,7 +386,7 @@ export default async function BlogPostPage({ params }: Props) {
                         href={ref.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
+                        className="text-[#E8654A] hover:text-[#C94D35] underline"
                       >
                         {ref.title}
                       </a>
@@ -420,16 +420,16 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* CTA Box — Dynamic based on DarkSEOKing semantic clustering */}
           {crossDomainCta === 'signup' ? (
-            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-[#E8654A] to-[#C94D35] p-8 text-white text-center">
               <h3 className="text-xl font-bold">
                 Ready to automate your review management?
               </h3>
-              <p className="mt-2 text-blue-100 text-sm">
+              <p className="mt-2 text-[#FEE2D5] text-sm">
                 Start collecting more Google reviews with AI-powered assistance. Free plan available.
               </p>
               <Link
                 href="/auth/signup"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-[#E8654A] hover:bg-[#FFF7ED] transition-colors"
               >
                 Get Started Free <ArrowRight className="h-4 w-4" />
               </Link>
@@ -450,7 +450,7 @@ export default async function BlogPostPage({ params }: Props) {
               </Link>
             </div>
           ) : guide ? (
-            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 ring-1 ring-blue-200 p-8 text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-[#FFF7ED] to-[#FEE2D5] ring-1 ring-[#E8654A]/30 p-8 text-center">
               <h3 className="text-xl font-bold text-gray-900">
                 {guide.title}
               </h3>
@@ -459,22 +459,22 @@ export default async function BlogPostPage({ params }: Props) {
               </p>
               <Link
                 href={guide.path}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#E8654A] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#C94D35] transition-colors"
               >
                 {guide.ctaText} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           ) : (
-            <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center">
+            <div className="mt-14 rounded-2xl bg-gradient-to-r from-[#E8654A] to-[#C94D35] p-8 text-white text-center">
               <h3 className="text-xl font-bold">
                 Ready to automate your review management?
               </h3>
-              <p className="mt-2 text-blue-100 text-sm">
+              <p className="mt-2 text-[#FEE2D5] text-sm">
                 Start collecting more Google reviews with AI-powered assistance. Free plan available.
               </p>
               <Link
                 href="/auth/signup"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-[#E8654A] hover:bg-[#FFF7ED] transition-colors"
               >
                 Get Started Free <ArrowRight className="h-4 w-4" />
               </Link>
@@ -493,7 +493,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <Link
                   key={related.slug}
                   href={`/blog/${related.slug}`}
-                  className="group flex flex-col rounded-xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-md hover:ring-blue-200 transition-all"
+                  className="group flex flex-col rounded-xl bg-white ring-1 ring-gray-200 overflow-hidden hover:shadow-md hover:ring-[#FEE2D5] transition-all"
                 >
                   {related.heroImage && (
                     <div className="relative w-full h-36 overflow-hidden">
@@ -507,13 +507,13 @@ export default async function BlogPostPage({ params }: Props) {
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm leading-snug">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-[#E8654A] transition-colors text-sm leading-snug">
                       {related.title}
                     </h3>
                     <p className="mt-2 text-xs text-gray-500 line-clamp-2 flex-1">
                       {related.excerpt}
                     </p>
-                    <span className="mt-3 text-xs font-medium text-blue-600 flex items-center gap-1">
+                    <span className="mt-3 text-xs font-medium text-[#E8654A] flex items-center gap-1">
                       Read more <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>

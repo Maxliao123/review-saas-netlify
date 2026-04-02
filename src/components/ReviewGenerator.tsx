@@ -295,8 +295,8 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                                         p-3 rounded-full text-sm font-semibold transition-all border
                                         min-h-[48px] flex items-center justify-center leading-tight
                                         ${active
-                                                    ? 'bg-blue-500 text-white border-transparent shadow-md transform -translate-y-0.5'
-                                                    : 'bg-blue-50 text-slate-600 border-blue-100 hover:bg-white hover:border-blue-200 shadow-sm'
+                                                    ? 'bg-[#E8654A] text-white border-transparent shadow-md transform -translate-y-0.5'
+                                                    : 'bg-[#FFF7ED] text-slate-600 border-[#FEE2D5] hover:bg-white hover:border-[#E8654A]/30 shadow-sm'
                                                 }
                                     `}
                                         >
@@ -307,7 +307,7 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
 
                                 {/* Custom Input */}
                                 {group.id === 'food' && (
-                                    <div className="relative min-h-[48px] rounded-full border border-dashed border-blue-300 flex items-center bg-white">
+                                    <div className="relative min-h-[48px] rounded-full border border-dashed border-[#E8654A]/30 flex items-center bg-white">
                                         <input
                                             type="text"
                                             className="w-full h-full bg-transparent text-center text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none px-4 rounded-full"
@@ -319,7 +319,7 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                                 )}
                                 {/* Suggestion Custom Input */}
                                 {group.isConsGroup && (
-                                    <div className="relative min-h-[48px] rounded-full border border-dashed border-blue-300 flex items-center bg-white">
+                                    <div className="relative min-h-[48px] rounded-full border border-dashed border-[#E8654A]/30 flex items-center bg-white">
                                         <input
                                             type="text"
                                             className="w-full h-full bg-transparent text-center text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none px-4 rounded-full"
@@ -338,7 +338,7 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                     <button
                         onClick={handleGenerate}
                         disabled={isGenerating}
-                        className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/20 hover:bg-blue-500 hover:shadow-blue-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-[#E8654A] text-white rounded-2xl font-bold text-lg shadow-lg shadow-[#E8654A]/20 hover:bg-[#C94D35] hover:shadow-[#E8654A]/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {isGenerating && <Loader2 className="animate-spin w-5 h-5" />}
                         {isGenerating
@@ -356,7 +356,7 @@ export function ReviewGenerator({ storeId, storeData, initialLang = 'en' }: Revi
                             <textarea
                                 value={generatedReview}
                                 onChange={(e) => setGeneratedReview(e.target.value)}
-                                className="w-full p-4 border border-blue-200 rounded-2xl text-slate-700 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white mb-4 min-h-[120px]"
+                                className="w-full p-4 border border-[#FEE2D5] rounded-2xl text-slate-700 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E8654A]/30 bg-white mb-4 min-h-[120px]"
                             />
                             <button
                                 onClick={handleCopyAndOpen}
