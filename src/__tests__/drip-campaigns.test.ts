@@ -1,4 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock supabase admin to avoid requiring env vars at import time
+vi.mock('@/lib/supabase/admin', () => ({
+  supabaseAdmin: {
+    from: () => ({ select: () => ({ eq: () => ({ single: () => ({}) }) }), insert: () => ({}) }),
+  },
+}));
+
+// Mock email channel to avoid import side effects
+vi.mock('@/lib/notifications/channels/email', () => ({
+  sendEmail: vi.fn(),
+}));
+
 import { buildThankYouEmail, buildReminderEmail } from '@/lib/drip-campaigns';
 
 describe('buildThankYouEmail', () => {

@@ -21,9 +21,9 @@ describe('PRICING_DISPLAY consistency', () => {
     expect(freePlan?.stripePriceId).toBeNull();
   });
 
-  it('enterprise plan has no fixed price', () => {
+  it('enterprise plan has a fixed price', () => {
     const enterprise = PRICING_DISPLAY.find(p => p.id === 'enterprise');
-    expect(enterprise?.price).toBeNull();
+    expect(enterprise?.price).toBe(499);
     expect(enterprise?.stripePriceId).toBeNull();
   });
 

@@ -131,7 +131,7 @@ describe('generateDnsVerification', () => {
     const result = generateDnsVerification(42, 'reviews.mybrand.com');
     expect(result.type).toBe('CNAME');
     expect(result.name).toBe('reviews.mybrand.com');
-    expect(result.value).toBe('tenant-42.reputation-monitor.app');
+    expect(result.value).toBe('tenant-42.replywiseai.com');
   });
 
   it('should include tenant ID in target', () => {
@@ -145,7 +145,7 @@ describe('generateDnsVerification', () => {
 describe('getEmailFrom', () => {
   it('should return default email when not active', () => {
     const result = getEmailFrom(DEFAULT_CONFIG);
-    expect(result.email).toBe('noreply@reputation-monitor.app');
+    expect(result.email).toBe('noreply@replywiseai.com');
     expect(result.name).toBe('ReplyWise AI');
   });
 
@@ -180,7 +180,7 @@ describe('getEmailFrom', () => {
       customEmailFrom: null,
     };
     const result = getEmailFrom(config);
-    expect(result.email).toBe('noreply@reputation-monitor.app');
+    expect(result.email).toBe('noreply@replywiseai.com');
     expect(result.name).toBe('ReplyWise AI');
   });
 });

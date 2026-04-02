@@ -17,15 +17,15 @@ describe('Plan Limits - New Features', () => {
     expect(limits.features.multiPlatformReviews).toBe(true);
     expect(limits.features.sentimentAnalysis).toBe(true);
     expect(limits.features.reviewInvites).toBe(false);
-    expect(limits.maxInvitesPerMonth).toBe(0);
+    expect(limits.maxInvitesPerMonth).toBe(100);
   });
 
-  it('pro plan has all new features with 500 invite limit', () => {
+  it('pro plan has all new features with 1000 invite limit', () => {
     const limits = getPlanLimits('pro');
     expect(limits.features.multiPlatformReviews).toBe(true);
     expect(limits.features.sentimentAnalysis).toBe(true);
     expect(limits.features.reviewInvites).toBe(true);
-    expect(limits.maxInvitesPerMonth).toBe(500);
+    expect(limits.maxInvitesPerMonth).toBe(1000);
   });
 
   it('enterprise plan has unlimited invites', () => {

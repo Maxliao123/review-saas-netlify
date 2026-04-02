@@ -10,6 +10,7 @@ describe('Urgent Alert Templates', () => {
     dashboardUrl: 'https://app.example.com/admin/reviews',
     aiDraft: 'We sincerely apologize for the long wait. This is not up to our standards.',
     approveUrl: 'https://app.example.com/api/reviews/approve?token=abc123',
+    editUrl: 'https://app.example.com/api/reviews/edit?token=abc123',
   };
 
   const normalReview = {
@@ -83,7 +84,7 @@ describe('Urgent Alert Templates', () => {
 
     it('includes Edit Reply button for urgent reviews', () => {
       const { html } = buildEmailHtml(urgentReview);
-      expect(html).toContain('Edit Reply');
+      expect(html).toContain('Edit & Publish');
     });
 
     it('normal reviews do not have URGENT banner', () => {

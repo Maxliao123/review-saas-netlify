@@ -4,7 +4,9 @@
  * API docs: https://tripadvisor-content-api.readme.io/reference
  */
 
-const TRIPADVISOR_API_KEY = process.env.TRIPADVISOR_API_KEY || '';
+function getTripAdvisorApiKey() {
+  return process.env.TRIPADVISOR_API_KEY || '';
+}
 const TRIPADVISOR_BASE_URL = 'https://api.content.tripadvisor.com/api/v1';
 
 export interface TripAdvisorLocation {
@@ -29,12 +31,12 @@ export async function searchTripAdvisorLocation(
   name: string,
   location: string
 ): Promise<TripAdvisorLocation | null> {
-  if (!TRIPADVISOR_API_KEY) return null;
+  if (!getTripAdvisorApiKey()) return null;
 
   const params = new URLSearchParams({
     searchQuery: `${name} ${location}`,
     language: 'en',
-    key: TRIPADVISOR_API_KEY,
+    key: getTripAdvisorApiKey(),
   });
   const resp = await fetch(
     `${TRIPADVISOR_BASE_URL}/location/search?${params}`,
@@ -56,11 +58,11 @@ export async function searchTripAdvisorLocation(
 export async function getTripAdvisorSummary(
   locationId: string
 ): Promise<TripAdvisorSummary | null> {
-  if (!TRIPADVISOR_API_KEY) return null;
+  if (!getTripAdvisorApiKey()) return null;
 
   const params = new URLSearchParams({
     language: 'en',
-    key: TRIPADVISOR_API_KEY,
+    key: getTripAdvisorApiKey(),
   });
   const resp = await fetch(
     `${TRIPADVISOR_BASE_URL}/location/${locationId}/details?${params}`,
