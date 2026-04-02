@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { detectBrowserLocale } from '@/lib/locale-utils';
 import {
   Star,
   Sparkles,
@@ -61,7 +63,11 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
             <button
-              onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+              onClick={() => {
+                const newLang = lang === 'en' ? 'zh' : 'en';
+                setLang(newLang);
+                localStorage.setItem('preferredLang', newLang);
+              }}
               className="text-sm font-medium text-gray-500 hover:text-gray-900 px-2 py-1 rounded border border-gray-200 transition-colors"
             >
               {lang === 'en' ? '中文' : 'EN'}
@@ -107,7 +113,11 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
             </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
               <button
-                onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+                onClick={() => {
+                  const newLang = lang === 'en' ? 'zh' : 'en';
+                  setLang(newLang);
+                  localStorage.setItem('preferredLang', newLang);
+                }}
                 className="text-sm font-medium text-gray-500 px-2 py-2 text-left"
               >
                 {lang === 'en' ? '切換中文' : 'Switch to EN'}
@@ -826,9 +836,25 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
 /* ────────────────────────── Main Landing Page ────────────────────────── */
 
 export function LandingPage() {
+  const searchParams = useSearchParams();
+
   const [lang, setLang] = useState<'en' | 'zh'>(() => {
-    if (typeof navigator === 'undefined') return 'en';
-    return navigator.language?.startsWith('zh') ? 'zh' : 'en';
+    // 1. URL param takes priority
+    const urlLang = searchParams.get('lang');
+    if (urlLang === 'zh' || urlLang === 'en') return urlLang;
+
+    // 2. localStorage preference (set when user toggles language)
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('preferredLang');
+      if (stored === 'zh' || stored === 'en') return stored;
+    }
+
+    // 3. Browser locale detection
+    const detected = detectBrowserLocale();
+    if (detected === 'zh') return 'zh';
+
+    // 4. Default to English (SaaS targets North American businesses)
+    return 'en';
   });
 
   const jsonLd = {

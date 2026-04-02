@@ -3,7 +3,7 @@ import { MainFlow } from '@/components/MainFlow';
 import { LandingPage } from '@/components/LandingPage';
 
 export const metadata = {
-  title: 'ReplyWise AI — 讓每一位客人都成為你的神秘客 | Turn Every Customer Into Your Mystery Shopper',
+  title: 'ReplyWise AI — Turn Every Customer Into Your Mystery Shopper',
   description:
     'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously — great reputation follows naturally. Trusted by 500+ businesses.',
   openGraph: {
@@ -12,6 +12,8 @@ export const metadata = {
       'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously. Trusted by 500+ businesses.',
     type: 'website',
     siteName: 'ReplyWise AI',
+    locale: 'en_US',
+    alternateLocale: 'zh_TW',
   },
   twitter: {
     card: 'summary_large_image',
@@ -42,5 +44,9 @@ export default async function Page({
     );
   }
 
-  return <LandingPage />;
+  return (
+    <Suspense fallback={<div />}>
+      <LandingPage />
+    </Suspense>
+  );
 }

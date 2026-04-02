@@ -14,6 +14,7 @@ import {
 import DashboardInsights from './DashboardInsights';
 import ReviewAnalytics from './ReviewAnalytics';
 import SetupChecklist from '@/components/SetupChecklist';
+import OnboardingTour from '@/components/OnboardingTour';
 
 export const metadata = {
   title: 'Dashboard — ReplyWise AI',
@@ -319,6 +320,9 @@ export default async function AdminDashboard() {
       <div className="mt-6">
         <ReviewAnalytics />
       </div>
+
+      {/* Guided tour for first-time admin users */}
+      <OnboardingTour />
     </div>
   );
 }
