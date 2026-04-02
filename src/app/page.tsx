@@ -3,21 +3,21 @@ import { MainFlow } from '@/components/MainFlow';
 import { LandingPage } from '@/components/LandingPage';
 
 export const metadata = {
-  title: 'ReplyWise AI — AI-Powered Google Review Management',
+  title: 'ReplyWise AI — 讓每一位客人都成為你的神秘客 | Turn Every Customer Into Your Mystery Shopper',
   description:
-    'Turn every customer visit into a 5-star Google review. AI generates reviews, auto-drafts replies, and grows your reputation on autopilot.',
+    'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously — great reputation follows naturally. Trusted by 500+ businesses.',
   openGraph: {
-    title: 'ReplyWise AI — AI-Powered Google Review Management',
+    title: 'ReplyWise AI — Turn Every Customer Into Your Mystery Shopper',
     description:
-      'Turn every customer visit into a 5-star Google review with AI. Trusted by 500+ businesses.',
+      'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously. Trusted by 500+ businesses.',
     type: 'website',
     siteName: 'ReplyWise AI',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ReplyWise AI — AI-Powered Review Management',
+    title: 'ReplyWise AI — Turn Every Customer Into Your Mystery Shopper',
     description:
-      'Turn every customer visit into a 5-star Google review with AI.',
+      'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously.',
   },
 };
 

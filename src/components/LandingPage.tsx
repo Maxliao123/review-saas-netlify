@@ -18,6 +18,9 @@ import {
   Shield,
   TrendingUp,
   ChevronRight,
+  Reply,
+  Target,
+  MapPin,
 } from 'lucide-react';
 
 /* ────────────────────────── Navbar ────────────────────────── */
@@ -130,17 +133,17 @@ function Navbar({ lang, setLang }: { lang: 'en' | 'zh'; setLang: (l: 'en' | 'zh'
 
 function Hero({ lang }: { lang: 'en' | 'zh' }) {
   const t = lang === 'zh' ? {
-    badge: 'AI 智慧評論管理',
-    title1: '把每一次來店消費變成',
-    titleHighlight: '五星 Google 評論',
-    sub: '顧客掃描 QR Code，AI 自動生成個人化評論，一鍵發布。監控、回覆、成長 — 全自動運行。',
+    badge: 'AI 智慧經營助手',
+    title1: '讓每一位客人都成為',
+    titleHighlight: '你的神秘客',
+    sub: 'AI 自動收集真實回饋、即時提醒問題、幫你持續改善——讓好口碑自然發生。',
     ctaPrimary: '免費開始',
     ctaSecondary: '了解運作方式',
   } : {
-    badge: 'AI-Powered Review Management',
-    title1: 'Turn Every Visit Into a',
-    titleHighlight: '5-Star Google Review',
-    sub: 'Customers scan your QR code, AI crafts a personalized review, and they post it in one tap. Monitor, reply, and grow your reputation — all on autopilot.',
+    badge: 'AI-Powered Business Intelligence',
+    title1: 'Turn Every Customer Into',
+    titleHighlight: 'Your Mystery Shopper',
+    sub: 'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously — great reputation follows naturally.',
     ctaPrimary: 'Start Free Today',
     ctaSecondary: 'See How It Works',
   };
@@ -195,15 +198,15 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
         <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
           <div>
             <div className="text-3xl font-extrabold text-gray-900">50K+</div>
-            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '已產生評論' : 'Reviews Generated'}</div>
+            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '已收集回饋' : 'Feedback Collected'}</div>
           </div>
           <div className="border-x border-gray-200 px-4">
             <div className="text-3xl font-extrabold text-gray-900">4.9</div>
-            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '平均評分' : 'Average Rating'}</div>
+            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '平均提升評分' : 'Avg Rating Improvement'}</div>
           </div>
           <div>
             <div className="text-3xl font-extrabold text-gray-900">500+</div>
-            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '服務店家' : 'Businesses Served'}</div>
+            <div className="mt-1 text-sm text-gray-500">{lang === 'zh' ? '合作店家' : 'Businesses Trust Us'}</div>
           </div>
         </div>
       </div>
@@ -217,31 +220,39 @@ const STEPS = [
   {
     step: '01',
     icon: QrCode,
-    title: 'Customer Scans',
+    title: 'Share Experience',
     description:
-      'Place a QR code or NFC tag at your location. Customers scan it with their phone — no app needed.',
+      'Place a QR code at your location. Customers scan and share their real experience in 30 seconds — no app needed.',
   },
   {
     step: '02',
     icon: Sparkles,
-    title: 'AI Generates Review',
+    title: 'Select How They Felt',
     description:
-      'They select what they loved, and our AI crafts a personalized, authentic 5-star Google review in seconds.',
+      'Customers choose tags that reflect their genuine experience — what they loved, and what could be better.',
   },
   {
     step: '03',
-    icon: TrendingUp,
-    title: 'You Grow on Autopilot',
+    icon: MessageSquare,
+    title: 'AI Helps Express',
     description:
-      'Reviews flow in automatically. AI drafts replies, sends alerts, and generates weekly reports for you.',
+      'AI helps customers articulate their experience into a well-written, authentic review they can post with one tap.',
+  },
+  {
+    step: '04',
+    icon: TrendingUp,
+    title: 'Real Feedback Goes Live',
+    description:
+      'Genuine reviews go live on Google. You get instant insights, alerts on issues, and AI-powered replies — all automatic.',
   },
 ];
 
 function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
   const steps = lang === 'zh' ? [
-    { step: '01', icon: QrCode, title: '顧客掃描', description: '在你的店內放置 QR Code 或 NFC 標籤，顧客用手機掃描即可 — 不需要下載 App。' },
-    { step: '02', icon: Sparkles, title: 'AI 生成評論', description: '顧客選擇他們喜歡的項目，AI 立即產生個人化、真實的 5 星 Google 評論。' },
-    { step: '03', icon: TrendingUp, title: '自動成長', description: '評論自動湧入。AI 撰寫回覆、發送提醒、生成每週報告，全程自動化。' },
+    { step: '01', icon: QrCode, title: '掃碼分享體驗', description: '在你的店內放置 QR Code，客人用手機掃描 30 秒即可分享真實體驗 — 不需要下載 App。' },
+    { step: '02', icon: Sparkles, title: '選擇真實感受', description: '客人選擇最能反映真實體驗的標籤 — 喜歡什麼、哪裡可以更好。' },
+    { step: '03', icon: MessageSquare, title: 'AI 幫助表達', description: 'AI 幫助客人將體驗轉化為一則寫得好的、真實的評論，一鍵即可發布。' },
+    { step: '04', icon: TrendingUp, title: '真實回饋上線', description: '真實評論在 Google 上線。你即時獲得洞察、問題警報、AI 自動回覆 — 全程自動化。' },
   ] : STEPS;
 
   return (
@@ -252,11 +263,11 @@ function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
             {lang === 'zh' ? '運作方式' : 'How It Works'}
           </h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            {lang === 'zh' ? '三個簡單步驟，改變你的 Google 評價' : 'Three simple steps to transform your Google reputation'}
+            {lang === 'zh' ? '四個簡單步驟，讓每位客人成為你的神秘客' : 'Four simple steps to turn every customer into your mystery shopper'}
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-3">
+        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => {
             const Icon = step.icon;
             return (
@@ -289,51 +300,51 @@ function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
 
 const FEATURES = [
   {
-    icon: Sparkles,
-    title: 'AI Review Generation',
-    description:
-      'GPT-4 crafts authentic, personalized reviews based on what customers actually experienced. Every review is unique.',
-  },
-  {
     icon: MessageSquare,
-    title: 'Smart Reply Drafts',
+    title: 'Collect Real Feedback',
     description:
-      'AI auto-drafts thoughtful replies to every Google review. Approve with one click, or customize before publishing.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Analytics Dashboard',
-    description:
-      'Track scan volume, review generation rates, rating trends, and conversion funnels in real-time.',
+      'Customers scan, share their experience in 30 seconds — more natural than surveys, more frequent than mystery shoppers.',
   },
   {
     icon: Bell,
-    title: 'Multi-Channel Alerts',
+    title: 'Instant Issue Alerts',
     description:
-      'Get notified via Email, Slack, LINE, or WhatsApp the moment a new review comes in — especially negative ones.',
+      'Unhappy customer? Get notified in 2 minutes. Discover and fix issues the same day, before they become bad reviews.',
   },
   {
-    icon: Globe,
-    title: '6 Languages',
+    icon: BarChart3,
+    title: 'AI Insight Analytics',
     description:
-      'Generate reviews in English, Chinese, Korean, Japanese, French, and Spanish. Perfect for international locations.',
+      'AI analyzes hundreds of reviews to surface key issues: slow service? taste changed? cleanliness? See it all at a glance.',
   },
   {
-    icon: QrCode,
-    title: 'QR & NFC Ready',
+    icon: Reply,
+    title: 'Smart Reply Management',
     description:
-      'Generate custom QR codes and configure NFC tags. Track every scan with device, location, and source analytics.',
+      'AI drafts replies for every review — thank positive ones, address negative ones. Show customers you care, on autopilot.',
+  },
+  {
+    icon: Target,
+    title: 'Competitor Intelligence',
+    description:
+      'Track competitor review trends, understand what customers care about, find your competitive edge.',
+  },
+  {
+    icon: MapPin,
+    title: 'Google Maps Analytics',
+    description:
+      'Track direction requests, phone calls, website clicks — make data-driven business decisions.',
   },
 ];
 
 function Features({ lang }: { lang: 'en' | 'zh' }) {
   const features = lang === 'zh' ? [
-    { icon: Sparkles, title: 'AI 評論生成', description: 'GPT-4 根據顧客真實體驗撰寫個人化、自然的評論。每一則都獨一無二。' },
-    { icon: MessageSquare, title: '智慧回覆草稿', description: 'AI 自動為每則 Google 評論撰寫用心的回覆。一鍵核准，或自訂後再發佈。' },
-    { icon: BarChart3, title: '分析儀表板', description: '即時追蹤掃描量、評論生成率、評分趨勢和轉換漏斗。' },
-    { icon: Bell, title: '多管道通知', description: '新評論一進來就透過 Email、Slack、LINE 或 WhatsApp 通知你 — 尤其是負面評論。' },
-    { icon: Globe, title: '支援 6 種語言', description: '支援英文、中文、韓文、日文、法文、西班牙文生成評論。適合國際化門市。' },
-    { icon: QrCode, title: 'QR & NFC 就緒', description: '生成自訂 QR Code 和設定 NFC 標籤。追蹤每次掃描的裝置、位置和來源分析。' },
+    { icon: MessageSquare, title: '收集真實回饋', description: '客人掃碼 30 秒分享真實體驗，比問卷更自然，比神秘客更頻繁。' },
+    { icon: Bell, title: '即時問題警報', description: '客人不滿意？2 分鐘內收到通知。當天發現、當天改善，不讓小問題變成差評。' },
+    { icon: BarChart3, title: 'AI 洞察分析', description: '從上百則回饋中自動找出關鍵問題：服務太慢？味道變了？環境不夠乾淨？一目瞭然。' },
+    { icon: Reply, title: '智慧回覆管理', description: 'AI 幫你回覆每一則評論，展現你對客人的重視。好評感謝、差評化解，全自動。' },
+    { icon: Target, title: '競爭對手洞察', description: '了解同業的評論趨勢、客人在意什麼，找到你的差異化優勢。' },
+    { icon: MapPin, title: 'Google Maps 營運報告', description: '追蹤路線搜尋、電話撥打、網站點擊等關鍵指標，用數據驅動經營決策。' },
   ] : FEATURES;
 
   return (
@@ -341,10 +352,10 @@ function Features({ lang }: { lang: 'en' | 'zh' }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            {lang === 'zh' ? '全方位評論管理工具' : 'Everything You Need to Dominate Reviews'}
+            {lang === 'zh' ? '你的 AI 經營智囊團' : 'Your AI-Powered Business Intelligence'}
           </h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            {lang === 'zh' ? 'AI 驅動的聲譽管理平台，為現代企業打造' : 'A complete AI-powered reputation management platform built for modern businesses'}
+            {lang === 'zh' ? '從收集回饋到洞察分析，全方位幫你持續改善經營' : 'From collecting feedback to actionable insights — continuously improve your business'}
           </p>
         </div>
 
@@ -596,6 +607,88 @@ function Testimonials({ lang }: { lang: 'en' | 'zh' }) {
   );
 }
 
+/* ────────────────────────── Mystery Shopper Comparison ────────────────────────── */
+
+function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
+  const t = lang === 'zh' ? {
+    heading: '為什麼傳統神秘客花費太高？',
+    sub: '比較傳統神秘客服務與 ReplyWise AI 的差異',
+    col1: '傳統神秘客',
+    col2: 'ReplyWise AI',
+    costLabel: '每月成本',
+    cost1: '$3,000–5,000',
+    cost2: '$29 起',
+    freqLabel: '回饋頻率',
+    freq1: '每月 1–2 次',
+    freq2: '每天',
+    volLabel: '回饋數量',
+    vol1: '1–2 份報告',
+    vol2: '數十則真實回饋',
+    speedLabel: '回饋速度',
+    speed1: '2–4 週',
+    speed2: '即時',
+  } : {
+    heading: 'Why Mystery Shoppers Cost Too Much',
+    sub: 'See how ReplyWise AI compares to traditional mystery shopping services',
+    col1: 'Traditional Mystery Shoppers',
+    col2: 'ReplyWise AI',
+    costLabel: 'Monthly Cost',
+    cost1: '$3,000–5,000',
+    cost2: 'From $29',
+    freqLabel: 'Feedback Frequency',
+    freq1: '1–2 times / month',
+    freq2: 'Every day',
+    volLabel: 'Feedback Volume',
+    vol1: '1–2 reports',
+    vol2: 'Dozens of real reviews',
+    speedLabel: 'Feedback Speed',
+    speed1: '2–4 weeks',
+    speed2: 'Real-time',
+  };
+
+  const rows = [
+    { label: t.costLabel, old: t.cost1, new_: t.cost2 },
+    { label: t.freqLabel, old: t.freq1, new_: t.freq2 },
+    { label: t.volLabel, old: t.vol1, new_: t.vol2 },
+    { label: t.speedLabel, old: t.speed1, new_: t.speed2 },
+  ];
+
+  return (
+    <section className="py-20 sm:py-28 bg-white">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            {t.heading}
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            {t.sub}
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl ring-1 ring-gray-200">
+          {/* Header */}
+          <div className="grid grid-cols-3 bg-gray-50 text-sm font-semibold text-gray-500">
+            <div className="px-6 py-4" />
+            <div className="px-6 py-4 text-center">{t.col1}</div>
+            <div className="px-6 py-4 text-center bg-blue-50 text-blue-700">{t.col2}</div>
+          </div>
+          {/* Rows */}
+          {rows.map((row, i) => (
+            <div
+              key={row.label}
+              className={`grid grid-cols-3 text-sm ${i < rows.length - 1 ? 'border-b border-gray-100' : ''}`}
+            >
+              <div className="px-6 py-4 font-medium text-gray-700">{row.label}</div>
+              <div className="px-6 py-4 text-center text-gray-500">{row.old}</div>
+              <div className="px-6 py-4 text-center bg-blue-50/50 font-semibold text-blue-700">{row.new_}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ────────────────────────── Trust / Social Proof ────────────────────────── */
 
 function TrustSection({ lang }: { lang: 'en' | 'zh' }) {
@@ -648,10 +741,10 @@ function FinalCTA({ lang }: { lang: 'en' | 'zh' }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-16 sm:px-16 sm:py-20 text-center">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            {lang === 'zh' ? '準備好改變你的 Google 聲譽了嗎？' : 'Ready to Transform Your Google Reputation?'}
+            {lang === 'zh' ? '準備好讓每位客人都成為你的神秘客了嗎？' : 'Ready to Turn Every Customer Into Your Mystery Shopper?'}
           </h2>
           <p className="mt-4 text-lg text-blue-100 max-w-xl mx-auto">
-            {lang === 'zh' ? '加入數百家已經在用 AI 自動產生更多五星評論的企業。' : 'Join hundreds of businesses already using AI to generate more 5-star reviews, automatically.'}
+            {lang === 'zh' ? '加入數百家已經在用 AI 收集真實回饋、持續改善經營的企業。' : 'Join hundreds of businesses already using AI to collect real feedback and improve continuously.'}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -687,7 +780,7 @@ function Footer({ lang }: { lang: 'en' | 'zh' }) {
               <span className="text-base font-bold text-white">ReplyWise AI</span>
             </div>
             <p className="mt-3 text-sm text-gray-400 leading-relaxed">
-              {lang === 'zh' ? 'AI 驅動的評論管理平台，幫助企業自動提升 Google 聲譽。' : 'AI-powered review management platform that helps businesses grow their Google reputation on autopilot.'}
+              {lang === 'zh' ? 'AI 智慧經營助手，讓每位客人都成為你的神秘客，幫你持續改善、建立好口碑。' : 'AI-powered business intelligence that turns every customer into your mystery shopper — collect real feedback and grow your reputation naturally.'}
             </p>
           </div>
 
@@ -745,7 +838,7 @@ export function LandingPage() {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description:
-      'AI-powered Google review management platform. Generate reviews, auto-draft replies, and grow your reputation on autopilot.',
+      'AI-powered business intelligence platform. Turn every customer into your mystery shopper — collect real feedback, get instant alerts, and improve continuously.',
     offers: {
       '@type': 'AggregateOffer',
       lowPrice: '0',
@@ -771,6 +864,7 @@ export function LandingPage() {
       <HowItWorks lang={lang} />
       <Features lang={lang} />
       <Testimonials lang={lang} />
+      <ComparisonSection lang={lang} />
       <TrustSection lang={lang} />
       <Pricing lang={lang} />
       <FinalCTA lang={lang} />
