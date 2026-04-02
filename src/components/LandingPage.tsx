@@ -146,14 +146,14 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
     badge: 'AI 智慧經營助手',
     title1: '讓每一位客人都成為',
     titleHighlight: '你的神秘客',
-    sub: 'AI 自動收集真實回饋、即時提醒問題、幫你持續改善——讓好口碑自然發生。',
+    sub: '自動監控 Google 評論、AI 即時回覆差評、QR Code 收集好評——讓好口碑自然發生。',
     ctaPrimary: '免費開始',
     ctaSecondary: '了解運作方式',
   } : {
     badge: 'AI-Powered Business Intelligence',
     title1: 'Turn Every Customer Into',
     titleHighlight: 'Your Mystery Shopper',
-    sub: 'AI collects real feedback, alerts you to issues instantly, and helps you improve continuously — great reputation follows naturally.',
+    sub: 'Auto-monitor Google reviews, AI responds to bad reviews instantly, QR codes collect good ones — great reputation follows naturally.',
     ctaPrimary: 'Start Free Today',
     ctaSecondary: 'See How It Works',
   };
@@ -226,44 +226,76 @@ function Hero({ lang }: { lang: 'en' | 'zh' }) {
 
 /* ────────────────────────── How It Works ────────────────────────── */
 
-const STEPS = [
-  {
-    step: '01',
-    icon: QrCode,
-    title: 'Share Experience',
-    description:
-      'Place a QR code at your location. Customers scan and share their real experience in 30 seconds — no app needed.',
-  },
-  {
-    step: '02',
-    icon: Sparkles,
-    title: 'Select How They Felt',
-    description:
-      'Customers choose tags that reflect their genuine experience — what they loved, and what could be better.',
-  },
-  {
-    step: '03',
-    icon: MessageSquare,
-    title: 'AI Helps Express',
-    description:
-      'AI helps customers articulate their experience into a well-written, authentic review they can post with one tap.',
-  },
-  {
-    step: '04',
-    icon: TrendingUp,
-    title: 'Real Feedback Goes Live',
-    description:
-      'Genuine reviews go live on Google. You get instant insights, alerts on issues, and AI-powered replies — all automatic.',
-  },
+const FLOW_A_EN = [
+  { step: '01', icon: Globe, title: 'Connect Google Business', description: 'Link your Google Business Profile in 30 seconds. This enables review monitoring and AI reply.' },
+  { step: '02', icon: Bell, title: 'Get Notified Instantly', description: 'New review comes in? You get an alert within minutes — via Email, LINE, Slack, or WhatsApp.' },
+  { step: '03', icon: Sparkles, title: 'AI Drafts the Perfect Reply', description: 'AI reads the review, understands the context, and drafts a professional reply — positive or negative.' },
+  { step: '04', icon: Reply, title: 'One-Click Publish', description: 'Review the AI draft, tweak if you want, and publish directly to Google with one click.' },
 ];
 
+const FLOW_B_EN = [
+  { step: '01', icon: QrCode, title: 'Download QR Code', description: 'Print the QR code and place it at your counter, tables, or receipts — customers scan to start.' },
+  { step: '02', icon: Sparkles, title: 'Customer Scans & Selects Feelings', description: 'Customers choose tags that reflect their genuine experience — what they loved and what could be better.' },
+  { step: '03', icon: MessageSquare, title: 'AI Helps Express', description: 'AI helps customers articulate their experience into a well-written, authentic review they can post with one tap.' },
+  { step: '04', icon: TrendingUp, title: 'Real Review Goes Live', description: 'Genuine reviews go live on Google. Your rating climbs naturally with authentic 5-star reviews.' },
+];
+
+const FLOW_A_ZH = [
+  { step: '01', icon: Globe, title: '連接 Google 商家', description: '30 秒連結你的 Google 商家檔案，即可啟用評論監控與 AI 回覆。' },
+  { step: '02', icon: Bell, title: '新評論即時通知', description: '有新評論？幾分鐘內收到通知 — 支援 Email、LINE、Slack、WhatsApp。' },
+  { step: '03', icon: Sparkles, title: 'AI 自動擬稿回覆', description: 'AI 閱讀評論、理解情境，自動撰寫專業回覆 — 無論好評或差評。' },
+  { step: '04', icon: Reply, title: '一鍵發布', description: '檢視 AI 草稿、自由修改，一鍵直接發布到 Google。' },
+];
+
+const FLOW_B_ZH = [
+  { step: '01', icon: QrCode, title: '下載 QR Code', description: '印出 QR Code 放在櫃台、桌面或收據上，客人掃碼即可開始。' },
+  { step: '02', icon: Sparkles, title: '客人掃碼選感受', description: '客人選擇最能反映真實體驗的標籤 — 喜歡什麼、哪裡可以更好。' },
+  { step: '03', icon: MessageSquare, title: 'AI 幫助表達', description: 'AI 幫助客人將體驗轉化為一則寫得好的、真實的評論，一鍵即可發布。' },
+  { step: '04', icon: TrendingUp, title: '真實好評上線', description: '真實評論在 Google 上線，你的評分自然提升。' },
+];
+
+function HowItWorksFlow({ steps, flowTitle, flowBadge }: { steps: typeof FLOW_A_EN; flowTitle: string; flowBadge: string }) {
+  return (
+    <div className="mt-10">
+      <div className="flex items-center gap-3 mb-8">
+        <span className="inline-flex items-center rounded-full bg-[#FFF7ED] px-3 py-1 text-xs font-bold text-[#E8654A] ring-1 ring-[#FEE2D5]">
+          {flowBadge}
+        </span>
+        <h3 className="text-xl font-bold text-gray-900">{flowTitle}</h3>
+      </div>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {steps.map((step) => {
+          const Icon = step.icon;
+          return (
+            <div
+              key={step.step}
+              className="relative rounded-2xl bg-[#FDF6EC] p-8 hover:bg-[#FFF7ED] transition-colors group"
+            >
+              <div className="text-5xl font-extrabold text-gray-100 group-hover:text-[#FEE2D5] transition-colors absolute top-6 right-6">
+                {step.step}
+              </div>
+              <div className="relative">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8654A] to-[#FFBF00] text-white">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
+                <p className="mt-2 text-gray-600 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
-  const steps = lang === 'zh' ? [
-    { step: '01', icon: QrCode, title: '掃碼分享體驗', description: '在你的店內放置 QR Code，客人用手機掃描 30 秒即可分享真實體驗 — 不需要下載 App。' },
-    { step: '02', icon: Sparkles, title: '選擇真實感受', description: '客人選擇最能反映真實體驗的標籤 — 喜歡什麼、哪裡可以更好。' },
-    { step: '03', icon: MessageSquare, title: 'AI 幫助表達', description: 'AI 幫助客人將體驗轉化為一則寫得好的、真實的評論，一鍵即可發布。' },
-    { step: '04', icon: TrendingUp, title: '真實回饋上線', description: '真實評論在 Google 上線。你即時獲得洞察、問題警報、AI 自動回覆 — 全程自動化。' },
-  ] : STEPS;
+  const flowA = lang === 'zh' ? FLOW_A_ZH : FLOW_A_EN;
+  const flowB = lang === 'zh' ? FLOW_B_ZH : FLOW_B_EN;
+  const flowATitle = lang === 'zh' ? '自動守護你的聲譽' : 'Auto-Protect Your Reputation';
+  const flowBTitle = lang === 'zh' ? '主動收集好評' : 'Actively Collect Good Reviews';
 
   return (
     <section id="how-it-works" className="py-20 sm:py-28 bg-white">
@@ -273,34 +305,12 @@ function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
             {lang === 'zh' ? '運作方式' : 'How It Works'}
           </h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            {lang === 'zh' ? '四個簡單步驟，讓每位客人成為你的神秘客' : 'Four simple steps to turn every customer into your mystery shopper'}
+            {lang === 'zh' ? '兩大流程，全方位守護並提升你的線上聲譽' : 'Two powerful flows to protect and grow your online reputation'}
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            return (
-              <div
-                key={step.step}
-                className="relative rounded-2xl bg-[#FDF6EC] p-8 hover:bg-[#FFF7ED] transition-colors group"
-              >
-                <div className="text-5xl font-extrabold text-gray-100 group-hover:text-[#FEE2D5] transition-colors absolute top-6 right-6">
-                  {step.step}
-                </div>
-                <div className="relative">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#E8654A] to-[#FFBF00] text-white">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
-                  <p className="mt-2 text-gray-600 leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <HowItWorksFlow steps={flowA} flowTitle={flowATitle} flowBadge={lang === 'zh' ? '核心功能' : 'PRIMARY'} />
+        <HowItWorksFlow steps={flowB} flowTitle={flowBTitle} flowBadge={lang === 'zh' ? '進階功能' : 'SECONDARY'} />
       </div>
     </section>
   );
@@ -310,28 +320,28 @@ function HowItWorks({ lang }: { lang: 'en' | 'zh' }) {
 
 const FEATURES = [
   {
-    icon: MessageSquare,
-    title: 'Collect Real Feedback',
-    description:
-      'Customers scan, share their experience in 30 seconds — more natural than surveys, more frequent than mystery shoppers.',
-  },
-  {
     icon: Bell,
     title: 'Instant Issue Alerts',
     description:
       'Unhappy customer? Get notified in 2 minutes. Discover and fix issues the same day, before they become bad reviews.',
   },
   {
-    icon: BarChart3,
-    title: 'AI Insight Analytics',
-    description:
-      'AI analyzes hundreds of reviews to surface key issues: slow service? taste changed? cleanliness? See it all at a glance.',
-  },
-  {
     icon: Reply,
     title: 'Smart Reply Management',
     description:
       'AI drafts replies for every review — thank positive ones, address negative ones. Show customers you care, on autopilot.',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Collect Real Feedback',
+    description:
+      'Customers scan, share their experience in 30 seconds — more natural than surveys, more frequent than mystery shoppers.',
+  },
+  {
+    icon: BarChart3,
+    title: 'AI Insight Analytics',
+    description:
+      'AI analyzes hundreds of reviews to surface key issues: slow service? taste changed? cleanliness? See it all at a glance.',
   },
   {
     icon: Target,
@@ -349,10 +359,10 @@ const FEATURES = [
 
 function Features({ lang }: { lang: 'en' | 'zh' }) {
   const features = lang === 'zh' ? [
-    { icon: MessageSquare, title: '收集真實回饋', description: '客人掃碼 30 秒分享真實體驗，比問卷更自然，比神秘客更頻繁。' },
     { icon: Bell, title: '即時問題警報', description: '客人不滿意？2 分鐘內收到通知。當天發現、當天改善，不讓小問題變成差評。' },
-    { icon: BarChart3, title: 'AI 洞察分析', description: '從上百則回饋中自動找出關鍵問題：服務太慢？味道變了？環境不夠乾淨？一目瞭然。' },
     { icon: Reply, title: '智慧回覆管理', description: 'AI 幫你回覆每一則評論，展現你對客人的重視。好評感謝、差評化解，全自動。' },
+    { icon: MessageSquare, title: '收集真實回饋', description: '客人掃碼 30 秒分享真實體驗，比問卷更自然，比神秘客更頻繁。' },
+    { icon: BarChart3, title: 'AI 洞察分析', description: '從上百則回饋中自動找出關鍵問題：服務太慢？味道變了？環境不夠乾淨？一目瞭然。' },
     { icon: Target, title: '競爭對手洞察', description: '了解同業的評論趨勢、客人在意什麼，找到你的差異化優勢。' },
     { icon: MapPin, title: 'Google Maps 營運報告', description: '追蹤路線搜尋、電話撥打、網站點擊等關鍵指標，用數據驅動經營決策。' },
   ] : FEATURES;
@@ -637,6 +647,9 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
     speedLabel: '回饋速度',
     speed1: '2–4 週',
     speed2: '即時',
+    replyLabel: '差評回覆速度',
+    reply1: '數小時至數天',
+    reply2: 'AI 即時擬稿',
   } : {
     heading: 'Why Mystery Shoppers Cost Too Much',
     sub: 'See how ReplyWise AI compares to traditional mystery shopping services',
@@ -654,6 +667,9 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
     speedLabel: 'Feedback Speed',
     speed1: '2–4 weeks',
     speed2: 'Real-time',
+    replyLabel: 'Bad Review Response',
+    reply1: 'Hours to days',
+    reply2: 'AI drafts instantly',
   };
 
   const rows = [
@@ -661,6 +677,7 @@ function ComparisonSection({ lang }: { lang: 'en' | 'zh' }) {
     { label: t.freqLabel, old: t.freq1, new_: t.freq2 },
     { label: t.volLabel, old: t.vol1, new_: t.vol2 },
     { label: t.speedLabel, old: t.speed1, new_: t.speed2 },
+    { label: t.replyLabel, old: t.reply1, new_: t.reply2 },
   ];
 
   return (

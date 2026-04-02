@@ -24,9 +24,9 @@ interface TourStep {
 const STEPS: TourStep[] = [
   {
     selector: null,
-    title: "Let's get your first review in 3 minutes!",
+    title: "Set up auto-monitoring in 3 minutes!",
     description:
-      "Welcome to ReplyWise AI! I'll walk you through the essential setup — it's fast and you'll have a working QR code by the end.",
+      "Welcome to ReplyWise AI! I'll walk you through the essential setup — connect Google, set up alerts, and let AI handle your reviews.",
     position: 'center',
     emoji: '👋',
     ctaLabel: "Let's Go!",
@@ -35,18 +35,18 @@ const STEPS: TourStep[] = [
     selector: 'a[href="/admin/settings/google"]',
     title: 'Step 1: Connect Google Business',
     description:
-      "This links your Google Business Profile so we can monitor reviews and publish replies. It takes 30 seconds — just click here and sign in with Google.",
+      "This is the most important step — it links your Google Business Profile so we can monitor reviews and publish AI replies. Just click here and sign in with Google.",
     position: 'right',
     emoji: '🔗',
     navigateTo: '/admin',
   },
   {
-    selector: 'a[href="/admin/qr-codes"]',
-    title: 'Step 2: Download Your QR Code',
+    selector: 'a[href="/admin/settings/notifications"]',
+    title: 'Step 2: Set Up Notifications',
     description:
-      "This is your money maker! Download it, print it, and put it near the cash register or on tables. Customers scan → AI writes a 5-star review → they post it.",
+      "Know immediately when reviews come in — especially bad ones. Connect Email, LINE, Slack, or WhatsApp so you never miss a review.",
     position: 'right',
-    emoji: '📱',
+    emoji: '🔔',
   },
   {
     selector: 'a[href="/admin/reviews"]',
@@ -57,22 +57,22 @@ const STEPS: TourStep[] = [
     emoji: '⭐',
   },
   {
-    selector: 'a[href="/admin/settings/notifications"]',
-    title: 'Step 4: Never Miss a Review',
+    selector: 'a[href="/admin/qr-codes"]',
+    title: 'Step 4: Download Your QR Code',
     description:
-      "Set up notifications so you get alerted the moment a customer leaves a review — especially bad ones. Connect Email, LINE, Slack, or WhatsApp.",
+      "Bonus: actively collect more reviews! Download the QR code, print it, and put it near the register or on tables. Customers scan, AI writes a review, they post it.",
     position: 'right',
-    emoji: '🔔',
+    emoji: '📱',
   },
   {
     selector: null,
-    title: "You're ready! 🎉",
+    title: "You're protected! 🎉",
     description:
-      "Print your QR code, put it where customers can see it, and watch the 5-star reviews come in. Most stores see their first AI-powered review within 24 hours.",
+      "AI is now watching your reviews 24/7. You'll get instant alerts for new reviews and AI-drafted replies ready to publish. Plus, use the QR code to actively collect 5-star reviews!",
     position: 'center',
-    emoji: '🚀',
-    ctaLabel: 'Download My QR Code',
-    ctaHref: '/admin/qr-codes',
+    emoji: '🛡️',
+    ctaLabel: 'Go to Review Command Center',
+    ctaHref: '/admin/reviews',
   },
 ];
 
