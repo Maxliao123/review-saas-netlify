@@ -1,0 +1,51 @@
+name: Weekly GSC Analysis
+
+on:
+  schedule:
+    # Monday 07:00 UTC (Sunday 11pm PST)
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Look-back period in days'
+        required: false
+        default: '28'
+        type: string
+
+env:
+  GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: GSC content gap analysis
+        run: |
+          DAYS="${{ github.event.inputs.days || '28' }}"
+          npx tsx scripts/content-pipeline/gsc-analyze.ts --days "$DAYS"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A scripts/content-pipeline/gsc-data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "gsc: weekly content gap analysis $(date +%Y-%m-%d)"
+            git push
+          fi

@@ -1,0 +1,93 @@
+name: Daily Content Pipeline
+
+on:
+  schedule:
+    # 08:00 UTC daily (midnight PST)
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: 'Priority batch (P0, P1, P2, or all)'
+        required: false
+        default: 'P0'
+        type: choice
+        options:
+          - P0
+          - P1
+          - all
+      limit:
+        description: 'Max articles to generate'
+        required: false
+        default: '2'
+        type: string
+      skip_images:
+        description: 'Skip image generation'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+  REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+  GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch GSC data
+        if: env.GSC_SERVICE_ACCOUNT_JSON != ''
+        run: npx tsx scripts/content-pipeline/gsc-fetch.ts
+        continue-on-error: true
+
+      - name: Generate topic briefs
+        run: |
+          BATCH="${{ github.event.inputs.batch || 'P0' }}"
+          if [ -d "scripts/content-pipeline/gsc-data" ]; then
+            npx tsx scripts/content-pipeline/topic-generator.ts --from-gsc --batch "$BATCH"
+          else
+            npx tsx scripts/content-pipeline/topic-generator.ts --batch "$BATCH"
+          fi
+
+      - name: Generate articles
+        run: |
+          BATCH="${{ github.event.inputs.batch || 'P0' }}"
+          npx tsx scripts/content-pipeline/article-generator.ts --batch "$BATCH"
+
+      - name: Content optimization
+        run: npx tsx scripts/content-pipeline/content-optimizer.ts
+        continue-on-error: true
+
+      - name: Generate hero images
+        if: github.event.inputs.skip_images != 'true'
+        run: npx tsx scripts/content-pipeline/image-generator.ts
+        continue-on-error: true
+
+      - name: Convert to blog data
+        run: npx tsx scripts/content-pipeline/convert-to-blogdata.ts --append
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A scripts/content-pipeline/output/ scripts/content-pipeline/gsc-data/ public/blog/ src/lib/blog-data-generated.ts
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "content: auto-generate articles $(date +%Y-%m-%d)"
+            git push
+          fi

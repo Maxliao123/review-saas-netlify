@@ -1,0 +1,60 @@
+name: Auto Publish Articles
+
+on:
+  schedule:
+    # 10:00 UTC daily (2am PST, after content pipeline at 08:00 UTC)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      force_count:
+        description: 'Override article count (0 = auto)'
+        required: false
+        default: '0'
+        type: string
+
+env:
+  INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scheduled publish (Seed/Ramp/Cruise)
+        run: |
+          FORCE="${{ github.event.inputs.force_count || '0' }}"
+          if [ "$FORCE" != "0" ]; then
+            npx tsx scripts/content-pipeline/scheduled-publish.ts --force-count "$FORCE"
+          else
+            npx tsx scripts/content-pipeline/scheduled-publish.ts
+          fi
+
+      - name: IndexNow notification
+        if: env.INDEXNOW_KEY != ''
+        run: npx tsx scripts/content-pipeline/indexnow.ts
+        continue-on-error: true
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A src/lib/blog-data-generated.ts scripts/content-pipeline/publish-tracker.json public/blog/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "publish: auto-publish articles $(date +%Y-%m-%d)"
+            git push
+          fi

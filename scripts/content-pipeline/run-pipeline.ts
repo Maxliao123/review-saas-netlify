@@ -2,13 +2,16 @@
 /**
  * run-pipeline.ts — Master Pipeline Script for ReplyWise AI Content Generation
  *
- * Orchestrates the full content pipeline:
- *   1. Generate topic briefs
- *   2. Generate articles (via DeepSeek V3)
- *   3. Quality check (built into article generator)
- *   4. Generate hero images (via Replicate Flux Schnell)
- *   5. Generate Medium drafts
- *   6. Convert to blog data format
+ * Orchestrates the full 9-step content pipeline:
+ *   1. GSC Fetch (search performance data)
+ *   2. Generate topic briefs (static or GSC-driven)
+ *   3. Generate articles (via DeepSeek V3)
+ *   4. Content optimization (quality check + SEO audit)
+ *   5. Generate hero images (via Replicate Flux Schnell)
+ *   6. Generate Medium drafts
+ *   7. Convert to blog data format
+ *   8. Scheduled publish (Seed/Ramp/Cruise cadence)
+ *   9. IndexNow (notify search engines)
  *
  * Usage:
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --batch P0
@@ -16,15 +19,21 @@
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --slug specific-article-slug
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --batch P0 --skip-images
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --batch P0 --dry-run
- *   npx tsx scripts/content-pipeline/run-pipeline.ts --step briefs
+ *   npx tsx scripts/content-pipeline/run-pipeline.ts --step gsc-fetch
+ *   npx tsx scripts/content-pipeline/run-pipeline.ts --step briefs [--from-gsc]
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --step articles --batch P0
+ *   npx tsx scripts/content-pipeline/run-pipeline.ts --step optimize
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --step images
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --step medium
  *   npx tsx scripts/content-pipeline/run-pipeline.ts --step convert
+ *   npx tsx scripts/content-pipeline/run-pipeline.ts --step publish
+ *   npx tsx scripts/content-pipeline/run-pipeline.ts --step indexnow
  *
  * Environment variables needed:
- *   DEEPSEEK_API_KEY      — For article generation
- *   REPLICATE_API_TOKEN   — For image generation (optional if --skip-images)
+ *   DEEPSEEK_API_KEY          — For article generation
+ *   REPLICATE_API_TOKEN       — For image generation (optional if --skip-images)
+ *   GSC_SERVICE_ACCOUNT_JSON  — For GSC steps (optional)
+ *   INDEXNOW_KEY              — For IndexNow notification (optional)
  */
 
 import { execSync } from 'node:child_process';
@@ -84,16 +93,29 @@ function main() {
   if (dryRun) filterArgs.push('--dry-run');
   const filterStr = filterArgs.join(' ');
 
+  const fromGsc = args.includes('--from-gsc');
+
   const steps: { name: string; step: string; command: string; skip?: boolean }[] = [
+    {
+      name: 'Fetch GSC Data',
+      step: 'gsc-fetch',
+      command: `${TSX} ${path.join(SCRIPTS_DIR, 'gsc-fetch.ts')}`,
+      skip: !process.env.GSC_SERVICE_ACCOUNT_JSON && !process.env.GSC_SERVICE_ACCOUNT_PATH,
+    },
     {
       name: 'Generate Topic Briefs',
       step: 'briefs',
-      command: `${TSX} ${path.join(SCRIPTS_DIR, 'topic-generator.ts')} ${filterStr}`.trim(),
+      command: `${TSX} ${path.join(SCRIPTS_DIR, 'topic-generator.ts')} ${fromGsc ? '--from-gsc ' : ''}${filterStr}`.trim(),
     },
     {
       name: 'Generate Articles',
       step: 'articles',
       command: `${TSX} ${path.join(SCRIPTS_DIR, 'article-generator.ts')} ${filterStr}`.trim(),
+    },
+    {
+      name: 'Content Optimization',
+      step: 'optimize',
+      command: `${TSX} ${path.join(SCRIPTS_DIR, 'content-optimizer.ts')} ${slugArg ? `--slug ${slugArg}` : ''} ${dryRun ? '--dry-run' : ''}`.trim(),
     },
     {
       name: 'Generate Hero Images',
@@ -111,6 +133,17 @@ function main() {
       step: 'convert',
       command: `${TSX} ${path.join(SCRIPTS_DIR, 'convert-to-blogdata.ts')} ${slugArg ? `--slug ${slugArg}` : ''} --append`.trim(),
     },
+    {
+      name: 'Scheduled Publish',
+      step: 'publish',
+      command: `${TSX} ${path.join(SCRIPTS_DIR, 'scheduled-publish.ts')} ${dryRun ? '--dry-run' : ''}`.trim(),
+    },
+    {
+      name: 'IndexNow Notification',
+      step: 'indexnow',
+      command: `${TSX} ${path.join(SCRIPTS_DIR, 'indexnow.ts')} ${dryRun ? '--dry-run' : ''}`.trim(),
+      skip: !process.env.INDEXNOW_KEY,
+    },
   ];
 
   // Filter to single step if specified
@@ -120,7 +153,7 @@ function main() {
 
   if (stepsToRun.length === 0) {
     console.error(`Unknown step: ${stepArg}`);
-    console.error('Available steps: briefs, articles, images, medium, convert');
+    console.error('Available steps: gsc-fetch, briefs, articles, optimize, images, medium, convert, publish, indexnow');
     process.exit(1);
   }
 

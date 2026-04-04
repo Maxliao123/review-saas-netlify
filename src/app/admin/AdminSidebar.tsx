@@ -28,6 +28,7 @@ import {
   ShieldAlert,
   Route,
   Key,
+  Shield,
   Webhook,
   GraduationCap,
   Palette,
@@ -205,6 +206,23 @@ export default function AdminSidebar({ user, tenant, role, stores }: SidebarProp
           );
         })}
       </nav>
+
+      {/* Super Admin link (only for maxliao2020@gmail.com) */}
+      {user.email === 'maxliao2020@gmail.com' && (
+        <div className="px-3 pb-1">
+          <Link
+            href="/admin/super"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              pathname.startsWith('/admin/super')
+                ? 'bg-red-50 text-red-600'
+                : 'text-gray-400 hover:bg-red-50 hover:text-red-600'
+            }`}
+          >
+            <Shield className="w-4 h-4 shrink-0" />
+            Super Admin
+          </Link>
+        </div>
+      )}
 
       {/* User Footer */}
       <div className="p-4 border-t border-gray-200">

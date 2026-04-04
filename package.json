@@ -11,7 +11,13 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "gsc:fetch": "npx tsx scripts/content-pipeline/gsc-fetch.ts",
+    "gsc:analyze": "npx tsx scripts/content-pipeline/gsc-analyze.ts",
+    "content:optimize": "npx tsx scripts/content-pipeline/content-optimizer.ts",
+    "content:publish": "npx tsx scripts/content-pipeline/scheduled-publish.ts",
+    "content:indexnow": "npx tsx scripts/content-pipeline/indexnow.ts",
+    "content:pipeline": "npx tsx scripts/content-pipeline/run-pipeline.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.46.0",

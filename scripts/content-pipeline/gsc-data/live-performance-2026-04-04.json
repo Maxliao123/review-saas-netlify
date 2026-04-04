@@ -1,0 +1,23 @@
+{
+  "generated": "2026-04-04",
+  "period": {
+    "start": "2026-03-07",
+    "end": "2026-04-04",
+    "days": 28
+  },
+  "domain": "replywiseai.com",
+  "insights": {
+    "summary": {
+      "totalImpressions": 0,
+      "totalClicks": 0,
+      "avgCTR": 0,
+      "avgPosition": 0,
+      "uniqueQueries": 0,
+      "uniquePages": 0
+    },
+    "topQueries": [],
+    "lowHangingFruit": [],
+    "contentGaps": [],
+    "topPages": []
+  }
+}

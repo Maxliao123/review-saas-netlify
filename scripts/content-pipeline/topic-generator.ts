@@ -32,6 +32,18 @@ export interface ArticleBrief {
   tags: string[];
 }
 
+// GSC-derived brief (from gsc-analyze.ts output)
+interface GscBrief {
+  slug: string;
+  target_keyword: string;
+  related_queries: string[];
+  total_impressions: number;
+  total_clicks: number;
+  avg_position: number;
+  intent_type: string;
+  priority: 'P0' | 'P1' | 'P2';
+}
+
 // ── Cluster A: Industry Guides (15 articles) ───────────────────────────────
 
 const INDUSTRY_GUIDES: ArticleBrief[] = [
@@ -561,14 +573,83 @@ export const ALL_BRIEFS: ArticleBrief[] = [
   ...LOCAL_ARTICLES,
 ];
 
+// ── GSC-driven brief loading ─────────────────────────────────────────────
+
+function loadGscBriefs(): ArticleBrief[] {
+  const gscDataDir = path.resolve(__dirname, 'gsc-data');
+  if (!fs.existsSync(gscDataDir)) return [];
+
+  // Find most recent content-gaps file
+  const files = fs.readdirSync(gscDataDir)
+    .filter(f => f.startsWith('content-gaps-') && f.endsWith('.json'))
+    .sort()
+    .reverse();
+
+  if (files.length === 0) return [];
+
+  const filePath = path.join(gscDataDir, files[0]);
+  console.log(`Loading GSC briefs from: ${files[0]}`);
+
+  const report = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  const gscBriefs: GscBrief[] = report.briefs || [];
+
+  // Convert GSC briefs to ArticleBrief format
+  return gscBriefs.map((gb): ArticleBrief => {
+    // Map intent_type to category
+    const categoryMap: Record<string, ArticleBrief['category']> = {
+      guide: 'how-to',
+      comparison: 'comparison',
+      'how-to': 'how-to',
+      industry: 'industry',
+      local: 'local',
+    };
+    const category = categoryMap[gb.intent_type] || 'how-to';
+
+    // Build title from keyword
+    const title = gb.target_keyword
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    return {
+      slug: gb.slug,
+      title,
+      titleZh: `[GSC] ${title}`,
+      targetQuery: gb.target_keyword,
+      outline: `Data-driven article for query "${gb.target_keyword}" (${gb.total_impressions} impressions, position ${gb.avg_position}). Related: ${gb.related_queries.join(', ') || 'none'}.`,
+      priority: gb.priority,
+      category,
+      tags: ['gsc-driven', 'data-driven', gb.intent_type],
+    };
+  });
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────
 
 function main() {
   const args = process.argv.slice(2);
   const batchArg = args.includes('--batch') ? args[args.indexOf('--batch') + 1]?.toUpperCase() : null;
   const categoryArg = args.includes('--category') ? args[args.indexOf('--category') + 1] : null;
+  const fromGsc = args.includes('--from-gsc');
 
-  let briefs = ALL_BRIEFS;
+  let briefs: ArticleBrief[];
+
+  if (fromGsc) {
+    const gscBriefs = loadGscBriefs();
+    if (gscBriefs.length === 0) {
+      console.log('No GSC data found. Run gsc-analyze.ts first, or use without --from-gsc.');
+      console.log('Falling back to static briefs.\n');
+      briefs = ALL_BRIEFS;
+    } else {
+      // Merge: GSC briefs first, then static briefs for slugs not in GSC
+      const gscSlugs = new Set(gscBriefs.map(b => b.slug));
+      const staticNotInGsc = ALL_BRIEFS.filter(b => !gscSlugs.has(b.slug));
+      briefs = [...gscBriefs, ...staticNotInGsc];
+      console.log(`Merged ${gscBriefs.length} GSC briefs + ${staticNotInGsc.length} static briefs\n`);
+    }
+  } else {
+    briefs = ALL_BRIEFS;
+  }
 
   if (batchArg) {
     briefs = briefs.filter(b => b.priority === batchArg);

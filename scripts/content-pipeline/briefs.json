@@ -1,0 +1,186 @@
+[
+  {
+    "slug": "google-review-management-restaurants-complete-guide",
+    "title": "Google Review Management for Restaurants: Complete Guide",
+    "titleZh": "餐廳 Google 評論管理完全指南",
+    "targetQuery": "google review management for restaurants complete guide",
+    "outline": "Cover: table tent QR codes, post-payment timing, server training scripts, Google review link on receipts, WiFi landing page, delivery bag inserts, handling food criticism, menu-specific keyword encouragement, photos in reviews strategy. Include 90-day implementation timeline.",
+    "priority": "P0",
+    "category": "industry",
+    "tags": [
+      "restaurant",
+      "google reviews",
+      "review management",
+      "food service",
+      "local business"
+    ]
+  },
+  {
+    "slug": "how-to-get-more-google-reviews-hotels",
+    "title": "How to Get More Google Reviews for Hotels",
+    "titleZh": "飯店如何獲得更多 Google 評論",
+    "targetQuery": "how to get more google reviews for hotels",
+    "outline": "Cover: check-out review request timing, in-room QR codes, post-stay email sequences, front desk scripts, handling OTA reviews vs Google reviews, concierge-driven collection, loyalty program integration, multi-language review management.",
+    "priority": "P0",
+    "category": "industry",
+    "tags": [
+      "hotel",
+      "hospitality",
+      "google reviews",
+      "review collection",
+      "reputation management"
+    ]
+  },
+  {
+    "slug": "dental-clinic-reputation-management-guide",
+    "title": "Dental Clinic Reputation Management Guide",
+    "titleZh": "牙醫診所聲譽管理指南",
+    "targetQuery": "dental clinic reputation management guide",
+    "outline": "Cover: HIPAA-compliant responses, post-appointment timing (1-2 hours), patient portal integration, handling pain-related complaints, new patient acquisition through reviews, emergency dentist keywords, family dentistry approach, dental anxiety mentions.",
+    "priority": "P0",
+    "category": "industry",
+    "tags": [
+      "dental",
+      "clinic",
+      "reputation management",
+      "healthcare",
+      "patient reviews"
+    ]
+  },
+  {
+    "slug": "how-to-respond-to-negative-google-reviews",
+    "title": "How to Respond to Negative Google Reviews",
+    "titleZh": "如何回覆 Google 負面評論",
+    "targetQuery": "how to respond to negative google reviews",
+    "outline": "Cover: the 24-hour response rule, HEARD framework (Hear, Empathize, Apologize, Resolve, Diagnose), when to take offline, legal considerations, response templates for 1-star and 2-star reviews, turning critics into loyal customers, compensation guidelines.",
+    "priority": "P0",
+    "category": "how-to",
+    "tags": [
+      "negative reviews",
+      "review response",
+      "crisis management",
+      "customer service"
+    ]
+  },
+  {
+    "slug": "how-to-ask-customers-for-google-reviews",
+    "title": "How to Ask Customers for Google Reviews",
+    "titleZh": "如何請客戶留下 Google 評論",
+    "targetQuery": "how to ask customers for google reviews",
+    "outline": "Cover: timing strategies (2-4 hours post-visit), SMS follow-ups, email templates, in-person scripts, QR code methods, Google review link shortener, NFC tap-to-review, receipt-based prompts, what NOT to say, compliance with Google policies.",
+    "priority": "P0",
+    "category": "how-to",
+    "tags": [
+      "review collection",
+      "customer ask",
+      "google reviews",
+      "review strategy"
+    ]
+  },
+  {
+    "slug": "how-to-remove-fake-google-reviews",
+    "title": "How to Remove Fake Google Reviews",
+    "titleZh": "如何移除假的 Google 評論",
+    "targetQuery": "how to remove fake google reviews",
+    "outline": "Cover: identifying fake reviews (patterns, timing, reviewer history), Google flagging process step-by-step, what qualifies for removal under Google policy, legal options (cease and desist, defamation), documentation for disputes, response templates while waiting for removal.",
+    "priority": "P0",
+    "category": "how-to",
+    "tags": [
+      "fake reviews",
+      "review removal",
+      "google policy",
+      "reputation management"
+    ]
+  },
+  {
+    "slug": "how-to-use-qr-codes-for-google-reviews",
+    "title": "How to Use QR Codes for Google Reviews",
+    "titleZh": "如何使用 QR Code 收集 Google 評論",
+    "targetQuery": "how to use qr codes for google reviews",
+    "outline": "Cover: getting your Google review link, creating QR codes (free tools vs branded), placement strategies (table tents, receipts, business cards, packaging, walls), NFC alternative, A/B testing CTAs, measuring scan-to-review conversion, AI-assisted review drafting after scan.",
+    "priority": "P0",
+    "category": "how-to",
+    "tags": [
+      "qr code",
+      "review collection",
+      "google reviews",
+      "setup guide"
+    ]
+  },
+  {
+    "slug": "how-to-improve-google-star-rating",
+    "title": "How to Improve Your Google Star Rating",
+    "titleZh": "如何提升 Google 星級評分",
+    "targetQuery": "how to improve google star rating",
+    "outline": "Cover: the math behind rating improvement (how many 5-stars to move from 3.8 to 4.2), identifying rating-drag patterns, service recovery for at-risk visits, proactive review collection velocity, response strategy impact on perception, Google rating calculation methodology.",
+    "priority": "P0",
+    "category": "how-to",
+    "tags": [
+      "star rating",
+      "review improvement",
+      "google reviews",
+      "local SEO"
+    ]
+  },
+  {
+    "slug": "replywiseai-vs-birdeye-comparison",
+    "title": "ReplyWise AI vs Birdeye: Complete Comparison",
+    "titleZh": "ReplyWise AI 與 Birdeye 完整比較",
+    "targetQuery": "ReplyWise AI vs Birdeye comparison",
+    "outline": "Cover: feature comparison table (review collection, AI responses, analytics, multi-platform, pricing), use case fit (SMB vs enterprise), setup complexity, customer support, unique differentiators, verdict by business type.",
+    "priority": "P0",
+    "category": "comparison",
+    "tags": [
+      "ReplyWise AI",
+      "Birdeye",
+      "comparison",
+      "review management tools"
+    ]
+  },
+  {
+    "slug": "replywiseai-vs-podium-comparison",
+    "title": "ReplyWise AI vs Podium: Complete Comparison",
+    "titleZh": "ReplyWise AI 與 Podium 完整比較",
+    "targetQuery": "ReplyWise AI vs Podium comparison",
+    "outline": "Cover: feature comparison (review collection, messaging, payments, AI), pricing transparency, ease of use, integration ecosystem, multi-location support, contract terms, best for which business type.",
+    "priority": "P0",
+    "category": "comparison",
+    "tags": [
+      "ReplyWise AI",
+      "Podium",
+      "comparison",
+      "review management tools"
+    ]
+  },
+  {
+    "slug": "best-google-review-management-tools-2026",
+    "title": "Best Google Review Management Tools 2026",
+    "titleZh": "2026 年最佳 Google 評論管理工具",
+    "targetQuery": "best google review management tools 2026",
+    "outline": "Cover: top 10 tools ranked (ReplyWise AI, Birdeye, Podium, ReviewTrackers, Yext, GatherUp, Grade.us, Trustpilot, BrightLocal, NiceJob), comparison table with pricing, features, pros/cons, best for category.",
+    "priority": "P0",
+    "category": "comparison",
+    "tags": [
+      "review management tools",
+      "best of",
+      "software comparison",
+      "2026"
+    ]
+  },
+  {
+    "slug": "google-review-management-vancouver-restaurants",
+    "title": "Google Review Management for Vancouver Restaurants",
+    "titleZh": "溫哥華餐廳 Google 評論管理",
+    "targetQuery": "google review management for Vancouver restaurants",
+    "outline": "Cover: Vancouver-specific restaurant landscape, multilingual review management (English, Chinese, Korean), seasonal tourism review patterns, Vancouver food scene competition, local SEO for Vancouver, neighborhood-specific strategies (Gastown, Richmond, Main St).",
+    "priority": "P0",
+    "category": "local",
+    "tags": [
+      "Vancouver",
+      "restaurant",
+      "local SEO",
+      "google reviews",
+      "Canada"
+    ]
+  }
+]
