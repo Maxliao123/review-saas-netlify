@@ -69,9 +69,9 @@ const BOOKINGS = [
 ];
 
 const PACKAGES = [
-  { name: 'Gel Nails 10-Pack', type: 'sessions', units: 10, price: 580, validDays: 365, members: 2 },
-  { name: 'Gel Nails 5-Pack', type: 'sessions', units: 5, price: 300, validDays: 180, members: 1 },
-  { name: 'Store Credit $200', type: 'amount', units: 200, price: 180, validDays: 365, members: 1 },
+  { name: 'Gel Nails 10-Pack', type: 'sessions', units: 10, price: 580, validDays: 365, members: 6 },
+  { name: 'Gel Nails 5-Pack', type: 'sessions', units: 5, price: 300, validDays: 180, members: 4 },
+  { name: 'Store Credit $200', type: 'amount', units: 200, price: 180, validDays: 365, members: 2 },
 ];
 
 const COUPONS = [
@@ -86,21 +86,32 @@ const COUPONS = [
 const COUPON_USAGE = [
   { code: 'WELCOME15', member: '王小美', date: 'Apr 2', order: '#1042', discount: '$9.75', original: '$65.00' },
   { code: 'VIP10OFF', member: 'Anna Park', date: 'Apr 1', order: '#1038', discount: '$10.00', original: '$95.00' },
-  { code: 'BDAY25', member: 'Mary Johnson', date: 'Mar 28', order: '#1031', discount: '$16.25', original: '$65.00' },
+  { code: 'BDAY25', member: '王小美', date: 'Mar 8', order: '#1031', discount: '$16.25', original: '$65.00' },
   { code: 'WELCOME15', member: 'Emily Zhang', date: 'Mar 25', order: '#1027', discount: '$14.25', original: '$95.00' },
   { code: 'FREESHIP', member: 'Anna Park', date: 'Mar 20', order: '#1019', discount: '$12.00', original: '$85.00' },
   { code: 'SPRING20', member: '王小美', date: 'Mar 15', order: '#1012', discount: '$19.00', original: '$95.00' },
 ];
 
 const POINTS_LOG = [
+  // Anna Park: +300+100+100+50-30 = 520 ✅ matches member balance
   { member: 'Anna Park', amount: '+50', type: 'Review reward', desc: 'Left 5-star Google review', date: 'Apr 3' },
   { member: 'Anna Park', amount: '+100', type: 'Referral', desc: 'Referred Emily Zhang', date: 'Mar 20' },
+  { member: 'Anna Park', amount: '+100', type: 'Referral', desc: 'Referred Grace Liu', date: 'Mar 10' },
   { member: 'Anna Park', amount: '-30', type: 'Redeem', desc: 'Redeemed for $3 discount', date: 'Mar 15' },
   { member: 'Anna Park', amount: '+300', type: 'Purchase', desc: 'Purchased Gel Nails 10-Pack', date: 'Feb 10' },
+  // Mary Johnson: +300+50 = 350 ✅
   { member: 'Mary Johnson', amount: '+50', type: 'Review reward', desc: 'Left 4-star Google review', date: 'Apr 1' },
   { member: 'Mary Johnson', amount: '+300', type: 'Purchase', desc: 'Purchased Gel Nails 10-Pack', date: 'Mar 5' },
+  // 王小美: +150+30 = 180 ✅
   { member: '王小美', amount: '+150', type: 'Purchase', desc: 'Purchased Gel Nails 5-Pack', date: 'Mar 12' },
-  { member: '王小美', amount: '+30', type: 'Birthday bonus', desc: 'Birthday month double points', date: 'Mar 8' },
+  { member: '王小美', amount: '+30', type: 'Birthday bonus', desc: 'Birthday month double points (Mar)', date: 'Mar 8' },
+  // Sophia Chen: +580+300+100+300+50-50 = 1280 ✅
+  { member: 'Sophia Chen', amount: '+580', type: 'Purchase', desc: 'Purchased Gel Nails 10-Pack (2x)', date: 'Jan 5' },
+  { member: 'Sophia Chen', amount: '+300', type: 'Purchase', desc: 'Purchased Store Credit $200', date: 'Feb 1' },
+  { member: 'Sophia Chen', amount: '+100', type: 'Referral', desc: 'Referred Rachel Kim', date: 'Feb 15' },
+  { member: 'Sophia Chen', amount: '+50', type: 'Review reward', desc: 'Left 5-star Google review', date: 'Mar 28' },
+  { member: 'Sophia Chen', amount: '-50', type: 'Redeem', desc: 'Redeemed for $5 discount', date: 'Apr 1' },
+  // Emily Zhang: +50 = 50 ✅
   { member: 'Emily Zhang', amount: '+50', type: 'Review reward', desc: 'Left feedback (internal)', date: 'Feb 20' },
 ];
 
@@ -122,20 +133,25 @@ const SMS_LOG = [
   { to: 'Mary Johnson', phone: '604-555-0101', type: 'Booking Confirm', message: 'Hi Mary, your Gel Pedicure is confirmed for Thu 2:00 PM.', status: 'delivered', date: 'Apr 3, 6:00 PM' },
 ];
 
+// 3 technicians × 6 bookings/day avg × $75 avg = ~$1,350/day max
+// Realistic for small nail studio: 3-7 bookings/day
 const REVENUE_DAILY = [
-  { date: 'Mon', amount: 520, bookings: 8 },
-  { date: 'Tue', amount: 390, bookings: 6 },
-  { date: 'Wed', amount: 650, bookings: 10 },
-  { date: 'Thu', amount: 455, bookings: 7 },
-  { date: 'Fri', amount: 780, bookings: 12 },
-  { date: 'Sat', amount: 910, bookings: 14 },
+  { date: 'Mon', amount: 325, bookings: 5 },
+  { date: 'Tue', amount: 260, bookings: 4 },
+  { date: 'Wed', amount: 455, bookings: 7 },
+  { date: 'Thu', amount: 390, bookings: 6 },
+  { date: 'Fri', amount: 520, bookings: 8 },
+  { date: 'Sat', amount: 585, bookings: 9 },
   { date: 'Sun', amount: 0, bookings: 0 },
 ];
 
 const STAFF_STATS = [
-  { name: 'Lisa Chen', checkins: 156, rating: 4.8, commission: '$3,640', reviews: 12, topReview: 'Always perfect nails!' },
-  { name: 'Amy Wang', checkins: 98, rating: 4.5, commission: '$2,058', reviews: 8, topReview: 'Very detailed work' },
-  { name: 'Sarah Kim', checkins: 72, rating: 4.9, commission: '$1,296', reviews: 5, topReview: 'Best service ever!' },
+  // Lisa: 68 check-ins × $72 avg × 40% commission = $1,958
+  { name: 'Lisa Chen', checkins: 68, rating: 4.8, commission: '$1,958', reviews: 8, topReview: 'Always perfect nails!' },
+  // Amy: 45 check-ins × $80 avg × 35% = $1,260
+  { name: 'Amy Wang', checkins: 45, rating: 4.5, commission: '$1,260', reviews: 5, topReview: 'Very detailed work' },
+  // Sarah: 32 check-ins × $75 avg × 30% = $720
+  { name: 'Sarah Kim', checkins: 32, rating: 4.9, commission: '$720', reviews: 3, topReview: 'Best service ever!' },
 ];
 
 // ─── Component ───
@@ -200,7 +216,7 @@ export default function AdminDemoPage() {
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '16px' }}>📋 Today&apos;s Overview</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
-              {[{ n: '$780', l: 'Revenue', c: '#22c55e' }, { n: '12', l: 'Bookings', c: '#3b82f6' }, { n: '3', l: 'Check-ins', c: '#f5c842' }, { n: '89', l: 'Members', c: '#8b5cf6' }].map(s => (
+              {[{ n: '$455', l: 'Revenue', c: '#22c55e' }, { n: '5', l: 'Bookings', c: '#3b82f6' }, { n: '2', l: 'Check-ins', c: '#f5c842' }, { n: '20', l: 'Members', c: '#8b5cf6' }].map(s => (
                 <div key={s.l} style={{ ...card, textAlign: 'center' as const, padding: '12px 8px' }}>
                   <div style={{ fontSize: '20px', fontWeight: 900, color: s.c }}>{s.n}</div>
                   <div style={{ fontSize: '10px', color: '#6b6b96' }}>{s.l}</div>
@@ -552,15 +568,15 @@ export default function AdminDemoPage() {
             <h2 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '16px' }}>💰 Revenue</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
               <div style={{ ...card, textAlign: 'center' as const, padding: '12px' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: '#22c55e' }}>$3,705</div>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#22c55e' }}>$2,535</div>
                 <div style={{ fontSize: '10px', color: '#6b6b96' }}>This Week</div>
               </div>
               <div style={{ ...card, textAlign: 'center' as const, padding: '12px' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: '#3b82f6' }}>$12,580</div>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#3b82f6' }}>$7,280</div>
                 <div style={{ fontSize: '10px', color: '#6b6b96' }}>This Month</div>
               </div>
               <div style={{ ...card, textAlign: 'center' as const, padding: '12px' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: '#f5c842' }}>57</div>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#f5c842' }}>39</div>
                 <div style={{ fontSize: '10px', color: '#6b6b96' }}>Bookings/Wk</div>
               </div>
             </div>
@@ -581,7 +597,8 @@ export default function AdminDemoPage() {
 
             {/* Top services */}
             <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', marginBottom: '8px', letterSpacing: '1px' }}>TOP SERVICES</div>
-            {[{ name: 'Gel Manicure', rev: '$4,550', pct: 36, bookings: 70 }, { name: 'Nail Art Design', rev: '$3,420', pct: 27, bookings: 36 }, { name: 'Eyelash Extensions', rev: '$2,160', pct: 17, bookings: 18 }, { name: 'Gel Pedicure', rev: '$1,650', pct: 13, bookings: 22 }, { name: 'Removal + Redo', rev: '$800', pct: 7, bookings: 9 }].map((s, i) => (
+            {/* Total: $7,280 = sum of below */}
+            {[{ name: 'Gel Manicure', rev: '$2,600', pct: 36, bookings: 40 }, { name: 'Nail Art Design', rev: '$1,900', pct: 26, bookings: 20 }, { name: 'Eyelash Extensions', rev: '$1,200', pct: 16, bookings: 10 }, { name: 'Gel Pedicure', rev: '$975', pct: 13, bookings: 13 }, { name: 'Removal + Redo', rev: '$605', pct: 9, bookings: 7 }].map((s, i) => (
               <div key={i} style={{ ...card, marginBottom: '6px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>{s.name}</div>
