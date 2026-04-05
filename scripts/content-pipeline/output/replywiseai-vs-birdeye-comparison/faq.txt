@@ -1,0 +1,14 @@
+Q: What is the main difference between ReplyWise AI and Birdeye?
+A: The main difference is scope and target customer. Birdeye is a comprehensive enterprise suite for managing reputation across 200+ sites, including surveys and social media. ReplyWise AI is a focused SMB tool designed specifically to streamline and increase Google review generation through a simple QR code and AI draft process.
+
+Q: How much does Birdeye cost compared to ReplyWise AI?
+A: Birdeye uses custom enterprise pricing, with entry points typically starting above $300 per month. ReplyWise AI uses public, tiered pricing with plans for single-location businesses starting under $100 per month. Birdeye's cost reflects its vast feature set for large organizations.
+
+Q: Which tool is easier to set up for a small business?
+A: ReplyWise AI is significantly easier and faster to set up. A business owner can connect their Google My Business account, generate a QR code, and start collecting reviews in under an hour. Birdeye requires a more involved onboarding process that can take days or weeks.
+
+Q: Can Birdeye generate AI draft reviews for customers like ReplyWise AI?
+A: While Birdeye uses AI for insights and suggested business responses, its core review collection method is traditional (email/SMS requests to a review form). ReplyWise AI's unique differentiator is its customer-facing QR code flow where AI generates a complete review draft based on simple customer taps, significantly reducing friction.
+
+Q: I'm a marketing agency. Which tool should I use for my clients?
+A: It depends on your client base. For agencies serving primarily local SMBs (restaurants, service trades), ReplyWise AI is an easy-to-implement, high-impact solution. For agencies managing enterprise or multi-location brand clients, Birdeye's white-label reporting and comprehensive platform are likely necessary.

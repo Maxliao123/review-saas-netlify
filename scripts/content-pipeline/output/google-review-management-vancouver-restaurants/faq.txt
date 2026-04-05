@@ -1,0 +1,14 @@
+Q: How many Google reviews do I need to be competitive in Vancouver?
+A: There's no magic number, but for competitive neighborhoods like Downtown or Main Street, aim for a minimum of 100 reviews with a 4.3+ star average. The key is consistent volume; getting 5-10 new reviews per week is often more important for local SEO than a one-time push to 200.
+
+Q: How should I handle a negative review in Mandarin or Korean?
+A: First, use Google Translate or a professional translation tool to understand the complaint fully. Then, craft a polite, apologetic response in English, and use a reliable tool to translate it accurately into the reviewer's language. Acknowledge the issue, apologize, and offer to continue the conversation offline via email or phone. This shows all customers you respect their feedback.
+
+Q: Is it okay to offer a discount for leaving a Google review?
+A: No. Google's policies strictly prohibit offering incentives in exchange for reviews[^5]. This can lead to your reviews being removed or your profile penalized. Instead, focus on providing an excellent experience and making the act of reviewing as easy as possible with a QR code or direct link.
+
+Q: My restaurant is in Richmond. Should I focus on Yelp or Google?
+A: Focus primarily on Google. For all local businesses, Google Reviews have the dominant impact on local search visibility and are seen by the broadest audience. However, for authentic Asian cuisine in Richmond, platforms like Dianping (a Chinese Yelp equivalent) are also influential within the Chinese-speaking community. Your Google Business Profile should still be your primary managed asset.
+
+Q: How much time should this take each week?
+A: With a system in place, it should take a manager 30-60 minutes per week. This includes scanning new reviews, sending a few personalized responses, and checking analytics. The bulk of the work is automated through QR code collection and, if used, a management dashboard that aggregates feedback. The time investment is minimal compared to the revenue impact of a strong reputation[^1].

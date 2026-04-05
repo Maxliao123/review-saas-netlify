@@ -1,0 +1,14 @@
+Q: Is it against Google's rules to use QR codes to ask for reviews?
+A: No, it is perfectly within Google's guidelines to use QR codes to ask for reviews. The key rule is that you cannot offer incentives (like discounts or free items) in exchange for positive reviews. Asking for feedback and making it easy is encouraged.
+
+Q: What's the difference between a static and a dynamic QR code for reviews?
+A: A static QR code directly contains your review link and cannot be changed after creation. A dynamic QR code is a short URL that redirects to your review link. The major advantage of dynamic codes is that you can change the destination link later and track scan analytics like number of scans, location, and device type.
+
+Q: Where is the absolute best place to put a review QR code in my restaurant?
+A: Data and experience show table tents and receipts are the top performers. The table tent is visible at the peak satisfaction moment after the meal, and the receipt is a natural touchpoint as the transaction concludes. A/B test placements to see what works best for your specific layout and customer flow.
+
+Q: How can I increase the number of people who actually write a review after scanning the code?
+A: The biggest drop-off happens when customers face a blank text box. To increase completion, reduce friction. Use a system where customers select a few experience tags (e.g., "friendly service," "great cocktails") and have an AI generate a personalized review draft for them to post with one tap, like the process used by ReplyWise AI.
+
+Q: Can I use the same QR code for other review sites like Yelp or TripAdvisor?
+A: Technically, you can create a QR code that links to a landing page with links to multiple review sites. However, this adds steps and reduces conversion. For highest conversion, it's generally better to have a dedicated QR code that goes directly to your Google review link, as Google is the most impactful platform for local business visibility.

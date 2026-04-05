@@ -1,0 +1,16 @@
+{
+  "slug": "google-review-management-vancouver-restaurants",
+  "antiAiScore": 77,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "streamline",
+    "crucial",
+    "furthermore",
+    "truly"
+  ],
+  "emDashCount": 1,
+  "h2Count": 8,
+  "wordCount": 2418,
+  "avgSentenceLength": 12.8
+}

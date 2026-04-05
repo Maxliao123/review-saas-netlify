@@ -1,0 +1,19 @@
+{
+  "slug": "how-to-respond-to-negative-google-reviews",
+  "antiAiScore": 65,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "comprehensive",
+    "crucial",
+    "furthermore",
+    "clearly",
+    "incredibly",
+    "significantly",
+    "truly"
+  ],
+  "emDashCount": 0,
+  "h2Count": 9,
+  "wordCount": 2289,
+  "avgSentenceLength": 10.8
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "google-review-management-restaurants-complete-guide",
+  "antiAiScore": 74,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "leverage",
+    "definitely",
+    "really",
+    "very"
+  ],
+  "emDashCount": 2,
+  "h2Count": 8,
+  "wordCount": 2151,
+  "avgSentenceLength": 11.2
+}

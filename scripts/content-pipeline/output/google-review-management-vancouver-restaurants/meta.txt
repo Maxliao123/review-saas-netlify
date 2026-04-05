@@ -1,0 +1,4 @@
+title: Google Review Management Guide for Vancouver Restaurants
+description: A local consultant's guide to managing Google reviews in Vancouver's competitive food scene. Covers multilingual strategies, neighborhood tips, and local SEO.
+excerpt: Competing in Vancouver's restaurant scene means mastering your online reputation. This guide provides Vancouver-specific strategies for managing Google reviews, handling multiple languages, and using local SEO to stand out.
+readTime: 8

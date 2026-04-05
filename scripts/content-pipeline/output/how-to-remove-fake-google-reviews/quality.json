@@ -1,0 +1,18 @@
+{
+  "slug": "how-to-remove-fake-google-reviews",
+  "antiAiScore": 67,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "navigate",
+    "streamline",
+    "robust",
+    "clearly",
+    "simply",
+    "very"
+  ],
+  "emDashCount": 1,
+  "h2Count": 9,
+  "wordCount": 2244,
+  "avgSentenceLength": 14
+}

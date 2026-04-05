@@ -1,0 +1,396 @@
+{
+  "generated": "2026-04-05T01:46:04.766Z",
+  "summary": {
+    "total": 12,
+    "pass": 12,
+    "review": 0,
+    "fail": 0
+  },
+  "articles": [
+    {
+      "slug": "best-google-review-management-tools-2026",
+      "antiAI": {
+        "score": 68,
+        "bannedWordsFound": [
+          "streamline",
+          "robust",
+          "comprehensive",
+          "seamless"
+        ],
+        "emDashCount": 0
+      },
+      "seo": {
+        "score": 90,
+        "titleLength": 66,
+        "h2Count": 7,
+        "wordCount": 2577,
+        "hasInternalLinks": false,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 7,
+        "avgSectionLength": 355,
+        "readTimeMinutes": 13
+      },
+      "overall": 85,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: streamline, robust, comprehensive, seamless",
+        "SEO: no internal links found"
+      ]
+    },
+    {
+      "slug": "dental-clinic-reputation-management-guide",
+      "antiAI": {
+        "score": 72,
+        "bannedWordsFound": [
+          "leverage",
+          "furthermore"
+        ],
+        "emDashCount": 4
+      },
+      "seo": {
+        "score": 90,
+        "titleLength": 70,
+        "h2Count": 8,
+        "wordCount": 2155,
+        "hasInternalLinks": false,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 256,
+        "readTimeMinutes": 11
+      },
+      "overall": 86,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: leverage, furthermore",
+        "Anti-AI: 4 em dashes found (max 3 recommended)",
+        "SEO: no internal links found"
+      ]
+    },
+    {
+      "slug": "google-review-management-restaurants-complete-guide",
+      "antiAI": {
+        "score": 78,
+        "bannedWordsFound": [
+          "leverage",
+          "streamline"
+        ],
+        "emDashCount": 2
+      },
+      "seo": {
+        "score": 100,
+        "titleLength": 56,
+        "h2Count": 8,
+        "wordCount": 2151,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 255,
+        "readTimeMinutes": 11
+      },
+      "overall": 92,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: leverage, streamline"
+      ]
+    },
+    {
+      "slug": "google-review-management-vancouver-restaurants",
+      "antiAI": {
+        "score": 73,
+        "bannedWordsFound": [
+          "streamline",
+          "crucial",
+          "furthermore"
+        ],
+        "emDashCount": 1
+      },
+      "seo": {
+        "score": 100,
+        "titleLength": 65,
+        "h2Count": 8,
+        "wordCount": 2418,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 291,
+        "readTimeMinutes": 13
+      },
+      "overall": 91,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: streamline, crucial, furthermore"
+      ]
+    },
+    {
+      "slug": "how-to-ask-customers-for-google-reviews",
+      "antiAI": {
+        "score": 64,
+        "bannedWordsFound": [
+          "facilitate",
+          "comprehensive",
+          "seamless"
+        ],
+        "emDashCount": 4
+      },
+      "seo": {
+        "score": 100,
+        "titleLength": 67,
+        "h2Count": 8,
+        "wordCount": 2369,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 281,
+        "readTimeMinutes": 12
+      },
+      "overall": 87,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: facilitate, comprehensive, seamless",
+        "Anti-AI: 4 em dashes found (max 3 recommended)"
+      ]
+    },
+    {
+      "slug": "how-to-get-more-google-reviews-hotels",
+      "antiAI": {
+        "score": 70,
+        "bannedWordsFound": [
+          "leverage",
+          "seamless",
+          "furthermore"
+        ],
+        "emDashCount": 2
+      },
+      "seo": {
+        "score": 85,
+        "titleLength": 79,
+        "h2Count": 8,
+        "wordCount": 2433,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 282,
+        "readTimeMinutes": 13
+      },
+      "overall": 84,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: leverage, seamless, furthermore",
+        "SEO: title length 79 (target 30-70)"
+      ]
+    },
+    {
+      "slug": "how-to-improve-google-star-rating",
+      "antiAI": {
+        "score": 84,
+        "bannedWordsFound": [
+          "leverage",
+          "streamline"
+        ],
+        "emDashCount": 0
+      },
+      "seo": {
+        "score": 75,
+        "titleLength": 79,
+        "h2Count": 8,
+        "wordCount": 2112,
+        "hasInternalLinks": false,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 250,
+        "readTimeMinutes": 11
+      },
+      "overall": 84,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: leverage, streamline",
+        "SEO: title length 79 (target 30-70)",
+        "SEO: no internal links found"
+      ]
+    },
+    {
+      "slug": "how-to-remove-fake-google-reviews",
+      "antiAI": {
+        "score": 73,
+        "bannedWordsFound": [
+          "navigate",
+          "streamline",
+          "robust"
+        ],
+        "emDashCount": 1
+      },
+      "seo": {
+        "score": 85,
+        "titleLength": 75,
+        "h2Count": 9,
+        "wordCount": 2244,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 9,
+        "avgSectionLength": 237,
+        "readTimeMinutes": 12
+      },
+      "overall": 85,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: navigate, streamline, robust",
+        "SEO: title length 75 (target 30-70)"
+      ]
+    },
+    {
+      "slug": "how-to-respond-to-negative-google-reviews",
+      "antiAI": {
+        "score": 76,
+        "bannedWordsFound": [
+          "comprehensive",
+          "crucial",
+          "furthermore"
+        ],
+        "emDashCount": 0
+      },
+      "seo": {
+        "score": 100,
+        "titleLength": 67,
+        "h2Count": 9,
+        "wordCount": 2289,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 9,
+        "avgSectionLength": 240,
+        "readTimeMinutes": 12
+      },
+      "overall": 92,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: comprehensive, crucial, furthermore"
+      ]
+    },
+    {
+      "slug": "how-to-use-qr-codes-for-google-reviews",
+      "antiAI": {
+        "score": 59,
+        "bannedWordsFound": [
+          "leverage",
+          "streamline",
+          "comprehensive",
+          "crucial"
+        ],
+        "emDashCount": 3
+      },
+      "seo": {
+        "score": 100,
+        "titleLength": 66,
+        "h2Count": 7,
+        "wordCount": 1987,
+        "hasInternalLinks": true,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 7,
+        "avgSectionLength": 254,
+        "readTimeMinutes": 10
+      },
+      "overall": 86,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: leverage, streamline, comprehensive, crucial"
+      ]
+    },
+    {
+      "slug": "replywiseai-vs-birdeye-comparison",
+      "antiAI": {
+        "score": 43,
+        "bannedWordsFound": [
+          "utilize",
+          "streamline",
+          "robust",
+          "comprehensive",
+          "seamless",
+          "holistic"
+        ],
+        "emDashCount": 3
+      },
+      "seo": {
+        "score": 90,
+        "titleLength": 55,
+        "h2Count": 8,
+        "wordCount": 2008,
+        "hasInternalLinks": false,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 236,
+        "readTimeMinutes": 11
+      },
+      "overall": 76,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: utilize, streamline, robust, comprehensive, seamless, holistic",
+        "SEO: no internal links found"
+      ]
+    },
+    {
+      "slug": "replywiseai-vs-podium-comparison",
+      "antiAI": {
+        "score": 65,
+        "bannedWordsFound": [
+          "utilize",
+          "navigate",
+          "streamline",
+          "comprehensive"
+        ],
+        "emDashCount": 1
+      },
+      "seo": {
+        "score": 90,
+        "titleLength": 64,
+        "h2Count": 8,
+        "wordCount": 1946,
+        "hasInternalLinks": false,
+        "hasFAQ": true
+      },
+      "content": {
+        "score": 100,
+        "sectionCount": 8,
+        "avgSectionLength": 230,
+        "readTimeMinutes": 10
+      },
+      "overall": 84,
+      "verdict": "PASS",
+      "issues": [
+        "Anti-AI: found banned words: utilize, navigate, streamline, comprehensive",
+        "SEO: no internal links found"
+      ]
+    }
+  ]
+}

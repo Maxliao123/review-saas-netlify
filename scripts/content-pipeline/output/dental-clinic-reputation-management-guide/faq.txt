@@ -1,0 +1,14 @@
+Q: How soon after a dental appointment should we ask for a review?
+A: The optimal time is 1-2 hours after the patient leaves the office. This allows any immediate procedural discomfort (like numbness) to fade while the positive aspects of the visit—clean teeth, friendly service, completed treatment—are still fresh in their mind, leading to more detailed and positive reviews.
+
+Q: What is the biggest HIPAA risk when responding to dental reviews?
+A: The biggest risk is confirming a patient's identity or disclosing Protected Health Information (PHI). This includes using the patient's name, referencing a specific procedure ("your root canal"), mentioning appointment dates, or alluding to their health condition. All public responses must use generic, non-identifying language.
+
+Q: How can we handle reviews that complain about pain without violating HIPAA?
+A: Respond with general empathy without confirming the specific experience. A compliant response would be: "We are sorry to read about your experience. Patient comfort is our top priority. We take this feedback seriously and would welcome the opportunity to discuss it with you privately. Please contact our office manager at [phone/email]." This shows concern and moves the conversation offline.
+
+Q: Can we use a QR code to collect reviews in the waiting room?
+A: Yes, QR codes are an excellent, low-friction way to collect reviews. Place them at the front desk or give a card to patients as they leave. When scanned, the code should take them directly to your review page. Some systems even let patients select experience tags to generate a review draft, making the process easier and guiding feedback toward your practice's strengths.
+
+Q: How do positive reviews help attract new patients specifically searching for an emergency dentist?
+A: Patients in dental emergencies are highly motivated but anxious. They often search "emergency dentist" and filter by highest ratings. Positive reviews that mention "got me in right away," "quick appointment," or "relieved my pain" provide the social proof and reassurance they need to choose your clinic in a stressful moment. Featuring these keywords in your business profile and website can significantly improve conversion.

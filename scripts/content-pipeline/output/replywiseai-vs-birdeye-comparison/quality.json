@@ -1,0 +1,17 @@
+{
+  "slug": "replywiseai-vs-birdeye-comparison",
+  "antiAiScore": 66,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "comprehensive",
+    "seamless",
+    "holistic",
+    "significantly",
+    "simply"
+  ],
+  "emDashCount": 3,
+  "h2Count": 8,
+  "wordCount": 2008,
+  "avgSentenceLength": 12.2
+}

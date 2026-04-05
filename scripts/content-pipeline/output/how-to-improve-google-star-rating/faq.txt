@@ -1,0 +1,14 @@
+Q: How many 5-star reviews do I need to raise my average from 3.5 to 4.0 stars?
+A: The exact number depends on your total review count and current distribution. For a business with 50 reviews at a 3.5 average, it could require 25-35 new consecutive 5-star reviews with no new low ratings. Use an online "review average calculator" to model your specific scenario.
+
+Q: Is it against Google's rules to ask customers for reviews?
+A: No, it is perfectly within Google's guidelines to ask your customers for honest reviews. What is against the rules is offering incentives (discounts, freebies, money) in exchange for specifically positive reviews. Always ask for genuine feedback.
+
+Q: Should I respond to positive reviews or just the negative ones?
+A: You should respond to a mix. Replying to positive reviews shows appreciation and encourages future customers. It's good practice to respond to all negative reviews and a significant portion of your positive ones to show active engagement.
+
+Q: Can I have a fake or negative review removed from Google?
+A: You can flag a review for removal if it violates Google's policies (e.g., contains hate speech, is off-topic, is spam, or is from someone with no actual experience). Google is less likely to remove a negative review simply because you disagree with it. Your best recourse is to respond professionally and use the strategies in this guide to dilute it with positive reviews.
+
+Q: How quickly will my rating update after I get a new review?
+A: Your Google star rating typically updates within 24 hours after a new review is posted, though it can sometimes be almost instantaneous. The system recalculates the average each time a new review is added.

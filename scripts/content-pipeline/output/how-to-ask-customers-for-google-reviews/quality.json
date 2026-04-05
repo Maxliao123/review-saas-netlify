@@ -1,0 +1,16 @@
+{
+  "slug": "how-to-ask-customers-for-google-reviews",
+  "antiAiScore": 68,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "comprehensive",
+    "incredibly",
+    "really",
+    "simply"
+  ],
+  "emDashCount": 4,
+  "h2Count": 8,
+  "wordCount": 2369,
+  "avgSentenceLength": 12.2
+}

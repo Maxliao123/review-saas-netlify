@@ -1,0 +1,14 @@
+Q: Can I try ReplyWise AI before committing to a paid plan?
+A: Yes, ReplyWise AI offers a demo experience where you can scan a QR code to see exactly how the customer review generation process works. This allows you to test the user experience before signing up.
+
+Q: Does Podium require a contract?
+A: Yes, Podium typically requires an annual contract for its services. This is standard for their pricing model and includes early termination fees if you cancel before the contract period ends.
+
+Q: Which tool is better for a business with 10+ locations?
+A: ReplyWise AI is often more cost-effective and simpler to manage for multi-location businesses. Its Pro plan includes unlimited locations in a single dashboard for a flat monthly fee, whereas Podium usually charges per location, which can become expensive at scale.
+
+Q: Can Podium or ReplyWise AI post reviews automatically for customers?
+A: No platform can automatically post a review on a customer's behalf, as this violates platform terms of service. ReplyWise AI reduces friction by generating a draft and allowing one-tap posting by the customer. Podium sends a link that the customer must click and complete themselves.
+
+Q: If I already use a CRM, which tool integrates better?
+A: Podium generally has a broader set of native integrations with popular CRM and business software, positioning it as a communications hub. ReplyWise AI focuses on deep integration with Google Business Profile and provides API access for custom connections to other systems.

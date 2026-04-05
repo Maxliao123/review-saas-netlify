@@ -1,0 +1,17 @@
+{
+  "slug": "dental-clinic-reputation-management-guide",
+  "antiAiScore": 63,
+  "seoScore": 100,
+  "overallVerdict": "PASS",
+  "bannedWordsFound": [
+    "leverage",
+    "furthermore",
+    "incredibly",
+    "significantly",
+    "truly"
+  ],
+  "emDashCount": 4,
+  "h2Count": 8,
+  "wordCount": 2155,
+  "avgSentenceLength": 13.8
+}
