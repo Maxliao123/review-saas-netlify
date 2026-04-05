@@ -9,3 +9,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 export const supabaseAdmin = createClient(supabaseUrl || '', supabaseServiceKey || '');
+
+// Factory alias used by newer lib modules (member-token, booking-utils, verification)
+export function createSupabaseAdmin() {
+  return supabaseAdmin;
+}

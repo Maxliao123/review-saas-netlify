@@ -43,6 +43,12 @@ import {
   MapPin,
   Gift,
   Code,
+  CalendarDays,
+  UserCheck,
+  BadgeCheck,
+  Package,
+  Scissors,
+  Activity,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -77,6 +83,18 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: '/admin/reviews', label: '4. Reviews & AI Reply', icon: MessageSquare },
       { href: '/admin/templates', label: '5. Reply Templates', icon: BookTemplate },
       { href: '/admin/analytics/scans', label: '6. QR Scan Analytics', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Membership',
+    items: [
+      { href: '/admin/members', label: 'Members', icon: UserCheck },
+      { href: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
+      { href: '/admin/verify', label: 'Check-in', icon: BadgeCheck },
+      { href: '/admin/packages', label: 'Packages', icon: Package },
+      { href: '/admin/services', label: 'Services', icon: Scissors },
+      { href: '/admin/staff-mgmt', label: 'Staff', icon: Users },
+      { href: '/admin/performance', label: 'Performance', icon: Activity },
     ],
   },
   {

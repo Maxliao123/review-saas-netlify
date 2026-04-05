@@ -23,11 +23,14 @@ const PUBLIC_API_PREFIXES = [
   '/api/webhooks/', // LINE and other webhooks (verified by signature)
   '/api/review/action', // Token-based review action page
   '/api/reviews/approve', // One-click approve from notification links
+  '/api/member/', // Member portal API (token-based auth)
 ];
 
 // Pages that don't require auth (token-secured)
 const PUBLIC_PAGE_PREFIXES = [
   '/review/action', // Edit & publish page from notification links
+  '/m/', // Member portal PWA pages (token-based auth)
+  '/p/', // Internal pages (quote, playbook - hidden URLs)
 ];
 
 function isPublicRoute(pathname: string): boolean {
