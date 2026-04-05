@@ -157,7 +157,19 @@ export default function BookingPage() {
       {/* Step: Service */}
       {step === 'service' && (
         <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Select a Service</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">Select a Service</h2>
+          {/* Store hours info */}
+          <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 mb-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-sm">🕐</span>
+              <span className="text-sm font-semibold text-gray-800">Business Hours</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-gray-600">
+              <div className="flex justify-between"><span>Mon–Fri</span><span className="font-medium text-gray-800">9:00 AM – 6:00 PM</span></div>
+              <div className="flex justify-between"><span>Saturday</span><span className="font-medium text-gray-800">10:00 AM – 5:00 PM</span></div>
+              <div className="flex justify-between"><span>Sunday</span><span className="font-medium text-gray-400">Closed</span></div>
+            </div>
+          </div>
           {loading ? (
             <Spinner />
           ) : (
@@ -230,8 +242,17 @@ export default function BookingPage() {
       {step === 'staff' && (
         <div>
           <h2 className="text-lg font-bold text-gray-900 mb-1">Pick a Time</h2>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 mb-1">
             {selectedService?.name} &middot; {formatDateShort(selectedDate)}
+          </p>
+          <p className="text-xs text-gray-400 mb-4">
+            {(() => {
+              const day = new Date(selectedDate + 'T12:00:00').getDay();
+              if (day === 0) return '❌ Sunday — Closed';
+              if (day === 6) return '🕐 Saturday: 10:00 AM – 5:00 PM';
+              return '🕐 Weekday: 9:00 AM – 6:00 PM';
+            })()}
+            {' · '}{selectedService?.duration_minutes} min per session
           </p>
           {loading ? (
             <Spinner />

@@ -52,7 +52,7 @@ export default function DemoDashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold">商家後台 &middot; Dashboard</h1>
-          <p className="text-sm text-[#6b6b96] mt-1">Bloom Studio</p>
+          <p className="text-sm text-[#6b6b96] mt-1">Lush Nail Studio</p>
         </div>
 
         {/* AI Alert */}

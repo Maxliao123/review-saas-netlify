@@ -34,7 +34,7 @@ export default function DemoCheckoutPage() {
       <div className="max-w-lg mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-2xl font-bold">Bloom Studio</div>
+          <div className="text-2xl font-bold">Lush Nail Studio</div>
           <div className="text-sm text-[#6b6b96] mt-1">Checkout</div>
         </div>
 

@@ -34,7 +34,7 @@ const REVIEWS = [
     name: 'Amy Z.',
     date: '2026-03-20',
     rating: 5,
-    text: 'Bloom Studio never disappoints! I have bought multiple kits and they are always fresh and well-packaged. The dried flower frame was a hit at my workshop.',
+    text: 'Lush Nail Studio never disappoints! I have bought multiple kits and they are always fresh and well-packaged. The dried flower frame was a hit at my workshop.',
     verified: true,
   },
   {
@@ -99,7 +99,7 @@ export default function DemoReviewsPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold">商品評價 &middot; Product Reviews</h1>
-          <p className="text-sm text-[#6b6b96] mt-1">Bloom Studio</p>
+          <p className="text-sm text-[#6b6b96] mt-1">Lush Nail Studio</p>
         </div>
 
         {/* Overall Rating */}
@@ -154,13 +154,13 @@ export default function DemoReviewsPage() {
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
             {/* Email header */}
             <div className="bg-white/[0.03] px-6 py-4 border-b border-white/[0.06]">
-              <div className="text-xs text-[#6b6b96]">From: Bloom Studio &lt;hello@bloomstudio.ca&gt;</div>
+              <div className="text-xs text-[#6b6b96]">From: Lush Nail Studio &lt;hello@bloomstudio.ca&gt;</div>
               <div className="text-xs text-[#6b6b96] mt-1">Subject: How was your experience? We&apos;d love your feedback!</div>
             </div>
             {/* Email body */}
             <div className="p-6">
               <div className="text-center mb-6">
-                <div className="text-lg font-bold text-white mb-1">Thanks for visiting Bloom Studio!</div>
+                <div className="text-lg font-bold text-white mb-1">Thanks for visiting Lush Nail Studio!</div>
                 <div className="text-sm text-[#6b6b96]">We hope you enjoyed your purchase.</div>
               </div>
               <div className="bg-white/[0.04] rounded-lg p-5 text-center mb-4">

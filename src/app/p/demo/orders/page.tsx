@@ -119,7 +119,7 @@ export default function DemoOrdersPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold">訂單管理 &middot; Order Management</h1>
-          <p className="text-sm text-[#6b6b96] mt-1">Bloom Studio</p>
+          <p className="text-sm text-[#6b6b96] mt-1">Lush Nail Studio</p>
         </div>
 
         {/* Stats */}

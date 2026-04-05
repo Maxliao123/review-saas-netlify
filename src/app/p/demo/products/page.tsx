@@ -53,7 +53,7 @@ export default function DemoProductsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold">商品管理 &middot; Product Management</h1>
-            <p className="text-sm text-[#6b6b96] mt-1">Bloom Studio</p>
+            <p className="text-sm text-[#6b6b96] mt-1">Lush Nail Studio</p>
           </div>
           <button className="px-5 py-2.5 bg-[#E8654A] text-white rounded-lg text-sm font-semibold hover:bg-[#d4563d] transition-colors self-start">
             + Add Product
