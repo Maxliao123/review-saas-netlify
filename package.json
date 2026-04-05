@@ -17,7 +17,8 @@
     "content:optimize": "npx tsx scripts/content-pipeline/content-optimizer.ts",
     "content:publish": "npx tsx scripts/content-pipeline/scheduled-publish.ts",
     "content:indexnow": "npx tsx scripts/content-pipeline/indexnow.ts",
-    "content:pipeline": "npx tsx scripts/content-pipeline/run-pipeline.ts"
+    "content:pipeline": "npx tsx scripts/content-pipeline/run-pipeline.ts",
+    "prospect": "npx tsx scripts/prospecting/find-targets.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.46.0",

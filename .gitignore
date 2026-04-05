@@ -3,6 +3,9 @@
 # service account keys (sensitive)
 gsc-service-account.json
 
+# prospecting reports (contain business data)
+scripts/prospecting/reports/
+
 # dependencies
 /node_modules
 /.pnp

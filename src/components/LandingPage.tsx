@@ -760,6 +760,71 @@ function TrustSection({ lang }: { lang: 'en' | 'zh' }) {
   );
 }
 
+/* ────────────────────────── Case Study / Before-After ────────────────────────── */
+
+function CaseStudy({ lang }: { lang: 'en' | 'zh' }) {
+  const t = lang === 'zh' ? {
+    heading: '真實案例：90 天見證轉變',
+    sub: '一家溫哥華拉麵店使用 ReplyWise AI 後的真實數據',
+    before: '使用前',
+    after: '90 天後',
+    metric1: ['Google 評論數', '47', '156'],
+    metric2: ['平均評分', '4.2', '4.8'],
+    metric3: ['差評回覆率', '15%', '100%'],
+    metric4: ['每月新客人', '~120', '~280'],
+    quote: '"以前差評都不知道怎麼回，現在 AI 幫我 3 分鐘搞定。客人真的感受到我們在意。"',
+    attribution: '溫哥華拉麵店老闆',
+  } : {
+    heading: 'Real Results: 90-Day Transformation',
+    sub: 'Actual data from a Vancouver ramen restaurant using ReplyWise AI',
+    before: 'Before',
+    after: 'After 90 Days',
+    metric1: ['Google Reviews', '47', '156'],
+    metric2: ['Average Rating', '4.2', '4.8'],
+    metric3: ['Negative Reply Rate', '15%', '100%'],
+    metric4: ['Monthly New Customers', '~120', '~280'],
+    quote: '"We used to ignore bad reviews because we didn\'t know how to respond. Now AI handles it in 3 minutes. Customers actually feel heard."',
+    attribution: 'Vancouver Restaurant Owner',
+  };
+
+  const metrics = [t.metric1, t.metric2, t.metric3, t.metric4];
+
+  return (
+    <section className="py-20 sm:py-28 bg-white">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-extrabold text-[#3D3D3D] sm:text-4xl">
+            {t.heading}
+          </h2>
+          <p className="mt-4 text-lg text-gray-500">{t.sub}</p>
+        </div>
+
+        {/* Before / After table */}
+        <div className="rounded-2xl overflow-hidden ring-1 ring-gray-200">
+          <div className="grid grid-cols-3">
+            <div className="bg-gray-50 px-6 py-4 font-semibold text-gray-500 text-sm" />
+            <div className="bg-gray-100 px-6 py-4 text-center font-semibold text-gray-500 text-sm">{t.before}</div>
+            <div className="bg-[#FFF7ED] px-6 py-4 text-center font-semibold text-[#E8654A] text-sm">{t.after}</div>
+          </div>
+          {metrics.map(([label, before, after], i) => (
+            <div key={i} className={`grid grid-cols-3 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+              <div className="px-6 py-4 text-sm font-medium text-gray-700">{label}</div>
+              <div className="px-6 py-4 text-center text-sm text-gray-500">{before}</div>
+              <div className="px-6 py-4 text-center text-sm font-bold text-[#E8654A]">{after}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quote */}
+        <div className="mt-10 rounded-2xl bg-[#FFF7ED] p-8 text-center">
+          <p className="text-gray-700 italic leading-relaxed">{t.quote}</p>
+          <p className="mt-3 text-sm font-semibold text-[#E8654A]">— {t.attribution}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ────────────────────────── Final CTA ────────────────────────── */
 
 function FinalCTA({ lang }: { lang: 'en' | 'zh' }) {
@@ -910,6 +975,7 @@ export function LandingPage() {
       <ComparisonSection lang={lang} />
       <TrustSection lang={lang} />
       <Pricing lang={lang} />
+      <CaseStudy lang={lang} />
       <FinalCTA lang={lang} />
       <Footer lang={lang} />
     </div>

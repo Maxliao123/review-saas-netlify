@@ -188,7 +188,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <Star className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-lg font-bold text-gray-900">
-                Reputation<span className="text-[#E8654A]">Monitor</span>
+                Reply<span className="text-[#E8654A]">Wise AI</span>
               </span>
             </Link>
             <div className="flex items-center gap-4">
