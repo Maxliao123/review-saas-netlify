@@ -296,10 +296,10 @@ export default function BookingPage() {
             <Row label="Date" value={formatDateShort(selectedDate)} />
             <Row label="Time" value={formatTime(selectedSlot)} />
             <Row label="Duration" value={`${selectedService?.duration_minutes} min`} />
-            {selectedService?.credits_required ? (
-              <Row label="Credits" value={`${selectedService.credits_required}`} />
+            {selectedService?.credits_required && selectedService.credits_required > 0 ? (
+              <Row label="Credits" value={`${selectedService.credits_required} credit${selectedService.credits_required > 1 ? 's' : ''}`} />
             ) : (
-              <Row label="Price" value={`$${selectedService?.price}`} />
+              <Row label="Price" value={`$${selectedService?.price || 0}`} />
             )}
           </div>
           {error && (
@@ -378,5 +378,6 @@ function formatTime(iso: string): string {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    timeZone: 'America/Vancouver',
   });
 }

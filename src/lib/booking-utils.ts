@@ -125,9 +125,10 @@ export async function getAvailableSlots(
   const allSlots = generateSlots(timeRanges, intervalMinutes);
 
   // 4. Check each slot for conflicts
+  // Use Pacific Time (Vancouver) — append timezone offset
   return allSlots.map(time => {
     const [h, m] = time.split(':').map(Number);
-    const slotStart = new Date(`${date}T${time}:00`);
+    const slotStart = new Date(`${date}T${time}:00-07:00`); // PDT (UTC-7)
     const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60 * 1000);
 
     const available = !isSlotConflicting(slotStart, slotEnd, existingBookings || []);

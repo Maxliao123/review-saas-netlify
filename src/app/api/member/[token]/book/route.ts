@@ -140,6 +140,40 @@ export async function POST(
       }
     }
 
+    // Send notification email to store owner
+    try {
+      const RESEND_KEY = process.env.RESEND_API_KEY;
+      const NOTIFY_EMAIL = 'maxliao2020@gmail.com';
+      if (RESEND_KEY && NOTIFY_EMAIL) {
+        const memberName = member.name || 'A member';
+        const timeStr = startDate.toLocaleString('en-CA', { timeZone: 'America/Vancouver', dateStyle: 'medium', timeStyle: 'short' });
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: process.env.EMAIL_FROM || 'ReplyWise AI <noreply@replywiseai.com>',
+            to: [NOTIFY_EMAIL],
+            subject: `📅 New Booking: ${memberName} — ${service.name}`,
+            html: `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:20px">
+                <h2 style="color:#E8654A">New Booking Received</h2>
+                <table style="width:100%;border-collapse:collapse;font-size:14px">
+                  <tr><td style="padding:8px 0;color:#666">Member</td><td style="padding:8px 0;font-weight:bold">${memberName} (${member.phone})</td></tr>
+                  <tr><td style="padding:8px 0;color:#666">Service</td><td style="padding:8px 0;font-weight:bold">${service.name} (${service.duration_minutes} min)</td></tr>
+                  <tr><td style="padding:8px 0;color:#666">Date/Time</td><td style="padding:8px 0;font-weight:bold">${timeStr}</td></tr>
+                  <tr><td style="padding:8px 0;color:#666">Verification Code</td><td style="padding:8px 0;font-weight:bold;font-size:20px;color:#E8654A;letter-spacing:2px">${verificationCode}</td></tr>
+                </table>
+                <p style="color:#999;font-size:12px;margin-top:20px">— ReplyWise AI · Lush Nail Studio</p>
+              </div>
+            `,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error('Notification email failed:', emailErr);
+      // Don't fail the booking if email fails
+    }
+
     return NextResponse.json({
       booking,
       service_name: service.name,
