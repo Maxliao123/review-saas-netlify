@@ -199,42 +199,48 @@ export default function QuotePage() {
           <p style={{ fontSize: '12px', color: '#6b6b96' }}>建置費 3 期分付 · SMS 用量約 $0.01/封 · 不含 UI 設計費</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '14px', maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ background: '#14142a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', marginBottom: '6px', letterSpacing: '1px' }}>基礎官網</div>
-            <div style={{ fontSize: '13px', color: '#9898b8', marginBottom: '16px', lineHeight: 1.5 }}>品牌形象站 · 服務介紹 · 聯絡表單</div>
-            <div style={{ fontSize: '28px', fontWeight: 900, color: '#f5c842' }}>$2K–4K</div>
-            <div style={{ fontSize: '12px', color: '#6b6b96', marginBottom: '16px' }}>建置費 · 月維護 $99–199</div>
-            <div style={{ fontSize: '12px', color: '#9898b8', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div>✅ RWD · SEO · GA4 · SSL</div>
-            </div>
+        {/* Table-style pricing (v6 style) */}
+        <div style={{ maxWidth: '800px', margin: '0 auto', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px', background: '#14142a', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '14px 24px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', letterSpacing: '1px' }}>方案層級</div>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', letterSpacing: '1px', textAlign: 'center' }}>建置費</div>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', letterSpacing: '1px', textAlign: 'center' }}>月費（含維護）</div>
           </div>
-
-          <div style={{ background: '#14142a', border: '1px solid rgba(245,200,66,0.25)', borderRadius: '14px', padding: '24px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', background: '#f5c842', color: '#080600', fontSize: '9px', fontWeight: 800, padding: '3px 12px', borderRadius: '0 0 8px 8px', letterSpacing: '0.5px' }}>常見選擇</div>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b6b96', marginBottom: '6px', letterSpacing: '1px' }}>+ 電商</div>
-            <div style={{ fontSize: '13px', color: '#9898b8', marginBottom: '16px', lineHeight: 1.5 }}>Stripe 金流 · 商品管理 · 訂單後台</div>
-            <div style={{ fontSize: '28px', fontWeight: 900, color: '#f5c842' }}>+$1K–5K</div>
-            <div style={{ fontSize: '12px', color: '#6b6b96', marginBottom: '16px' }}>在基礎官網上加購 · 月維護 $199–399</div>
-            <div style={{ fontSize: '12px', color: '#9898b8', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div>✅ 商品+購物車+結帳</div>
-              <div>✅ Apple Pay / Google Pay</div>
-              <div>✅ 稅務自動計算</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px', padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700 }}>基礎官網</div>
+              <div style={{ fontSize: '12px', color: '#6b6b96', marginTop: '2px' }}>品牌形象站、服務介紹、聯絡表單</div>
             </div>
+            <div style={{ textAlign: 'center', fontSize: '18px', fontWeight: 900, color: '#f5c842' }}>$2K – $4K</div>
+            <div style={{ textAlign: 'center', fontSize: '14px', color: '#9898b8' }}>$99 – $199</div>
           </div>
-
-          <div style={{ background: '#14142a', border: '1px solid rgba(139,92,246,0.25)', borderRadius: '14px', padding: '24px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#8b5cf6', marginBottom: '6px', letterSpacing: '1px' }}>AI 會員系統</div>
-            <div style={{ fontSize: '13px', color: '#9898b8', marginBottom: '16px', lineHeight: 1.5 }}>獨立 SaaS · 可單獨訂閱</div>
-            <div style={{ fontSize: '28px', fontWeight: 900, color: '#8b5cf6' }}>$99<span style={{ fontSize: '14px', color: '#6b6b96' }}>/月</span></div>
-            <div style={{ fontSize: '12px', color: '#6b6b96', marginBottom: '16px' }}>首 30 天免費試用</div>
-            <div style={{ fontSize: '12px', color: '#9898b8', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div>✅ 堂數+預約+核銷</div>
-              <div>✅ SMS 提醒+評論引導</div>
-              <div>✅ 沉睡喚醒+數據分析</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px', padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'center', background: 'rgba(245,200,66,0.03)' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                官網 + 電商
+                <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(245,200,66,0.15)', color: '#f5c842', padding: '2px 8px', borderRadius: '99px' }}>常見</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#6b6b96', marginTop: '2px' }}>Stripe 金流、商品管理、訂單後台、基本會員</div>
             </div>
+            <div style={{ textAlign: 'center', fontSize: '18px', fontWeight: 900, color: '#f5c842' }}>+$1K – $5K</div>
+            <div style={{ textAlign: 'center', fontSize: '14px', color: '#9898b8' }}>$199 – $399</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 140px', padding: '18px 24px', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                AI 智能會員系統
+                <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', padding: '2px 8px', borderRadius: '99px' }}>獨立 SaaS</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#6b6b96', marginTop: '2px' }}>堂數管理、預約核銷、SMS 提醒、評論引導、數據分析</div>
+            </div>
+            <div style={{ textAlign: 'center', fontSize: '14px', color: '#6b6b96' }}>—</div>
+            <div style={{ textAlign: 'center', fontSize: '18px', fontWeight: 900, color: '#8b5cf6' }}>$99/月</div>
           </div>
         </div>
+        <p style={{ textAlign: 'center', fontSize: '11px', color: '#6b6b96', marginTop: '16px', lineHeight: 1.7, maxWidth: '600px', margin: '16px auto 0' }}>
+          以上均為 CAD，不含 UI 設計費（另計）· 建置費提供 3 期分付 · SMS 用量另計（約 $0.01/封）<br/>
+          <span style={{ color: '#9898b8' }}>實際報價會在了解你的功能需求後提供，不用套餐硬套。</span>
+        </p>
       </div>
 
       {/* Footer */}

@@ -98,7 +98,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 24,
     status: 'active',
     category: 'Kits',
-    image: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop&q=80',
     description: 'A complete DIY kit with fresh seasonal flowers, ribbons, and wrapping paper. Perfect for beginners and flower lovers alike.',
     variants: [
       { name: 'Rose Pink', sku: 'SKU-001-PK', price: 68, stock: 8, color: '#f87171' },
@@ -115,7 +115,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 18,
     status: 'active',
     category: 'Kits',
-    image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=200&h=200&fit=crop&q=80',
     description: 'Everything you need to start gel nail art at home. Includes UV lamp, base coat, top coat, and 6 popular gel colors.',
     variants: [
       { name: 'Blush Pink', sku: 'SKU-002-PK', price: 45, stock: 8, color: '#f472b6' },
@@ -131,7 +131,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 32,
     status: 'active',
     category: 'Kits',
-    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=200&h=200&fit=crop&q=80',
     description: 'Create stunning preserved flower art with this elegant frame kit. Includes dried flowers, frame, and adhesive.',
     variants: [
       { name: 'Golden Yellow', sku: 'SKU-003-YL', price: 55, stock: 12, color: '#fbbf24' },
@@ -147,7 +147,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 45,
     status: 'active',
     category: 'Tools',
-    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=200&h=200&fit=crop&q=80',
     description: 'Japanese stainless steel floral scissors with ergonomic grip. Sharp, precise, and built to last.',
     variants: [
       { name: 'Silver', sku: 'SKU-004-SL', price: 28, stock: 30, color: '#94a3b8' },
@@ -162,7 +162,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 8,
     status: 'active',
     category: 'Tools',
-    image: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=200&h=200&fit=crop&q=80',
     description: 'Professional-grade electric nail drill with adjustable speed, 6 interchangeable bits, and low-vibration motor.',
     variants: [
       { name: 'White', sku: 'SKU-005-WH', price: 120, stock: 5, color: '#e2e8f0' },
@@ -177,7 +177,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 120,
     status: 'active',
     category: 'Supplies',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200&h=200&fit=crop&q=80',
     description: 'Premium wet floral foam blocks for fresh flower arrangements. Easy to cut, excellent water absorption.',
     variants: [
       { name: 'Green', sku: 'SKU-006-GR', price: 15, stock: 120, color: '#4ade80' },
@@ -207,7 +207,7 @@ const INITIAL_PRODUCTS: Product[] = [
     stock: 0,
     status: 'draft',
     category: 'Supplies',
-    image: 'https://images.unsplash.com/photo-1585128792020-803d29415281?w=100&h=100&fit=crop',
+    image: 'https://images.unsplash.com/photo-1585128792020-803d29415281?w=200&h=200&fit=crop&q=80',
     description: 'Mirror-finish chrome nail powders in 3 stunning shades. Create eye-catching metallic nails in seconds.',
     variants: [
       { name: 'Silver Chrome', sku: 'SKU-008-SL', price: 35, stock: 0, color: '#c0c0c0' },
