@@ -25,11 +25,31 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 // ─── Fake Data ───
 
 const MEMBERS = [
-  { name: 'Anna Park', phone: '+1 604-555-0105', status: 'active', tags: ['VIP'], vip: 'Gold', visits: 18, points: 520, package: 'Gel Nails 10-Pack', remaining: 2, lastVisit: '1 day ago', birthday: 'Jun 15', email: 'anna@example.com', totalSpent: 2340 },
-  { name: 'Mary Johnson', phone: '+1 604-555-0101', status: 'active', tags: [], vip: 'Silver', visits: 12, points: 350, package: 'Gel Nails 10-Pack', remaining: 7, lastVisit: '3 days ago', birthday: 'Nov 22', email: 'mary@example.com', totalSpent: 1580 },
+  // Diamond VIP
+  { name: 'Sophia Chen', phone: '+1 604-555-0201', status: 'active', tags: ['VIP','Diamond'], vip: '💎 Diamond', visits: 42, points: 1280, package: 'Gel Nails 10-Pack', remaining: 1, lastVisit: '2 days ago', birthday: 'Apr 22', email: 'sophia@example.com', totalSpent: 4860 },
+  { name: '林雅婷', phone: '+1 604-555-0202', status: 'active', tags: ['VIP','Diamond'], vip: '💎 Diamond', visits: 35, points: 960, package: 'Gel Nails 10-Pack', remaining: 3, lastVisit: '5 days ago', birthday: 'Sep 15', email: 'yating@example.com', totalSpent: 3920 },
+  // Gold VIP
+  { name: 'Anna Park', phone: '+1 604-555-0105', status: 'active', tags: ['VIP','Gold'], vip: '🥇 Gold', visits: 18, points: 520, package: 'Gel Nails 10-Pack', remaining: 2, lastVisit: '1 day ago', birthday: 'Jun 15', email: 'anna@example.com', totalSpent: 2340 },
+  { name: 'Rachel Kim', phone: '+1 604-555-0203', status: 'active', tags: ['VIP','Gold'], vip: '🥇 Gold', visits: 24, points: 620, package: 'Gel Nails 10-Pack', remaining: 5, lastVisit: '4 days ago', birthday: 'Dec 3', email: 'rachel@example.com', totalSpent: 2180 },
+  { name: 'Olivia Nguyen', phone: '+1 604-555-0204', status: 'active', tags: ['VIP','Gold'], vip: '🥇 Gold', visits: 19, points: 480, package: 'Gel Nails 5-Pack', remaining: 2, lastVisit: '7 days ago', birthday: 'Jul 28', email: 'olivia@example.com', totalSpent: 1850 },
+  { name: '陳美玲', phone: '+1 604-555-0205', status: 'active', tags: ['VIP','Gold'], vip: '🥇 Gold', visits: 16, points: 410, package: 'Gel Nails 10-Pack', remaining: 4, lastVisit: '12 days ago', birthday: 'Feb 14', email: '', totalSpent: 1620 },
+  // Silver
+  { name: 'Mary Johnson', phone: '+1 604-555-0101', status: 'active', tags: ['Silver'], vip: '🥈 Silver', visits: 12, points: 350, package: 'Gel Nails 10-Pack', remaining: 7, lastVisit: '3 days ago', birthday: 'Nov 22', email: 'mary@example.com', totalSpent: 1580 },
+  { name: 'Hannah Lee', phone: '+1 604-555-0206', status: 'active', tags: ['Silver'], vip: '🥈 Silver', visits: 10, points: 220, package: 'Gel Nails 5-Pack', remaining: 3, lastVisit: '8 days ago', birthday: '', email: 'hannah@example.com', totalSpent: 780 },
+  { name: '張心怡', phone: '+1 604-555-0207', status: 'active', tags: ['Silver'], vip: '🥈 Silver', visits: 8, points: 190, package: 'Gel Nails 5-Pack', remaining: 4, lastVisit: '15 days ago', birthday: 'Nov 20', email: '', totalSpent: 640 },
+  { name: 'Mia Patel', phone: '+1 604-555-0208', status: 'active', tags: ['Silver'], vip: '🥈 Silver', visits: 7, points: 150, package: 'Store Credit $200', remaining: 120, lastVisit: '20 days ago', birthday: '', email: 'mia@example.com', totalSpent: 560 },
+  // Regular
   { name: '王小美', phone: '+1 604-555-0102', status: 'active', tags: [], vip: 'Regular', visits: 7, points: 180, package: 'Gel Nails 5-Pack', remaining: 3, lastVisit: '10 days ago', birthday: 'Mar 8', email: 'xiaomei@example.com', totalSpent: 680 },
+  { name: 'Isabella Wong', phone: '+1 604-555-0209', status: 'active', tags: [], vip: 'Regular', visits: 6, points: 130, package: '—', remaining: 0, lastVisit: '18 days ago', birthday: 'May 30', email: 'isabella@example.com', totalSpent: 390 },
+  { name: 'Grace Liu', phone: '+1 604-555-0211', status: 'active', tags: [], vip: 'Regular', visits: 3, points: 80, package: '—', remaining: 0, lastVisit: '14 days ago', birthday: '', email: 'grace@example.com', totalSpent: 195 },
+  // Dormant
   { name: 'Emily Zhang', phone: '+1 604-555-0103', status: 'active', tags: ['dormant_30d'], vip: 'Regular', visits: 3, points: 50, package: '—', remaining: 0, lastVisit: '45 days ago', birthday: 'Sep 3', email: 'emily@example.com', totalSpent: 195 },
+  { name: 'Chloe Park', phone: '+1 604-555-0212', status: 'active', tags: ['dormant_30d'], vip: 'Regular', visits: 1, points: 30, package: '—', remaining: 0, lastVisit: '35 days ago', birthday: '', email: 'chloe@example.com', totalSpent: 65 },
   { name: 'Jessica Liu', phone: '+1 604-555-0104', status: 'inactive', tags: ['dormant_60d'], vip: 'Regular', visits: 1, points: 0, package: '—', remaining: 0, lastVisit: '90 days ago', birthday: 'Jan 19', email: '', totalSpent: 65 },
+  { name: '王雅琪', phone: '+1 604-555-0213', status: 'inactive', tags: ['dormant_60d'], vip: 'Regular', visits: 1, points: 0, package: '—', remaining: 0, lastVisit: '60 days ago', birthday: '', email: '', totalSpent: 65 },
+  // Churned
+  { name: 'Natalie Tran', phone: '+1 604-555-0214', status: 'churned', tags: ['churned'], vip: '—', visits: 2, points: 0, package: '—', remaining: 0, lastVisit: '120 days ago', birthday: '', email: 'natalie@example.com', totalSpent: 130 },
+  { name: '李佳穎', phone: '+1 604-555-0215', status: 'churned', tags: ['churned'], vip: '—', visits: 4, points: 20, package: '—', remaining: 0, lastVisit: '95 days ago', birthday: '', email: '', totalSpent: 260 },
 ];
 
 const SERVICES = [
@@ -223,7 +243,7 @@ export default function AdminDemoPage() {
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {m.name}
-                      {m.vip !== 'Regular' && <span style={badge(m.vip === 'Gold' ? '#f5c842' : '#9898b8')}>{m.vip}</span>}
+                      {m.vip !== 'Regular' && m.vip !== '—' && <span style={badge(m.vip.includes('Diamond') ? '#8b5cf6' : m.vip.includes('Gold') ? '#f5c842' : '#9898b8')}>{m.vip}</span>}
                       {m.tags.includes('dormant_30d') && <span style={badge('#ef4444')}>30d dormant</span>}
                       {m.tags.includes('dormant_60d') && <span style={badge('#ef4444')}>60d+</span>}
                     </div>
