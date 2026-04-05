@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const DEMO_TOKEN = '3fd7ed1f3595a5b4cb8274fe0ac2d4a5';
 
-type Tab = 'today' | 'members' | 'verify' | 'bookings' | 'packages' | 'services' | 'coupons' | 'points' | 'reviews' | 'sms' | 'revenue' | 'performance';
+type Tab = 'today' | 'members' | 'verify' | 'bookings' | 'packages' | 'services' | 'products' | 'orders' | 'coupons' | 'points' | 'reviews' | 'sms' | 'revenue' | 'performance';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'today', label: 'Today', icon: '📋' },
@@ -14,6 +14,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'bookings', label: 'Bookings', icon: '📅' },
   { id: 'packages', label: 'Packages', icon: '🎫' },
   { id: 'services', label: 'Services', icon: '✂️' },
+  { id: 'products', label: 'Products', icon: '📦' },
+  { id: 'orders', label: 'Orders', icon: '🧾' },
   { id: 'coupons', label: 'Coupons', icon: '🎁' },
   { id: 'points', label: 'Points', icon: '⭐' },
   { id: 'reviews', label: 'Reviews', icon: '💬' },
@@ -152,6 +154,26 @@ const STAFF_STATS = [
   { name: 'Amy Wang', checkins: 45, rating: 4.5, commission: '$1,260', reviews: 5, topReview: 'Very detailed work' },
   // Sarah: 32 check-ins × $75 avg × 30% = $720
   { name: 'Sarah Kim', checkins: 32, rating: 4.9, commission: '$720', reviews: 3, topReview: 'Best service ever!' },
+];
+
+const ADMIN_PRODUCTS = [
+  { id: 1, name: 'Spring Bouquet DIY Kit', price: 68, stock: 24, status: 'active', image: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=100&h=100&fit=crop' },
+  { id: 2, name: 'Gel Nail Art Starter Set', price: 45, stock: 18, status: 'active', image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=100&h=100&fit=crop' },
+  { id: 3, name: 'Dried Flower Frame Kit', price: 55, stock: 32, status: 'active', image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=100&h=100&fit=crop' },
+  { id: 4, name: 'Premium Floral Scissors', price: 28, stock: 45, status: 'active', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=100&h=100&fit=crop' },
+  { id: 5, name: 'Nail Drill Machine Pro', price: 120, stock: 8, status: 'active', image: 'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=100&h=100&fit=crop' },
+  { id: 6, name: 'Floral Foam Blocks (10pk)', price: 15, stock: 120, status: 'active', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=100&h=100&fit=crop' },
+  { id: 7, name: 'Holiday Wreath Workshop Kit', price: 88, stock: 0, status: 'draft', image: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=100&h=100&fit=crop' },
+  { id: 8, name: 'Chrome Nail Powder Set', price: 35, stock: 0, status: 'draft', image: 'https://images.unsplash.com/photo-1585128792020-803d29415281?w=100&h=100&fit=crop' },
+];
+
+const ORDERS = [
+  { id: '#1042', customer: '王小美', date: 'Apr 2', items: 2, total: 120, status: 'paid' },
+  { id: '#1038', customer: 'Anna Park', date: 'Apr 1', items: 1, total: 95, status: 'shipped' },
+  { id: '#1031', customer: '王小美', date: 'Mar 28', items: 3, total: 178, status: 'delivered' },
+  { id: '#1027', customer: 'Emily Zhang', date: 'Mar 25', items: 1, total: 95, status: 'delivered' },
+  { id: '#1019', customer: 'Anna Park', date: 'Mar 20', items: 2, total: 153, status: 'delivered' },
+  { id: '#1012', customer: 'Sophia Chen', date: 'Mar 15', items: 1, total: 95, status: 'refunded' },
 ];
 
 // ─── Component ───
@@ -379,6 +401,74 @@ export default function AdminDemoPage() {
                 <div style={{ textAlign: 'right' as const }}>
                   <div style={{ fontSize: '16px', fontWeight: 800 }}>${s.price}</div>
                   <span style={badge('#22c55e')}>Active</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ═══ PRODUCTS ═══ */}
+        {activeTab === 'products' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 800 }}>📦 Products ({ADMIN_PRODUCTS.length})</h2>
+              <Link href="/p/demo/products" style={{ fontSize: '12px', color: '#E8654A', textDecoration: 'none', fontWeight: 600 }}>Open full view →</Link>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                    {['Image', 'Product', 'Price', 'Stock', 'Status'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '8px 12px', fontSize: '10px', color: '#6b6b96', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '1px' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {ADMIN_PRODUCTS.map(p => (
+                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td style={{ padding: '10px 12px' }}>
+                        <img src={p.image} alt={p.name} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+                      </td>
+                      <td style={{ padding: '10px 12px', fontSize: '13px', fontWeight: 600 }}>{p.name}</td>
+                      <td style={{ padding: '10px 12px', fontSize: '13px', fontWeight: 600 }}>${p.price}</td>
+                      <td style={{ padding: '10px 12px', fontSize: '13px', color: p.stock === 0 ? '#ef4444' : p.stock < 10 ? '#f5c842' : '#6b6b96' }}>{p.stock === 0 ? 'Out' : p.stock}</td>
+                      <td style={{ padding: '10px 12px' }}>
+                        <span style={badge(p.status === 'active' ? '#22c55e' : '#6b6b96')}>{p.status === 'active' ? 'Active' : 'Draft'}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <Link href="/p/demo/products" style={{ display: 'inline-block', padding: '10px 24px', borderRadius: '10px', background: '#E8654A', color: '#fff', textDecoration: 'none', fontSize: '13px', fontWeight: 700 }}>Open full view →</Link>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ ORDERS ═══ */}
+        {activeTab === 'orders' && (
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '4px' }}>🧾 Orders</h2>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', fontSize: '12px', color: '#6b6b96' }}>
+              <span>Total: {ORDERS.length}</span>
+              <span>·</span>
+              <span>Revenue: ${ORDERS.reduce((s, o) => s + o.total, 0)}</span>
+            </div>
+            {ORDERS.map((o, i) => (
+              <div key={i} style={{ ...card, marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{o.id} <span style={{ fontWeight: 400, color: '#9898b8' }}>· {o.customer}</span></div>
+                  <div style={{ fontSize: '11px', color: '#6b6b96' }}>{o.date} · {o.items} item{o.items > 1 ? 's' : ''}</div>
+                </div>
+                <div style={{ textAlign: 'right' as const }}>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: o.status === 'refunded' ? '#ef4444' : '#22c55e' }}>${o.total}</div>
+                  <span style={badge(
+                    o.status === 'paid' ? '#22c55e' :
+                    o.status === 'shipped' ? '#3b82f6' :
+                    o.status === 'delivered' ? '#6b6b96' :
+                    '#ef4444'
+                  )}>{o.status}</span>
                 </div>
               </div>
             ))}
